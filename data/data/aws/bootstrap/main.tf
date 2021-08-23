@@ -54,7 +54,8 @@ resource "aws_iam_role" "bootstrap" {
 
   name = "${var.cluster_id}-bootstrap-role"
   path = "/"
-
+  force_detach_policies = true
+  
   assume_role_policy = <<EOF
 {
     "Version": "2012-10-17",
