@@ -1,4 +1,4 @@
-# OpenShift Installer
+# OpenShift Installer with Route 53 Disabled for Restricted Environments
 
 ## Supported Platforms
 
