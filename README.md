@@ -1,4 +1,42 @@
-# OpenShift Installer
+# OpenShift Installer with Route 53 Disabled for Restricted Environments
+
+## Summary of changes from release-4.9
+```
+diff --git a/data/data/aws/bootstrap/main.tf b/data/data/aws/bootstrap/main.tf
+index 89dacb91a..8ccf77ebd 100644
+--- a/data/data/aws/bootstrap/main.tf
++++ b/data/data/aws/bootstrap/main.tf
+@@ -54,7 +54,8 @@ resource "aws_iam_role" "bootstrap" {
+
+   name = "${var.cluster_id}-bootstrap-role"
+   path = "/"
+-
++  force_detach_policies = true
++
+   assume_role_policy = <<EOF
+ {
+     "Version": "2012-10-17",
+diff --git a/data/data/aws/main.tf b/data/data/aws/main.tf
+index 61e060e53..9154a9700 100644
+--- a/data/data/aws/main.tf
++++ b/data/data/aws/main.tf
+@@ -79,6 +79,7 @@ module "iam" {
+   tags = local.tags
+ }
+
++/* NoRoute53: Comment out DNS module so installer doesn't even check for route53 (and fail)
+ module "dns" {
+   source = "./route53"
+
+@@ -95,6 +96,7 @@ module "dns" {
+   region                   = var.aws_region
+   publish_strategy         = var.aws_publish_strategy
+ }
++*/
+
+ module "vpc" {
+   source = "./vpc"
+```
 
 ## Supported Platforms
 
