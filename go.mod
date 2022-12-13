@@ -22,7 +22,7 @@ require (
 	github.com/antchfx/xpath v1.1.2 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/awalterschulze/gographviz v0.0.0-20190522210029-fa59802746ab
-	github.com/aws/aws-sdk-go v1.35.20
+	github.com/aws/aws-sdk-go v1.35.37
 	github.com/btubbs/datetime v0.1.1 // indirect
 	github.com/c4milo/gotoolkit v0.0.0-20190525173301-67483a18c17a // indirect
 	github.com/clarketm/json v1.14.1
@@ -101,7 +101,7 @@ require (
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
-	golang.org/x/sys v0.0.0-20210225134936-a50acf3fe073
+	golang.org/x/sys v0.0.0-20220517195934-5e4e11fc645e
 	google.golang.org/api v0.33.0
 	google.golang.org/genproto v0.0.0-20201110150050-8816d57aaa9a
 	google.golang.org/grpc v1.32.0
@@ -135,7 +135,7 @@ replace (
 	github.com/metal3-io/cluster-api-provider-baremetal => github.com/openshift/cluster-api-provider-baremetal v0.0.0-20190821174549-a2a477909c1d // Pin OpenShift fork
 	github.com/openshift/client-go => github.com/openshift/client-go v0.0.0-20200929181438-91d71ef2122c // Pin client-go
 	github.com/openshift/machine-config-operator => github.com/openshift/machine-config-operator v0.0.1-0.20201009041932-4fe8559913b8 // Pin MCO so it doesn't get downgraded
-	github.com/terraform-providers/terraform-provider-aws => github.com/openshift/terraform-provider-aws v1.60.1-0.20210622193531-7d13cfbb1a8c // Pin to openshift fork with tag v2.67.0-openshift-1
+	github.com/terraform-providers/terraform-provider-aws => github.com/openshift/terraform-provider-aws v1.60.1-0.20211215220004-24df6d73af46 // Pin to openshift fork with tag v3.1.0-openshift-2
 	github.com/terraform-providers/terraform-provider-azurerm => github.com/openshift/terraform-provider-azurerm v1.44.1-0.20210224232508-7509319df0f4 // Pin to 2.48.0-openshift
 	github.com/terraform-providers/terraform-provider-azurestack => github.com/openshift/terraform-provider-azurestack v0.10.0-openshift // Use OpenShift fork
 	github.com/terraform-providers/terraform-provider-google v1.20.1-0.20200623174414-27107f2ee160 => github.com/openshift/terraform-providers-terraform-provider-google v1.20.1-0.20211201190933-7b79c6d1afc8 // Pin to 3.27.0-openshift
@@ -155,7 +155,6 @@ replace (
 replace (
 	github.com/IBM/vpc-go-sdk => github.com/IBM/vpc-go-sdk v0.7.0
 	github.com/apparentlymart/go-cidr => github.com/apparentlymart/go-cidr v1.0.1
-	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.32.3
 	github.com/go-openapi/errors => github.com/go-openapi/errors v0.19.2
 	github.com/go-openapi/spec => github.com/go-openapi/spec v0.19.4
 	github.com/go-openapi/validate => github.com/go-openapi/validate v0.19.8
@@ -165,3 +164,7 @@ replace (
 	google.golang.org/genproto => google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
 	google.golang.org/grpc => google.golang.org/grpc v1.29.1
 )
+
+replace github.com/hashicorp/terraform-plugin-test => github.com/jhixson74/terraform-plugin-test v1.3.0-openshift
+
+replace github.com/hashicorp/go-getter => github.com/hashicorp/go-getter v1.6.2
