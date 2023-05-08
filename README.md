@@ -1,5 +1,41 @@
 # OpenShift Installer
 
+## Summary of Changes from release-4.12
+```diff
+diff --git a/data/data/aws/bootstrap/main.tf b/data/data/aws/bootstrap/main.tf
+index a3d00f029..dc96da675 100644
+--- a/data/data/aws/bootstrap/main.tf
++++ b/data/data/aws/bootstrap/main.tf
+@@ -79,6 +79,7 @@ resource "aws_iam_role" "bootstrap" {
+
+   name = "${var.cluster_id}-bootstrap-role"
+   path = "/"
++  force_detach_policies = true
+
+   assume_role_policy = <<EOF
+ {
+diff --git a/data/data/aws/cluster/main.tf b/data/data/aws/cluster/main.tf
+index 2bd761adc..d912aa856 100644
+--- a/data/data/aws/cluster/main.tf
++++ b/data/data/aws/cluster/main.tf
+@@ -57,6 +57,7 @@ module "iam" {
+   tags = local.tags
+ }
+
++/* NoRoute53: Comment out DNS module so installer doesn't even check for route53 (and fail)
+ module "dns" {
+   source = "./route53"
+
+@@ -73,6 +74,7 @@ module "dns" {
+   region                   = var.aws_region
+   publish_strategy         = var.aws_publish_strategy
+ }
++*/
+
+ module "vpc" {
+   source = "./vpc"
+```
+
 ## Supported Platforms
 
 * [AWS](docs/user/aws/README.md)

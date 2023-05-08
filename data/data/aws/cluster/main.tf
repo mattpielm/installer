@@ -58,6 +58,7 @@ module "iam" {
   tags = local.tags
 }
 
+/* NoRoute53: Comment out DNS module so installer doesn't even check for route53 (and fail)
 module "dns" {
   source = "./route53"
 
@@ -74,6 +75,7 @@ module "dns" {
   region                   = var.aws_region
   publish_strategy         = var.aws_publish_strategy
 }
+*/
 
 module "vpc" {
   source = "./vpc"
