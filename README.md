@@ -1,6 +1,6 @@
 # OpenShift Installer
 
-## Summary of Changes from release-4.10
+## Summary of Changes from release-4.13
 ```diff
 diff --git a/data/data/aws/bootstrap/main.tf b/data/data/aws/bootstrap/main.tf
 index a3d00f029..dc96da675 100644
