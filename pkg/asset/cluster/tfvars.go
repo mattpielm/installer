@@ -289,6 +289,7 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 			PrivateSubnets:        privateSubnets,
 			PublicSubnets:         publicSubnets,
 			InternalZone:          installConfig.Config.AWS.HostedZone,
+			InternalZoneRole:      installConfig.Config.AWS.HostedZoneRole,
 			Services:              installConfig.Config.AWS.ServiceEndpoints,
 			Publish:               installConfig.Config.Publish,
 			MasterConfigs:         masterConfigs,
@@ -399,13 +400,14 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 			ServiceAccount:   string(sess.Credentials.JSON),
 		}
 
+		client, err := gcpconfig.NewClient(context.Background())
+		if err != nil {
+			return err
+		}
+
 		// In the case of a shared vpn, the firewall rules should only be created if the user has permissions to do so
 		createFirewallRules := true
 		if installConfig.Config.GCP.NetworkProjectID != "" {
-			client, err := gcpconfig.NewClient(context.Background())
-			if err != nil {
-				return err
-			}
 			permissions, err := client.GetProjectPermissions(context.Background(), installConfig.Config.GCP.NetworkProjectID, []string{
 				GCPFirewallPermission,
 			})
@@ -434,9 +436,24 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 		preexistingnetwork := installConfig.Config.GCP.Network != ""
 
 		// Search the project for a dns zone with the specified base domain.
-		publicZone, err := gcpconfig.GetPublicZone(ctx, installConfig.Config.GCP.ProjectID, installConfig.Config.BaseDomain)
-		if err != nil {
-			return errors.Wrapf(err, "failed to get GCP public zone")
+		publicZoneName := ""
+		if installConfig.Config.Publish == types.ExternalPublishingStrategy {
+			publicZone, err := client.GetDNSZone(ctx, installConfig.Config.GCP.ProjectID, installConfig.Config.BaseDomain, true)
+			if err != nil {
+				return errors.Wrapf(err, "failed to get GCP public zone")
+			}
+			publicZoneName = publicZone.Name
+		}
+
+		privateZoneName := ""
+		if installConfig.Config.GCP.NetworkProjectID != "" {
+			privateZone, err := client.GetDNSZone(ctx, installConfig.Config.GCP.ProjectID, installConfig.Config.ClusterDomain(), false)
+			if err != nil {
+				return errors.Wrapf(err, "failed to get GCP private zone")
+			}
+			if privateZone != nil {
+				privateZoneName = privateZone.Name
+			}
 		}
 
 		archName := coreosarch.RpmArch(string(installConfig.Config.ControlPlane.Architecture))
@@ -466,7 +483,8 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 				ImageURI:            imageURL,
 				ImageLicenses:       installConfig.Config.GCP.Licenses,
 				PreexistingNetwork:  preexistingnetwork,
-				PublicZoneName:      publicZone.Name,
+				PublicZoneName:      publicZoneName,
+				PrivateZoneName:     privateZoneName,
 				PublishStrategy:     installConfig.Config.Publish,
 			},
 		)

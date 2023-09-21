@@ -4,17 +4,18 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	compute "google.golang.org/api/compute/v1"
+	"google.golang.org/api/dns/v1"
 	"google.golang.org/api/googleapi"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/openshift/installer/pkg/types"
+	"github.com/openshift/installer/pkg/types/gcp"
 	"github.com/openshift/installer/pkg/validate"
 )
 
@@ -33,6 +34,15 @@ var computeReq = resourceRequirements{
 	minimumMemory: 7680,
 }
 
+var (
+	apiRecordType = func(ic *types.InstallConfig) string {
+		return fmt.Sprintf("api.%s.", strings.TrimSuffix(ic.ClusterDomain(), "."))
+	}
+	apiIntRecordName = func(ic *types.InstallConfig) string {
+		return fmt.Sprintf("api-int.%s.", strings.TrimSuffix(ic.ClusterDomain(), "."))
+	}
+)
+
 // Validate executes platform-specific validation.
 func Validate(client API, ic *types.InstallConfig) error {
 	allErrs := field.ErrorList{}
@@ -47,6 +57,7 @@ func Validate(client API, ic *types.InstallConfig) error {
 	allErrs = append(allErrs, validateNetworks(client, ic, field.NewPath("platform").Child("gcp"))...)
 	allErrs = append(allErrs, validateInstanceTypes(client, ic)...)
 	allErrs = append(allErrs, validateCredentialMode(client, ic)...)
+	allErrs = append(allErrs, validateMarketplaceImages(client, ic)...)
 
 	return allErrs.ToAggregate()
 }
@@ -118,49 +129,94 @@ func validateInstanceTypes(client API, ic *types.InstallConfig) field.ErrorList 
 // DNS zone for cluster's Kubernetes API. If a PublicDNSZone is provided, the provided
 // zone is verified against the BaseDomain. If no zone is provided, the base domain is
 // checked for any public zone that can be used.
-func ValidatePreExistingPublicDNS(client API, ic *types.InstallConfig) error {
+func ValidatePreExistingPublicDNS(client API, ic *types.InstallConfig) *field.Error {
 	// If this is an internal cluster, this check is not necessary
 	if ic.Publish == types.InternalPublishingStrategy {
 		return nil
 	}
 
-	record := fmt.Sprintf("api.%s.", strings.TrimSuffix(ic.ClusterDomain(), "."))
-
-	zone, err := client.GetPublicDNSZone(context.TODO(), ic.Platform.GCP.ProjectID, ic.BaseDomain)
+	zone, err := client.GetDNSZone(context.TODO(), ic.Platform.GCP.ProjectID, ic.BaseDomain, true)
 	if err != nil {
-		var gErr *googleapi.Error
-		if errors.As(err, &gErr) {
-			if gErr.Code == http.StatusNotFound {
-				return field.NotFound(field.NewPath("baseDomain"), fmt.Sprintf("DNS Zone (%s/%s)", ic.Platform.GCP.ProjectID, ic.BaseDomain))
-			}
+		if IsNotFound(err) {
+			return field.NotFound(field.NewPath("baseDomain"), fmt.Sprintf("Public DNS Zone (%s/%s)", ic.Platform.GCP.ProjectID, ic.BaseDomain))
+		}
+		return field.InternalError(field.NewPath("baseDomain"), err)
+	}
+	return checkRecordSets(client, ic, zone, []string{apiRecordType(ic)})
+}
+
+// ValidatePrivateDNSZone ensure no pre-existing DNS record exists in the private dns zone
+// matching the name that will be used for this installation.
+func ValidatePrivateDNSZone(client API, ic *types.InstallConfig) *field.Error {
+	if ic.GCP.Network == "" || ic.GCP.NetworkProjectID == "" {
+		return nil
+	}
+
+	zone, err := client.GetDNSZone(context.TODO(), ic.GCP.ProjectID, ic.ClusterDomain(), false)
+	if err != nil {
+		logrus.Debug("No private DNS Zone found")
+		if IsNotFound(err) {
+			return field.NotFound(field.NewPath("baseDomain"), fmt.Sprintf("Private DNS Zone (%s/%s)", ic.Platform.GCP.ProjectID, ic.BaseDomain))
 		}
 		return field.InternalError(field.NewPath("baseDomain"), err)
 	}
 
+	// Private Zone can be nil, check to see if it was found or not
+	if zone != nil {
+		return checkRecordSets(client, ic, zone, []string{apiRecordType(ic), apiIntRecordName(ic)})
+	}
+	return nil
+}
+
+func checkRecordSets(client API, ic *types.InstallConfig, zone *dns.ManagedZone, records []string) *field.Error {
 	rrSets, err := client.GetRecordSets(context.TODO(), ic.GCP.ProjectID, zone.Name)
 	if err != nil {
 		return field.InternalError(field.NewPath("baseDomain"), err)
 	}
 
+	setOfReturnedRecords := sets.New[string]()
 	for _, r := range rrSets {
-		if strings.EqualFold(r.Name, record) {
-			errMsg := fmt.Sprintf("record %s already exists in DNS Zone (%s/%s) and might be in use by another cluster, please remove it to continue", record, ic.GCP.ProjectID, zone.Name)
-			return field.Invalid(field.NewPath("metadata", "name"), ic.ObjectMeta.Name, errMsg)
-		}
+		setOfReturnedRecords.Insert(r.Name)
+	}
+	preexistingRecords := sets.New[string](records...).Intersection(setOfReturnedRecords)
+
+	if preexistingRecords.Len() > 0 {
+		errMsg := fmt.Sprintf("record(s) %q already exists in DNS Zone (%s/%s) and might be in use by another cluster, please remove it to continue", sets.List(preexistingRecords), ic.GCP.ProjectID, zone.Name)
+		return field.Invalid(field.NewPath("metadata", "name"), ic.ObjectMeta.Name, errMsg)
 	}
 	return nil
+}
+
+// ValidateForProvisioning validates that the install config is valid for provisioning the cluster.
+func ValidateForProvisioning(ic *types.InstallConfig) error {
+	allErrs := field.ErrorList{}
+
+	client, err := NewClient(context.TODO())
+	if err != nil {
+		return err
+	}
+
+	if err := ValidatePreExistingPublicDNS(client, ic); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
+	if err := ValidatePrivateDNSZone(client, ic); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
+	return allErrs.ToAggregate()
 }
 
 func validateProject(client API, ic *types.InstallConfig, fieldPath *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if ic.GCP.ProjectID != "" {
-		projects, err := client.GetProjects(context.TODO())
+		_, err := client.GetProjectByID(context.TODO(), ic.GCP.ProjectID)
 		if err != nil {
+			if IsNotFound(err) {
+				return append(allErrs, field.Invalid(fieldPath.Child("project"), ic.GCP.ProjectID, "invalid project ID"))
+			}
 			return append(allErrs, field.InternalError(fieldPath.Child("project"), err))
-		}
-		if _, found := projects[ic.GCP.ProjectID]; !found {
-			return append(allErrs, field.Invalid(fieldPath.Child("project"), ic.GCP.ProjectID, "invalid project ID"))
 		}
 	}
 
@@ -171,12 +227,12 @@ func validateNetworkProject(client API, ic *types.InstallConfig, fieldPath *fiel
 	allErrs := field.ErrorList{}
 
 	if ic.GCP.NetworkProjectID != "" {
-		projects, err := client.GetProjects(context.TODO())
+		_, err := client.GetProjectByID(context.TODO(), ic.GCP.NetworkProjectID)
 		if err != nil {
+			if IsNotFound(err) {
+				return append(allErrs, field.Invalid(fieldPath.Child("networkProjectID"), ic.GCP.NetworkProjectID, "invalid project ID"))
+			}
 			return append(allErrs, field.InternalError(fieldPath.Child("networkProjectID"), err))
-		}
-		if _, found := projects[ic.GCP.NetworkProjectID]; !found {
-			return append(allErrs, field.Invalid(fieldPath.Child("networkProjectID"), ic.GCP.NetworkProjectID, "invalid project ID"))
 		}
 	}
 
@@ -335,4 +391,77 @@ func validateCredentialMode(client API, ic *types.InstallConfig) field.ErrorList
 	}
 
 	return allErrs
+}
+
+func validateMarketplaceImages(client API, ic *types.InstallConfig) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	const errorMessage string = "could not find the boot image: %v"
+	var err error
+	var defaultImage *compute.Image
+	var defaultOsImage *gcp.OSImage
+
+	if ic.GCP.DefaultMachinePlatform != nil && ic.GCP.DefaultMachinePlatform.OSImage != nil {
+		defaultOsImage = ic.GCP.DefaultMachinePlatform.OSImage
+		defaultImage, err = client.GetImage(context.TODO(), defaultOsImage.Name, defaultOsImage.Project)
+		if err != nil {
+			allErrs = append(allErrs, field.Invalid(field.NewPath("platform", "gcp", "defaultMachinePlatform", "osImage"), *defaultOsImage, fmt.Sprintf(errorMessage, err)))
+		}
+	}
+
+	if ic.ControlPlane != nil {
+		image := defaultImage
+		osImage := defaultOsImage
+		if ic.ControlPlane.Platform.GCP != nil && ic.ControlPlane.Platform.GCP.OSImage != nil {
+			osImage = ic.ControlPlane.Platform.GCP.OSImage
+			image, err = client.GetImage(context.TODO(), osImage.Name, osImage.Project)
+			if err != nil {
+				allErrs = append(allErrs, field.Invalid(field.NewPath("controlPlane", "platform", "gcp", "osImage"), *osImage, fmt.Sprintf(errorMessage, err)))
+			}
+		}
+		if image != nil {
+			if errMsg := checkArchitecture(image.Architecture, ic.ControlPlane.Architecture, "controlPlane"); errMsg != "" {
+				allErrs = append(allErrs, field.Invalid(field.NewPath("controlPlane", "platform", "gcp", "osImage"), *osImage, errMsg))
+			}
+		}
+	}
+
+	for idx, compute := range ic.Compute {
+		image := defaultImage
+		osImage := defaultOsImage
+		fieldPath := field.NewPath("compute").Index(idx)
+		if compute.Platform.GCP != nil && compute.Platform.GCP.OSImage != nil {
+			osImage = compute.Platform.GCP.OSImage
+			image, err = client.GetImage(context.TODO(), osImage.Name, osImage.Project)
+			if err != nil {
+				allErrs = append(allErrs, field.Invalid(fieldPath.Child("platform", "gcp", "osImage"), *osImage, fmt.Sprintf(errorMessage, err)))
+			}
+		}
+		if image != nil {
+			if errMsg := checkArchitecture(image.Architecture, compute.Architecture, "compute"); errMsg != "" {
+				allErrs = append(allErrs, field.Invalid(fieldPath.Child("platform", "gcp", "osImage"), *osImage, errMsg))
+			}
+		}
+	}
+
+	return allErrs
+}
+
+func checkArchitecture(imageArch string, icArch types.Architecture, role string) string {
+	const unspecifiedArch string = "ARCHITECTURE_UNSPECIFIED"
+	// The possible architecture names from image.Architecture are of type string hence we cannot directly obtain the possible values
+	// In the docs the possible values are ARM64, X86_64, and ARCHITECTURE_UNSPECIFIED
+	// There is no simple translation between the architecture values from Google and the architecture names used in the install config so a map is used
+
+	translateArchName := map[string]types.Architecture{
+		"ARM64":  types.ArchitectureARM64,
+		"X86_64": types.ArchitectureAMD64,
+	}
+
+	if imageArch == "" || imageArch == unspecifiedArch {
+		logrus.Warn(fmt.Sprintf("Boot image architecture is unspecified and might not be compatible with %s %s nodes", icArch, role))
+	} else if translateArchName[imageArch] != icArch {
+		return fmt.Sprintf("image architecture %s does not match %s node architecture %s", imageArch, role, icArch)
+	}
+	return ""
 }

@@ -99,6 +99,12 @@ variable "aws_master_instance_metadata_authentication" {
   description = "The session tokens requirement, also referred to as Instance Metadata Service Version 2 (IMDSv2). Values are optional or required. Defaults to optional."
 }
 
+variable "aws_bootstrap_instance_metadata_authentication" {
+  type        = string
+  default     = "optional"
+  description = "The session tokens requirement, also referred to as Instance Metadata Service Version 2 (IMDSv2). Values are optional or required. Defaults to optional."
+}
+
 variable "aws_region" {
   type        = string
   description = "The target AWS region for the cluster."
@@ -137,6 +143,13 @@ variable "aws_internal_zone" {
   default     = null
   description = "(optional) An existing hosted zone (zone ID) to use for the internal API."
 }
+
+variable "aws_internal_zone_role" {
+  type        = string
+  default     = null
+  description = "(optional) A role to assume when using an existing hosted zone from another account."
+}
+
 
 variable "aws_publish_strategy" {
   type        = string

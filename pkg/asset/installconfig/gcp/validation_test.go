@@ -9,8 +9,10 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	logrusTest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	googleoauth "golang.org/x/oauth2/google"
+	"google.golang.org/api/cloudresourcemanager/v1"
 	compute "google.golang.org/api/compute/v1"
 	dns "google.golang.org/api/dns/v1"
 	"google.golang.org/api/googleapi"
@@ -129,11 +131,13 @@ func validInstallConfig() *types.InstallConfig {
 			},
 		},
 		ControlPlane: &types.MachinePool{
+			Architecture: types.ArchitectureAMD64,
 			Platform: types.MachinePoolPlatform{
 				GCP: &gcp.MachinePool{},
 			},
 		},
 		Compute: []types.MachinePool{{
+			Architecture: types.ArchitectureAMD64,
 			Platform: types.MachinePoolPlatform{
 				GCP: &gcp.MachinePool{},
 			},
@@ -279,8 +283,15 @@ func TestGCPInstallConfigValidation(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	gcpClient := mock.NewMockAPI(mockCtrl)
+
+	errNotFound := &googleapi.Error{Code: http.StatusNotFound}
+
 	// Should get the list of projects.
 	gcpClient.EXPECT().GetProjects(gomock.Any()).Return(map[string]string{"valid-project": "valid-project"}, nil).AnyTimes()
+	gcpClient.EXPECT().GetProjectByID(gomock.Any(), "valid-project").Return(&cloudresourcemanager.Project{}, nil).AnyTimes()
+	gcpClient.EXPECT().GetProjectByID(gomock.Any(), "invalid-project").Return(nil, errNotFound).AnyTimes()
+	gcpClient.EXPECT().GetProjectByID(gomock.Any(), gomock.Any()).Return(nil, fmt.Errorf("error")).AnyTimes()
+
 	// Should get the list of zones.
 	gcpClient.EXPECT().GetZones(gomock.Any(), gomock.Any(), gomock.Any()).Return([]*compute.Zone{{Name: validZone}}, nil).AnyTimes()
 
@@ -351,11 +362,11 @@ func TestValidatePreExistingPublicDNS(t *testing.T) {
 	}, {
 		name:    "pre-existing",
 		records: []*dns.ResourceRecordSet{{Name: "api.cluster-name.base-domain."}},
-		err:     `^metadata\.name: Invalid value: "cluster-name": record api\.cluster-name\.base-domain\. already exists in DNS Zone \(project-id/zone-name\) and might be in use by another cluster, please remove it to continue$`,
+		err:     `^metadata\.name: Invalid value: "cluster-name": record\(s\) \["api\.cluster-name\.base-domain\."\] already exists in DNS Zone \(project-id/zone-name\) and might be in use by another cluster, please remove it to continue$`,
 	}, {
 		name:    "pre-existing",
 		records: []*dns.ResourceRecordSet{{Name: "api.cluster-name.base-domain."}, {Name: "api.cluster-name.base-domain."}},
-		err:     `^metadata\.name: Invalid value: "cluster-name": record api\.cluster-name\.base-domain\. already exists in DNS Zone \(project-id/zone-name\) and might be in use by another cluster, please remove it to continue$`,
+		err:     `^metadata\.name: Invalid value: "cluster-name": record\(s\) \["api\.cluster-name\.base-domain\."\] already exists in DNS Zone \(project-id/zone-name\) and might be in use by another cluster, please remove it to continue$`,
 	}}
 
 	for _, test := range cases {
@@ -364,7 +375,7 @@ func TestValidatePreExistingPublicDNS(t *testing.T) {
 			defer mockCtrl.Finish()
 			gcpClient := mock.NewMockAPI(mockCtrl)
 
-			gcpClient.EXPECT().GetPublicDNSZone(gomock.Any(), "project-id", "base-domain").Return(&dns.ManagedZone{Name: "zone-name"}, nil).AnyTimes()
+			gcpClient.EXPECT().GetDNSZone(gomock.Any(), "project-id", "base-domain", true).Return(&dns.ManagedZone{Name: "zone-name"}, nil).AnyTimes()
 			gcpClient.EXPECT().GetRecordSets(gomock.Any(), gomock.Eq("project-id"), gomock.Eq("zone-name")).Return(test.records, nil).AnyTimes()
 
 			err := ValidatePreExistingPublicDNS(gcpClient, &types.InstallConfig{
@@ -373,7 +384,51 @@ func TestValidatePreExistingPublicDNS(t *testing.T) {
 				Platform:   types.Platform{GCP: &gcp.Platform{ProjectID: "project-id"}},
 			})
 			if test.err == "" {
-				assert.NoError(t, err)
+				assert.True(t, err == nil)
+			} else {
+				assert.Regexp(t, test.err, err)
+			}
+		})
+	}
+}
+
+func TestValidatePrivateDNSZone(t *testing.T) {
+	cases := []struct {
+		name    string
+		records []*dns.ResourceRecordSet
+		err     string
+	}{{
+		name:    "no pre-existing",
+		records: nil,
+	}, {
+		name:    "no pre-existing",
+		records: []*dns.ResourceRecordSet{{Name: "api.another-cluster-name.base-domain."}},
+	}, {
+		name:    "pre-existing",
+		records: []*dns.ResourceRecordSet{{Name: "api.cluster-name.base-domain."}},
+		err:     `^metadata\.name: Invalid value: "cluster-name": record\(s\) \["api\.cluster-name\.base-domain\."\] already exists in DNS Zone \(project-id/zone-name\) and might be in use by another cluster, please remove it to continue$`,
+	}, {
+		name:    "pre-existing",
+		records: []*dns.ResourceRecordSet{{Name: "api.cluster-name.base-domain."}, {Name: "api.cluster-name.base-domain."}},
+		err:     `^metadata\.name: Invalid value: "cluster-name": record\(s\) \["api\.cluster-name\.base-domain\."\] already exists in DNS Zone \(project-id/zone-name\) and might be in use by another cluster, please remove it to continue$`,
+	}}
+
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+			gcpClient := mock.NewMockAPI(mockCtrl)
+
+			gcpClient.EXPECT().GetDNSZone(gomock.Any(), "project-id", "cluster-name.base-domain", false).Return(&dns.ManagedZone{Name: "zone-name"}, nil).AnyTimes()
+			gcpClient.EXPECT().GetRecordSets(gomock.Any(), gomock.Eq("project-id"), gomock.Eq("zone-name")).Return(test.records, nil).AnyTimes()
+
+			err := ValidatePrivateDNSZone(gcpClient, &types.InstallConfig{
+				ObjectMeta: metav1.ObjectMeta{Name: "cluster-name"},
+				BaseDomain: "base-domain",
+				Platform:   types.Platform{GCP: &gcp.Platform{ProjectID: "project-id", Network: "shared-vpc", NetworkProjectID: "test-network-project"}},
+			})
+			if test.err == "" {
+				assert.True(t, err == nil)
 			} else {
 				assert.Regexp(t, test.err, err)
 			}
@@ -469,7 +524,6 @@ func TestValidateCredentialMode(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-
 			ic := types.InstallConfig{
 				ObjectMeta:      metav1.ObjectMeta{Name: "cluster-name"},
 				BaseDomain:      "base-domain",
@@ -488,6 +542,203 @@ func TestValidateCredentialMode(t *testing.T) {
 				assert.NoError(t, err)
 			} else {
 				assert.Regexp(t, test.err, err)
+			}
+		})
+	}
+}
+
+func TestValidateMarketplaceImages(t *testing.T) {
+	var (
+		validImage     = "valid-image"
+		projectID      = "project-id"
+		invalidImage   = "invalid-image"
+		mismatchedArch = "mismatched-arch"
+		osImage        = &gcp.OSImage{}
+
+		validDefaultMachineImage = func(ic *types.InstallConfig) {
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage = osImage
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage.Name = validImage
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage.Project = projectID
+		}
+		validControlPlaneImage = func(ic *types.InstallConfig) {
+			ic.ControlPlane.Platform.GCP.OSImage = osImage
+			ic.ControlPlane.Platform.GCP.OSImage.Name = validImage
+			ic.ControlPlane.Platform.GCP.OSImage.Project = projectID
+		}
+		validComputeImage = func(ic *types.InstallConfig) {
+			ic.Compute[0].Platform.GCP.OSImage = osImage
+			ic.Compute[0].Platform.GCP.OSImage.Name = validImage
+			ic.Compute[0].Platform.GCP.OSImage.Project = projectID
+		}
+
+		invalidDefaultMachineImage = func(ic *types.InstallConfig) {
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage = osImage
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage.Name = invalidImage
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage.Project = projectID
+		}
+		invalidControlPlaneImage = func(ic *types.InstallConfig) {
+			ic.ControlPlane.Platform.GCP.OSImage = osImage
+			ic.ControlPlane.Platform.GCP.OSImage.Name = invalidImage
+			ic.ControlPlane.Platform.GCP.OSImage.Project = projectID
+		}
+		invalidComputeImage = func(ic *types.InstallConfig) {
+			ic.Compute[0].Platform.GCP.OSImage = osImage
+			ic.Compute[0].Platform.GCP.OSImage.Name = invalidImage
+			ic.Compute[0].Platform.GCP.OSImage.Project = projectID
+		}
+
+		mismatchedDefaultMachineImageArchitecture = func(ic *types.InstallConfig) {
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage = osImage
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage.Name = mismatchedArch
+			ic.Platform.GCP.DefaultMachinePlatform.OSImage.Project = projectID
+			ic.ControlPlane.Architecture = types.ArchitectureARM64
+			ic.Compute[0].Architecture = types.ArchitectureARM64
+		}
+		mismatchedControlPlaneImageArchitecture = func(ic *types.InstallConfig) {
+			ic.ControlPlane.Platform.GCP.OSImage = osImage
+			ic.ControlPlane.Platform.GCP.OSImage.Name = mismatchedArch
+			ic.ControlPlane.Platform.GCP.OSImage.Project = projectID
+			ic.ControlPlane.Architecture = types.ArchitectureARM64
+		}
+		mismatchedComputeImageArchitecture = func(ic *types.InstallConfig) {
+			ic.Compute[0].Platform.GCP.OSImage = osImage
+			ic.Compute[0].Platform.GCP.OSImage.Name = mismatchedArch
+			ic.Compute[0].Platform.GCP.OSImage.Project = projectID
+			ic.Compute[0].Architecture = types.ArchitectureARM64
+		}
+		unspecifiedImageArchitecture = func(ic *types.InstallConfig) {
+			ic.ControlPlane.Platform.GCP.OSImage = osImage
+			ic.ControlPlane.Platform.GCP.OSImage.Name = "unspecified-arch"
+			ic.ControlPlane.Platform.GCP.OSImage.Project = projectID
+		}
+		missingImageArchitecture = func(ic *types.InstallConfig) {
+			ic.ControlPlane.Platform.GCP.OSImage = osImage
+			ic.ControlPlane.Platform.GCP.OSImage.Name = "missing-arch"
+			ic.ControlPlane.Platform.GCP.OSImage.Project = projectID
+		}
+
+		marketplaceImageAPIResult = &compute.Image{
+			Architecture: "X86_64",
+		}
+
+		unspecifiedMarketplaceImageAPIResult = &compute.Image{
+			Architecture: "ARCHITECTURE_UNSPECIFIED",
+		}
+		emptyMarketplaceImageAPIResult = &compute.Image{}
+	)
+
+	cases := []struct {
+		name            string
+		edits           editFunctions
+		expectedError   bool
+		expectedErrMsg  string
+		expectedWarnMsg string // NOTE: this is a REGEXP
+	}{
+		{
+			name:          "Valid default machine image",
+			edits:         editFunctions{validDefaultMachineImage},
+			expectedError: false,
+		},
+		{
+			name:          "Valid control plane image",
+			edits:         editFunctions{validControlPlaneImage},
+			expectedError: false,
+		},
+		{
+			name:          "Valid compute image",
+			edits:         editFunctions{validComputeImage},
+			expectedError: false,
+		},
+		{
+			name:           "Invalid default machine image",
+			edits:          editFunctions{invalidDefaultMachineImage},
+			expectedError:  true,
+			expectedErrMsg: `^\[platform.gcp.defaultMachinePlatform.osImage: Invalid value: gcp.OSImage{Name:"invalid-image", Project:"project-id"}: could not find the boot image: image not found\]$`,
+		},
+		{
+			name:           "Invalid control plane image",
+			edits:          editFunctions{invalidControlPlaneImage},
+			expectedError:  true,
+			expectedErrMsg: `^\[controlPlane.platform.gcp.osImage: Invalid value: gcp.OSImage{Name:"invalid-image", Project:"project-id"}: could not find the boot image: image not found\]$`,
+		},
+		{
+			name:           "Invalid compute image",
+			edits:          editFunctions{invalidComputeImage},
+			expectedError:  true,
+			expectedErrMsg: `^\[compute\[0\].platform.gcp.osImage: Invalid value: gcp.OSImage{Name:"invalid-image", Project:"project-id"}: could not find the boot image: image not found\]$`,
+		},
+		{
+			name:           "Invalid images",
+			edits:          editFunctions{invalidDefaultMachineImage, invalidControlPlaneImage, invalidComputeImage},
+			expectedError:  true,
+			expectedErrMsg: `^\[(.*?\.osImage: Invalid value: gcp\.OSImage\{Name:"invalid-image", Project:"project-id"\}: could not find the boot image: image not found){3}\]$`,
+		},
+		{
+			name:           "Mismatched default machine image architecture",
+			edits:          editFunctions{mismatchedDefaultMachineImageArchitecture},
+			expectedError:  true,
+			expectedErrMsg: `^\[controlPlane.platform.gcp.osImage: Invalid value: gcp.OSImage{Name:"mismatched-arch", Project:"project-id"}: image architecture X86_64 does not match controlPlane node architecture arm64 compute\[0\].platform.gcp.osImage: Invalid value: gcp.OSImage{Name:"mismatched-arch", Project:"project-id"}: image architecture X86_64 does not match compute node architecture arm64]$`,
+		},
+		{
+			name:           "Mismatched control plane image architecture",
+			edits:          editFunctions{mismatchedControlPlaneImageArchitecture},
+			expectedError:  true,
+			expectedErrMsg: `^\[controlPlane.platform.gcp.osImage: Invalid value: gcp.OSImage{Name:"mismatched-arch", Project:"project-id"}: image architecture X86_64 does not match controlPlane node architecture arm64]$`,
+		},
+		{
+			name:           "Mismatched compute image architecture",
+			edits:          editFunctions{mismatchedComputeImageArchitecture},
+			expectedError:  true,
+			expectedErrMsg: `^\[compute\[0\].platform.gcp.osImage: Invalid value: gcp.OSImage{Name:"mismatched-arch", Project:"project-id"}: image architecture X86_64 does not match compute node architecture arm64]$`,
+		},
+		{
+			name:            "Missing image architecture",
+			edits:           editFunctions{missingImageArchitecture},
+			expectedError:   false,
+			expectedWarnMsg: "Boot image architecture is unspecified and might not be compatible with amd64 controlPlane nodes",
+		},
+		{
+			name:            "Unspecified image architecture",
+			edits:           editFunctions{unspecifiedImageArchitecture},
+			expectedError:   false,
+			expectedWarnMsg: "Boot image architecture is unspecified and might not be compatible with amd64 controlPlane nodes",
+		},
+	}
+
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	gcpClient := mock.NewMockAPI(mockCtrl)
+
+	// Mocks: valid image with matching architecture
+	gcpClient.EXPECT().GetImage(gomock.Any(), gomock.Eq(validImage), gomock.Any()).Return(marketplaceImageAPIResult, nil).AnyTimes()
+
+	// Mocks: invalid image
+	gcpClient.EXPECT().GetImage(gomock.Any(), gomock.Eq(invalidImage), gomock.Any()).Return(marketplaceImageAPIResult, fmt.Errorf("image not found")).AnyTimes()
+
+	// Mocks: valid image with mismatched architecture
+	gcpClient.EXPECT().GetImage(gomock.Any(), gomock.Eq(mismatchedArch), gomock.Any()).Return(marketplaceImageAPIResult, nil).AnyTimes()
+
+	// Mocks: valid image with no specified architecture
+	gcpClient.EXPECT().GetImage(gomock.Any(), gomock.Eq("unspecified-arch"), gomock.Any()).Return(unspecifiedMarketplaceImageAPIResult, nil).AnyTimes()
+	gcpClient.EXPECT().GetImage(gomock.Any(), gomock.Eq("missing-arch"), gomock.Any()).Return(emptyMarketplaceImageAPIResult, nil).AnyTimes()
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			editedInstallConfig := validInstallConfig()
+			for _, edit := range tc.edits {
+				edit(editedInstallConfig)
+			}
+
+			hook := logrusTest.NewGlobal()
+			errs := validateMarketplaceImages(gcpClient, editedInstallConfig)
+			if tc.expectedError {
+				assert.Regexp(t, tc.expectedErrMsg, errs)
+			} else {
+				assert.Empty(t, errs)
+			}
+			if len(tc.expectedWarnMsg) > 0 {
+				assert.Regexp(t, tc.expectedWarnMsg, hook.LastEntry().Message)
 			}
 		})
 	}

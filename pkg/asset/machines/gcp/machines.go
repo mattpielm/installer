@@ -134,6 +134,8 @@ func provider(clusterID string, platform *gcp.Platform, mpool *gcp.MachinePool, 
 	az := mpool.Zones[azIdx]
 	if len(platform.Licenses) > 0 {
 		osImage = fmt.Sprintf("%s-rhcos-image", clusterID)
+	} else if mpool.OSImage != nil {
+		osImage = fmt.Sprintf("projects/%s/global/images/%s", mpool.OSImage.Project, mpool.OSImage.Name)
 	}
 	network, subnetwork, err := getNetworks(platform, clusterID, role)
 	if err != nil {
@@ -155,8 +157,12 @@ func provider(clusterID string, platform *gcp.Platform, mpool *gcp.MachinePool, 
 	}
 
 	instanceServiceAccount := fmt.Sprintf("%s-%s@%s.iam.gserviceaccount.com", clusterID, role[0:1], platform.ProjectID)
-	// Passthrough service accounts are only needed for GCP XPN.
-	if len(platform.NetworkProjectID) > 0 && credentialsMode == types.PassthroughCredentialsMode {
+	// In a vanilla install, the installer will create a service account with the naming convention above.
+	// These service accounts require permissions to check for firewalls. In a GCP XPN install, that permission
+	// would be required in the host project, but the installer is not likely to have permissions to create
+	// service accounts with host project privileges. Instead, we can use the existing service account provided
+	// to the installer.
+	if len(platform.NetworkProjectID) > 0 {
 		sess, err := gcpconfig.GetSession(context.TODO())
 		if err != nil {
 			return nil, err

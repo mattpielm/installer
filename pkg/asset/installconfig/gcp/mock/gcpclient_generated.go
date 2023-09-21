@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	google "golang.org/x/oauth2/google"
+	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
 	compute "google.golang.org/api/compute/v1"
 	dns "google.golang.org/api/dns/v1"
 	sets "k8s.io/apimachinery/pkg/util/sets"
@@ -52,6 +53,21 @@ func (mr *MockAPIMockRecorder) GetCredentials() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCredentials", reflect.TypeOf((*MockAPI)(nil).GetCredentials))
 }
 
+// GetDNSZone mocks base method.
+func (m *MockAPI) GetDNSZone(ctx context.Context, project, baseDomain string, isPublic bool) (*dns.ManagedZone, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDNSZone", ctx, project, baseDomain, isPublic)
+	ret0, _ := ret[0].(*dns.ManagedZone)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDNSZone indicates an expected call of GetDNSZone.
+func (mr *MockAPIMockRecorder) GetDNSZone(ctx, project, baseDomain, isPublic interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDNSZone", reflect.TypeOf((*MockAPI)(nil).GetDNSZone), ctx, project, baseDomain, isPublic)
+}
+
 // GetDNSZoneByName mocks base method.
 func (m *MockAPI) GetDNSZoneByName(ctx context.Context, project, zoneName string) (*dns.ManagedZone, error) {
 	m.ctrl.T.Helper()
@@ -80,6 +96,21 @@ func (m *MockAPI) GetEnabledServices(ctx context.Context, project string) ([]str
 func (mr *MockAPIMockRecorder) GetEnabledServices(ctx, project interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEnabledServices", reflect.TypeOf((*MockAPI)(nil).GetEnabledServices), ctx, project)
+}
+
+// GetImage mocks base method.
+func (m *MockAPI) GetImage(ctx context.Context, name, project string) (*compute.Image, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetImage", ctx, name, project)
+	ret0, _ := ret[0].(*compute.Image)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetImage indicates an expected call of GetImage.
+func (mr *MockAPIMockRecorder) GetImage(ctx, name, project interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetImage", reflect.TypeOf((*MockAPI)(nil).GetImage), ctx, name, project)
 }
 
 // GetMachineType mocks base method.
@@ -112,6 +143,21 @@ func (mr *MockAPIMockRecorder) GetNetwork(ctx, network, project interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNetwork", reflect.TypeOf((*MockAPI)(nil).GetNetwork), ctx, network, project)
 }
 
+// GetProjectByID mocks base method.
+func (m *MockAPI) GetProjectByID(ctx context.Context, project string) (*cloudresourcemanager.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProjectByID", ctx, project)
+	ret0, _ := ret[0].(*cloudresourcemanager.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProjectByID indicates an expected call of GetProjectByID.
+func (mr *MockAPIMockRecorder) GetProjectByID(ctx, project interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectByID", reflect.TypeOf((*MockAPI)(nil).GetProjectByID), ctx, project)
+}
+
 // GetProjectPermissions mocks base method.
 func (m *MockAPI) GetProjectPermissions(ctx context.Context, project string, permissions []string) (sets.Set[string], error) {
 	m.ctrl.T.Helper()
@@ -140,21 +186,6 @@ func (m *MockAPI) GetProjects(ctx context.Context) (map[string]string, error) {
 func (mr *MockAPIMockRecorder) GetProjects(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjects", reflect.TypeOf((*MockAPI)(nil).GetProjects), ctx)
-}
-
-// GetPublicDNSZone mocks base method.
-func (m *MockAPI) GetPublicDNSZone(ctx context.Context, project, baseDomain string) (*dns.ManagedZone, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPublicDNSZone", ctx, project, baseDomain)
-	ret0, _ := ret[0].(*dns.ManagedZone)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetPublicDNSZone indicates an expected call of GetPublicDNSZone.
-func (mr *MockAPIMockRecorder) GetPublicDNSZone(ctx, project, baseDomain interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublicDNSZone", reflect.TypeOf((*MockAPI)(nil).GetPublicDNSZone), ctx, project, baseDomain)
 }
 
 // GetPublicDomains mocks base method.
