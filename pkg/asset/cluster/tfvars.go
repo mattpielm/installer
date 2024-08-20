@@ -18,6 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/yaml"
 
 	configv1 "github.com/openshift/api/config/v1"
@@ -29,6 +30,7 @@ import (
 	"github.com/openshift/installer/pkg/asset/ignition"
 	"github.com/openshift/installer/pkg/asset/ignition/bootstrap"
 	baremetalbootstrap "github.com/openshift/installer/pkg/asset/ignition/bootstrap/baremetal"
+	gcpbootstrap "github.com/openshift/installer/pkg/asset/ignition/bootstrap/gcp"
 	"github.com/openshift/installer/pkg/asset/ignition/machine"
 	"github.com/openshift/installer/pkg/asset/installconfig"
 	awsconfig "github.com/openshift/installer/pkg/asset/installconfig/aws"
@@ -216,6 +218,11 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 
 	if masterCount == 0 {
 		return errors.Errorf("master slice cannot be empty")
+	}
+
+	numWorkers := int64(0)
+	for _, worker := range installConfig.Config.Compute {
+		numWorkers += ptr.Deref(worker.Replicas, 0)
 	}
 
 	switch platform {
@@ -483,6 +490,18 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 		if err != nil {
 			return err
 		}
+
+		// Based on the number of workers, we could have the following outcomes:
+		// 1. compute replicas > 0, worker machinesets > 0, masters not schedulable, valid cluster
+		// 2. compute replicas > 0, worker machinesets = 0, invalid cluster
+		// 3. compute replicas = 0, masters schedulable, valid cluster
+		if numWorkers != 0 && len(workers) == 0 {
+			return fmt.Errorf("invalid configuration. No worker assets available for requested number of compute replicas (%d)", numWorkers)
+		}
+		if numWorkers == 0 && !mastersSchedulable {
+			return fmt.Errorf("invalid configuration. No workers requested but masters are not schedulable")
+		}
+
 		workerConfigs := make([]*machinev1beta1.GCPMachineProviderSpec, len(workers))
 		for i, w := range workers {
 			workerConfigs[i] = w.Spec.Template.Spec.ProviderSpec.Value.Object.(*machinev1beta1.GCPMachineProviderSpec)
@@ -490,24 +509,38 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 		preexistingnetwork := installConfig.Config.GCP.Network != ""
 
 		// Search the project for a dns zone with the specified base domain.
+		// When the user has selected a custom DNS solution, the zones should be skipped.
 		publicZoneName := ""
-		if installConfig.Config.Publish == types.ExternalPublishingStrategy {
-			publicZone, err := client.GetDNSZone(ctx, installConfig.Config.GCP.ProjectID, installConfig.Config.BaseDomain, true)
-			if err != nil {
-				return errors.Wrapf(err, "failed to get GCP public zone")
+		privateZoneName := ""
+
+		if installConfig.Config.GCP.UserProvisionedDNS != gcp.UserProvisionedDNSEnabled {
+			if installConfig.Config.Publish == types.ExternalPublishingStrategy {
+				publicZone, err := client.GetDNSZone(ctx, installConfig.Config.GCP.ProjectID, installConfig.Config.BaseDomain, true)
+				if err != nil {
+					return errors.Wrapf(err, "failed to get GCP public zone")
+				}
+				publicZoneName = publicZone.Name
 			}
-			publicZoneName = publicZone.Name
+
+			if installConfig.Config.GCP.NetworkProjectID != "" {
+				privateZone, err := client.GetDNSZone(ctx, installConfig.Config.GCP.ProjectID, installConfig.Config.ClusterDomain(), false)
+				if err != nil {
+					return errors.Wrapf(err, "failed to get GCP private zone")
+				}
+				if privateZone != nil {
+					privateZoneName = privateZone.Name
+				}
+			}
 		}
 
-		privateZoneName := ""
-		if installConfig.Config.GCP.NetworkProjectID != "" {
-			privateZone, err := client.GetDNSZone(ctx, installConfig.Config.GCP.ProjectID, installConfig.Config.ClusterDomain(), false)
-			if err != nil {
-				return errors.Wrapf(err, "failed to get GCP private zone")
-			}
-			if privateZone != nil {
-				privateZoneName = privateZone.Name
-			}
+		url, err := gcpbootstrap.CreateSignedURL(clusterID.InfraID)
+		if err != nil {
+			return fmt.Errorf("failed to provision gcp bootstrap storage resources: %w", err)
+		}
+
+		shim, err := bootstrap.GenerateIgnitionShimWithCertBundleAndProxy(url, installConfig.Config.AdditionalTrustBundle, installConfig.Config.Proxy)
+		if err != nil {
+			return fmt.Errorf("failed to create gcp ignition shim: %w", err)
 		}
 
 		archName := coreosarch.RpmArch(string(installConfig.Config.ControlPlane.Architecture))
@@ -537,6 +570,7 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 				PublishStrategy:     installConfig.Config.Publish,
 				InfrastructureName:  clusterID.InfraID,
 				UserProvisionedDNS:  installConfig.Config.GCP.UserProvisionedDNS == gcp.UserProvisionedDNSEnabled,
+				IgnitionShim:        string(shim),
 			},
 		)
 		if err != nil {
@@ -771,7 +805,7 @@ func (t *TerraformVariables) Generate(parents asset.Parents) error {
 		data, err = baremetaltfvars.TFVars(
 			*installConfig.Config.ControlPlane.Replicas,
 			installConfig.Config.Platform.BareMetal.LibvirtURI,
-			installConfig.Config.Platform.BareMetal.APIVIPs[0],
+			installConfig.Config.Platform.BareMetal.APIVIPs,
 			imageCacheIP,
 			string(*rhcosBootstrapImage),
 			installConfig.Config.Platform.BareMetal.ExternalBridge,

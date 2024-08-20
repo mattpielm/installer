@@ -15,7 +15,7 @@
  */
 
 /*
- * IBM OpenAPI SDK Code Generator Version: 3.78.0-67aec9b7-20230818-174940
+ * IBM OpenAPI SDK Code Generator Version: 3.80.0-29334a73-20230925-151553
  */
 
 // Package vpcv1 : Operations and models for the VpcV1 service
@@ -38,7 +38,7 @@ import (
 // VpcV1 : The IBM Cloud Virtual Private Cloud (VPC) API can be used to programmatically provision and manage virtual
 // server instances, along with subnets, volumes, load balancers, and more.
 //
-// API Version: 2023-10-18
+// API Version: 2023-12-20
 type VpcV1 struct {
 	Service *core.BaseService
 
@@ -46,8 +46,8 @@ type VpcV1 struct {
 	// `2`.
 	generation *int64
 
-	// The API version, in format `YYYY-MM-DD`. For the API behavior documented here, specify any date between `2023-10-10`
-	// and `2023-10-18`.
+	// The API version, in format `YYYY-MM-DD`. For the API behavior documented here, specify any date between `2023-12-05`
+	// and `2023-12-20`.
 	Version *string
 }
 
@@ -63,8 +63,8 @@ type VpcV1Options struct {
 	URL           string
 	Authenticator core.Authenticator
 
-	// The API version, in format `YYYY-MM-DD`. For the API behavior documented here, specify any date between `2023-10-10`
-	// and `2023-10-18`.
+	// The API version, in format `YYYY-MM-DD`. For the API behavior documented here, specify any date between `2023-12-05`
+	// and `2023-12-20`.
 	Version *string
 }
 
@@ -122,7 +122,7 @@ func NewVpcV1(options *VpcV1Options) (service *VpcV1, err error) {
 	}
 
 	if options.Version == nil {
-		options.Version = core.StringPtr("2023-10-17")
+		options.Version = core.StringPtr("2023-12-19")
 	}
 
 	service = &VpcV1{
@@ -1248,13 +1248,14 @@ func (vpc *VpcV1) CreateVPCDnsResolutionBindingWithContext(ctx context.Context, 
 // DeleteVPCDnsResolutionBinding : Delete a DNS resolution binding
 // This request deletes a DNS resolution binding. This operation cannot be reversed.
 //
-// A DNS resolution binding for a VPC with `dns.enable_hub` set to `true` cannot be deleted.
-func (vpc *VpcV1) DeleteVPCDnsResolutionBinding(deleteVPCDnsResolutionBindingOptions *DeleteVPCDnsResolutionBindingOptions) (response *core.DetailedResponse, err error) {
+// For this request to succeed, the VPC specified by the identifier in the URL must not have
+// `dns.resolver.type` set to `delegated`.
+func (vpc *VpcV1) DeleteVPCDnsResolutionBinding(deleteVPCDnsResolutionBindingOptions *DeleteVPCDnsResolutionBindingOptions) (result *VpcdnsResolutionBinding, response *core.DetailedResponse, err error) {
 	return vpc.DeleteVPCDnsResolutionBindingWithContext(context.Background(), deleteVPCDnsResolutionBindingOptions)
 }
 
 // DeleteVPCDnsResolutionBindingWithContext is an alternate form of the DeleteVPCDnsResolutionBinding method which supports a Context parameter
-func (vpc *VpcV1) DeleteVPCDnsResolutionBindingWithContext(ctx context.Context, deleteVPCDnsResolutionBindingOptions *DeleteVPCDnsResolutionBindingOptions) (response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) DeleteVPCDnsResolutionBindingWithContext(ctx context.Context, deleteVPCDnsResolutionBindingOptions *DeleteVPCDnsResolutionBindingOptions) (result *VpcdnsResolutionBinding, response *core.DetailedResponse, err error) {
 	err = core.ValidateNotNil(deleteVPCDnsResolutionBindingOptions, "deleteVPCDnsResolutionBindingOptions cannot be nil")
 	if err != nil {
 		return
@@ -1285,6 +1286,7 @@ func (vpc *VpcV1) DeleteVPCDnsResolutionBindingWithContext(ctx context.Context, 
 	for headerName, headerValue := range sdkHeaders {
 		builder.AddHeader(headerName, headerValue)
 	}
+	builder.AddHeader("Accept", "application/json")
 
 	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
 	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
@@ -1294,7 +1296,18 @@ func (vpc *VpcV1) DeleteVPCDnsResolutionBindingWithContext(ctx context.Context, 
 		return
 	}
 
-	response, err = vpc.Service.Request(request, nil)
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalVpcdnsResolutionBinding)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
 
 	return
 }
@@ -1569,6 +1582,9 @@ func (vpc *VpcV1) CreateVPCRouteWithContext(ctx context.Context, createVPCRouteO
 	}
 	if createVPCRouteOptions.Action != nil {
 		body["action"] = createVPCRouteOptions.Action
+	}
+	if createVPCRouteOptions.Advertise != nil {
+		body["advertise"] = createVPCRouteOptions.Advertise
 	}
 	if createVPCRouteOptions.Name != nil {
 		body["name"] = createVPCRouteOptions.Name
@@ -1923,6 +1939,9 @@ func (vpc *VpcV1) CreateVPCRoutingTableWithContext(ctx context.Context, createVP
 	body := make(map[string]interface{})
 	if createVPCRoutingTableOptions.AcceptRoutesFrom != nil {
 		body["accept_routes_from"] = createVPCRoutingTableOptions.AcceptRoutesFrom
+	}
+	if createVPCRoutingTableOptions.AdvertiseRoutesTo != nil {
+		body["advertise_routes_to"] = createVPCRoutingTableOptions.AdvertiseRoutesTo
 	}
 	if createVPCRoutingTableOptions.Name != nil {
 		body["name"] = createVPCRoutingTableOptions.Name
@@ -2290,6 +2309,9 @@ func (vpc *VpcV1) CreateVPCRoutingTableRouteWithContext(ctx context.Context, cre
 	}
 	if createVPCRoutingTableRouteOptions.Action != nil {
 		body["action"] = createVPCRoutingTableRouteOptions.Action
+	}
+	if createVPCRoutingTableRouteOptions.Advertise != nil {
+		body["advertise"] = createVPCRoutingTableRouteOptions.Advertise
 	}
 	if createVPCRoutingTableRouteOptions.Name != nil {
 		body["name"] = createVPCRoutingTableRouteOptions.Name
@@ -2670,10 +2692,10 @@ func (vpc *VpcV1) CreateSubnetWithContext(ctx context.Context, createSubnetOptio
 
 // DeleteSubnet : Delete a subnet
 // This request deletes a subnet. This operation cannot be reversed. For this request to succeed, the subnet must not be
-// referenced by any bare metal server network interfaces, instance network interfaces, VPN gateways, or load balancers.
-// A delete operation automatically detaches the subnet from any network ACLs, public gateways, or endpoint gateways.
-// All flow log collectors with `auto_delete` set to `true` targeting the subnet or any resource in the subnet are
-// automatically deleted.
+// referenced by any bare metal server network interfaces, instance network interfaces, virtual network interfaces, VPN
+// gateways, or load balancers. A delete operation automatically detaches the subnet from any network ACLs, public
+// gateways, or endpoint gateways. All flow log collectors with `auto_delete` set to `true` targeting the subnet or any
+// resource in the subnet are automatically deleted.
 func (vpc *VpcV1) DeleteSubnet(deleteSubnetOptions *DeleteSubnetOptions) (response *core.DetailedResponse, err error) {
 	return vpc.DeleteSubnetWithContext(context.Background(), deleteSubnetOptions)
 }
@@ -3358,6 +3380,18 @@ func (vpc *VpcV1) ListSubnetReservedIpsWithContext(ctx context.Context, listSubn
 	if listSubnetReservedIpsOptions.Sort != nil {
 		builder.AddQuery("sort", fmt.Sprint(*listSubnetReservedIpsOptions.Sort))
 	}
+	if listSubnetReservedIpsOptions.TargetID != nil {
+		builder.AddQuery("target.id", fmt.Sprint(*listSubnetReservedIpsOptions.TargetID))
+	}
+	if listSubnetReservedIpsOptions.TargetCRN != nil {
+		builder.AddQuery("target.crn", fmt.Sprint(*listSubnetReservedIpsOptions.TargetCRN))
+	}
+	if listSubnetReservedIpsOptions.TargetName != nil {
+		builder.AddQuery("target.name", fmt.Sprint(*listSubnetReservedIpsOptions.TargetName))
+	}
+	if listSubnetReservedIpsOptions.TargetResourceType != nil {
+		builder.AddQuery("target.resource_type", fmt.Sprint(*listSubnetReservedIpsOptions.TargetResourceType))
+	}
 
 	request, err := builder.Build()
 	if err != nil {
@@ -3467,8 +3501,8 @@ func (vpc *VpcV1) CreateSubnetReservedIPWithContext(ctx context.Context, createS
 // This request releases a reserved IP. This operation cannot be reversed.
 //
 // For this request to succeed, the reserved IP must not be required by another resource, such as a bare metal server
-// network interface or instance network interface for which it is the primary IP. A provider-owned reserved IP is not
-// allowed to be deleted.
+// network interface, instance network interface or virtual network interface for which it is the primary IP. A
+// provider-owned reserved IP is not allowed to be deleted.
 func (vpc *VpcV1) DeleteSubnetReservedIP(deleteSubnetReservedIPOptions *DeleteSubnetReservedIPOptions) (response *core.DetailedResponse, err error) {
 	return vpc.DeleteSubnetReservedIPWithContext(context.Background(), deleteSubnetReservedIPOptions)
 }
@@ -5492,8 +5526,10 @@ func (vpc *VpcV1) CreateInstanceWithContext(ctx context.Context, createInstanceO
 
 // DeleteInstance : Delete an instance
 // This request deletes an instance. This operation cannot be reversed. Any floating IPs associated with instance
-// network interfaces are implicitly disassociated. All flow log collectors with `auto_delete` set to `true` targeting
-// the instance and/or the instance network interfaces are automatically deleted.
+// network interfaces are implicitly disassociated. All virtual network interfaces with `auto_delete` set to `true`
+// targeting instance network attachments on the instance are automatically deleted. All flow log collectors with
+// `auto_delete` set to `true` targeting the instance, the instance network attachments, the instance network
+// interfaces, or the automatically deleted virtual network interfaces are automatically deleted.
 func (vpc *VpcV1) DeleteInstance(deleteInstanceOptions *DeleteInstanceOptions) (response *core.DetailedResponse, err error) {
 	return vpc.DeleteInstanceWithContext(context.Background(), deleteInstanceOptions)
 }
@@ -6095,11 +6131,352 @@ func (vpc *VpcV1) UpdateInstanceDiskWithContext(ctx context.Context, updateInsta
 	return
 }
 
+// ListInstanceNetworkAttachments : List all network attachments on an instance
+// This request lists all network attachments on an instance. A network attachment represents a device on the instance
+// to which a virtual network interface is attached.
+//
+// The network attachments will be sorted by their `created_at` property values, with newest network attachments first.
+// Network attachments with identical `created_at` property values will in turn be sorted by ascending `name` property
+// values.
+func (vpc *VpcV1) ListInstanceNetworkAttachments(listInstanceNetworkAttachmentsOptions *ListInstanceNetworkAttachmentsOptions) (result *InstanceNetworkAttachmentCollection, response *core.DetailedResponse, err error) {
+	return vpc.ListInstanceNetworkAttachmentsWithContext(context.Background(), listInstanceNetworkAttachmentsOptions)
+}
+
+// ListInstanceNetworkAttachmentsWithContext is an alternate form of the ListInstanceNetworkAttachments method which supports a Context parameter
+func (vpc *VpcV1) ListInstanceNetworkAttachmentsWithContext(ctx context.Context, listInstanceNetworkAttachmentsOptions *ListInstanceNetworkAttachmentsOptions) (result *InstanceNetworkAttachmentCollection, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(listInstanceNetworkAttachmentsOptions, "listInstanceNetworkAttachmentsOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(listInstanceNetworkAttachmentsOptions, "listInstanceNetworkAttachmentsOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"instance_id": *listInstanceNetworkAttachmentsOptions.InstanceID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/instances/{instance_id}/network_attachments`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range listInstanceNetworkAttachmentsOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "ListInstanceNetworkAttachments")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalInstanceNetworkAttachmentCollection)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// CreateInstanceNetworkAttachment : Create a network attachment on an instance
+// This request creates a new instance network attachment from an instance network attachment prototype object. The
+// prototype object is structured in the same way as a retrieved instance network attachment, and contains the
+// information necessary to create the new instance network attachment.
+func (vpc *VpcV1) CreateInstanceNetworkAttachment(createInstanceNetworkAttachmentOptions *CreateInstanceNetworkAttachmentOptions) (result *InstanceNetworkAttachment, response *core.DetailedResponse, err error) {
+	return vpc.CreateInstanceNetworkAttachmentWithContext(context.Background(), createInstanceNetworkAttachmentOptions)
+}
+
+// CreateInstanceNetworkAttachmentWithContext is an alternate form of the CreateInstanceNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) CreateInstanceNetworkAttachmentWithContext(ctx context.Context, createInstanceNetworkAttachmentOptions *CreateInstanceNetworkAttachmentOptions) (result *InstanceNetworkAttachment, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(createInstanceNetworkAttachmentOptions, "createInstanceNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(createInstanceNetworkAttachmentOptions, "createInstanceNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"instance_id": *createInstanceNetworkAttachmentOptions.InstanceID,
+	}
+
+	builder := core.NewRequestBuilder(core.POST)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/instances/{instance_id}/network_attachments`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range createInstanceNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "CreateInstanceNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+	builder.AddHeader("Content-Type", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	body := make(map[string]interface{})
+	if createInstanceNetworkAttachmentOptions.VirtualNetworkInterface != nil {
+		body["virtual_network_interface"] = createInstanceNetworkAttachmentOptions.VirtualNetworkInterface
+	}
+	if createInstanceNetworkAttachmentOptions.Name != nil {
+		body["name"] = createInstanceNetworkAttachmentOptions.Name
+	}
+	_, err = builder.SetBodyContentJSON(body)
+	if err != nil {
+		return
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalInstanceNetworkAttachment)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// DeleteInstanceNetworkAttachment : Delete an instance network attachment
+// This request deletes an instance network attachment. This operation cannot be reversed. Any floating IPs associated
+// with the instance network attachment are implicitly disassociated. All flow log collectors with `auto_delete` set to
+// `true` targeting the instance network attachment are automatically deleted. The primary instance network attachment
+// is not allowed to be deleted.
+func (vpc *VpcV1) DeleteInstanceNetworkAttachment(deleteInstanceNetworkAttachmentOptions *DeleteInstanceNetworkAttachmentOptions) (response *core.DetailedResponse, err error) {
+	return vpc.DeleteInstanceNetworkAttachmentWithContext(context.Background(), deleteInstanceNetworkAttachmentOptions)
+}
+
+// DeleteInstanceNetworkAttachmentWithContext is an alternate form of the DeleteInstanceNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) DeleteInstanceNetworkAttachmentWithContext(ctx context.Context, deleteInstanceNetworkAttachmentOptions *DeleteInstanceNetworkAttachmentOptions) (response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(deleteInstanceNetworkAttachmentOptions, "deleteInstanceNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(deleteInstanceNetworkAttachmentOptions, "deleteInstanceNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"instance_id": *deleteInstanceNetworkAttachmentOptions.InstanceID,
+		"id":          *deleteInstanceNetworkAttachmentOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.DELETE)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/instances/{instance_id}/network_attachments/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range deleteInstanceNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "DeleteInstanceNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	response, err = vpc.Service.Request(request, nil)
+
+	return
+}
+
+// GetInstanceNetworkAttachment : Retrieve an instance network attachment
+// This request retrieves a single instance network attachment specified by the identifier in the URL.
+func (vpc *VpcV1) GetInstanceNetworkAttachment(getInstanceNetworkAttachmentOptions *GetInstanceNetworkAttachmentOptions) (result *InstanceNetworkAttachment, response *core.DetailedResponse, err error) {
+	return vpc.GetInstanceNetworkAttachmentWithContext(context.Background(), getInstanceNetworkAttachmentOptions)
+}
+
+// GetInstanceNetworkAttachmentWithContext is an alternate form of the GetInstanceNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) GetInstanceNetworkAttachmentWithContext(ctx context.Context, getInstanceNetworkAttachmentOptions *GetInstanceNetworkAttachmentOptions) (result *InstanceNetworkAttachment, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(getInstanceNetworkAttachmentOptions, "getInstanceNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(getInstanceNetworkAttachmentOptions, "getInstanceNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"instance_id": *getInstanceNetworkAttachmentOptions.InstanceID,
+		"id":          *getInstanceNetworkAttachmentOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/instances/{instance_id}/network_attachments/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range getInstanceNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "GetInstanceNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalInstanceNetworkAttachment)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// UpdateInstanceNetworkAttachment : Update an instance network attachment
+// This request updates an instance network attachment with the information provided in an instance network interface
+// patch object. The instance network attachment patch object is structured in the same way as a retrieved instance
+// network attachment and needs to contain only the information to be updated.
+func (vpc *VpcV1) UpdateInstanceNetworkAttachment(updateInstanceNetworkAttachmentOptions *UpdateInstanceNetworkAttachmentOptions) (result *InstanceNetworkAttachment, response *core.DetailedResponse, err error) {
+	return vpc.UpdateInstanceNetworkAttachmentWithContext(context.Background(), updateInstanceNetworkAttachmentOptions)
+}
+
+// UpdateInstanceNetworkAttachmentWithContext is an alternate form of the UpdateInstanceNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) UpdateInstanceNetworkAttachmentWithContext(ctx context.Context, updateInstanceNetworkAttachmentOptions *UpdateInstanceNetworkAttachmentOptions) (result *InstanceNetworkAttachment, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(updateInstanceNetworkAttachmentOptions, "updateInstanceNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(updateInstanceNetworkAttachmentOptions, "updateInstanceNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"instance_id": *updateInstanceNetworkAttachmentOptions.InstanceID,
+		"id":          *updateInstanceNetworkAttachmentOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.PATCH)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/instances/{instance_id}/network_attachments/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range updateInstanceNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "UpdateInstanceNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+	builder.AddHeader("Content-Type", "application/merge-patch+json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	_, err = builder.SetBodyContentJSON(updateInstanceNetworkAttachmentOptions.InstanceNetworkAttachmentPatch)
+	if err != nil {
+		return
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalInstanceNetworkAttachment)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
 // ListInstanceNetworkInterfaces : List all network interfaces on an instance
 // This request lists all network interfaces on an instance. An instance network interface is an abstract representation
 // of a network device and attaches an instance to a single subnet. Each network interface on an instance can attach to
 // any subnet in the zone, including subnets that are already attached to the instance. Multiple network interfaces on
 // the instance may also attach to the same subnet.
+//
+// If this instance has network attachments, each returned network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface.
 func (vpc *VpcV1) ListInstanceNetworkInterfaces(listInstanceNetworkInterfacesOptions *ListInstanceNetworkInterfacesOptions) (result *NetworkInterfaceUnpaginatedCollection, response *core.DetailedResponse, err error) {
 	return vpc.ListInstanceNetworkInterfacesWithContext(context.Background(), listInstanceNetworkInterfacesOptions)
 }
@@ -6166,6 +6543,10 @@ func (vpc *VpcV1) ListInstanceNetworkInterfacesWithContext(ctx context.Context, 
 // prototype object is structured in the same way as a retrieved instance network interface, and contains the
 // information necessary to create the new instance network interface. Any subnet in the instance's VPC may be
 // specified. Addresses on the instance network interface must be within the specified subnet's CIDR blocks.
+//
+// If this instance has network attachments, each network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface, and new network interfaces are not allowed to be created.
 func (vpc *VpcV1) CreateInstanceNetworkInterface(createInstanceNetworkInterfaceOptions *CreateInstanceNetworkInterfaceOptions) (result *NetworkInterface, response *core.DetailedResponse, err error) {
 	return vpc.CreateInstanceNetworkInterfaceWithContext(context.Background(), createInstanceNetworkInterfaceOptions)
 }
@@ -6254,6 +6635,10 @@ func (vpc *VpcV1) CreateInstanceNetworkInterfaceWithContext(ctx context.Context,
 // with the instance network interface are implicitly disassociated. All flow log collectors with `auto_delete` set to
 // `true` targeting the instance network interface are automatically deleted. The primary instance network interface is
 // not allowed to be deleted.
+//
+// If this instance has network attachments, this network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface, and is not allowed to be deleted.
 func (vpc *VpcV1) DeleteInstanceNetworkInterface(deleteInstanceNetworkInterfaceOptions *DeleteInstanceNetworkInterfaceOptions) (response *core.DetailedResponse, err error) {
 	return vpc.DeleteInstanceNetworkInterfaceWithContext(context.Background(), deleteInstanceNetworkInterfaceOptions)
 }
@@ -6306,6 +6691,10 @@ func (vpc *VpcV1) DeleteInstanceNetworkInterfaceWithContext(ctx context.Context,
 
 // GetInstanceNetworkInterface : Retrieve an instance network interface
 // This request retrieves a single instance network interface specified by the identifier in the URL.
+//
+// If this instance has network attachments, the retrieved network interface is a
+// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+// attachment and its attached virtual network interface.
 func (vpc *VpcV1) GetInstanceNetworkInterface(getInstanceNetworkInterfaceOptions *GetInstanceNetworkInterfaceOptions) (result *NetworkInterface, response *core.DetailedResponse, err error) {
 	return vpc.GetInstanceNetworkInterfaceWithContext(context.Background(), getInstanceNetworkInterfaceOptions)
 }
@@ -6372,6 +6761,10 @@ func (vpc *VpcV1) GetInstanceNetworkInterfaceWithContext(ctx context.Context, ge
 // This request updates an instance network interface with the information provided in an instance network interface
 // patch object. The instance network interface patch object is structured in the same way as a retrieved instance
 // network interface and needs to contain only the information to be updated.
+//
+// If this instance has network attachments, this network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface, and is not allowed to be updated.
 func (vpc *VpcV1) UpdateInstanceNetworkInterface(updateInstanceNetworkInterfaceOptions *UpdateInstanceNetworkInterfaceOptions) (result *NetworkInterface, response *core.DetailedResponse, err error) {
 	return vpc.UpdateInstanceNetworkInterfaceWithContext(context.Background(), updateInstanceNetworkInterfaceOptions)
 }
@@ -6625,8 +7018,13 @@ func (vpc *VpcV1) GetInstanceNetworkInterfaceFloatingIPWithContext(ctx context.C
 
 // AddInstanceNetworkInterfaceFloatingIP : Associate a floating IP with an instance network interface
 // This request associates the specified floating IP with the specified instance network interface, replacing any
-// existing association. For this request to succeed, the existing floating IP must not be required by another resource,
-// such as a public gateway. A request body is not required, and if provided, is ignored.
+// existing association.
+//
+// The existing floating IP must:
+// - not be required by another resource, such as a public gateway
+// - be in the same `zone` as the instance
+//
+// A request body is not required, and if provided, is ignored.
 func (vpc *VpcV1) AddInstanceNetworkInterfaceFloatingIP(addInstanceNetworkInterfaceFloatingIPOptions *AddInstanceNetworkInterfaceFloatingIPOptions) (result *FloatingIP, response *core.DetailedResponse, err error) {
 	return vpc.AddInstanceNetworkInterfaceFloatingIPWithContext(context.Background(), addInstanceNetworkInterfaceFloatingIPOptions)
 }
@@ -9896,12 +10294,12 @@ func (vpc *VpcV1) ListBackupPoliciesWithContext(ctx context.Context, listBackupP
 // CreateBackupPolicy : Create a backup policy
 // This request creates a new backup policy from a backup policy prototype object. The prototype object is structured in
 // the same way as a retrieved backup policy, and contains the information necessary to create the new backup policy.
-func (vpc *VpcV1) CreateBackupPolicy(createBackupPolicyOptions *CreateBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) CreateBackupPolicy(createBackupPolicyOptions *CreateBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	return vpc.CreateBackupPolicyWithContext(context.Background(), createBackupPolicyOptions)
 }
 
 // CreateBackupPolicyWithContext is an alternate form of the CreateBackupPolicy method which supports a Context parameter
-func (vpc *VpcV1) CreateBackupPolicyWithContext(ctx context.Context, createBackupPolicyOptions *CreateBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) CreateBackupPolicyWithContext(ctx context.Context, createBackupPolicyOptions *CreateBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	err = core.ValidateNotNil(createBackupPolicyOptions, "createBackupPolicyOptions cannot be nil")
 	if err != nil {
 		return
@@ -9933,26 +10331,7 @@ func (vpc *VpcV1) CreateBackupPolicyWithContext(ctx context.Context, createBacku
 	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
 	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
 
-	body := make(map[string]interface{})
-	if createBackupPolicyOptions.MatchUserTags != nil {
-		body["match_user_tags"] = createBackupPolicyOptions.MatchUserTags
-	}
-	if createBackupPolicyOptions.MatchResourceTypes != nil {
-		body["match_resource_types"] = createBackupPolicyOptions.MatchResourceTypes
-	}
-	if createBackupPolicyOptions.Name != nil {
-		body["name"] = createBackupPolicyOptions.Name
-	}
-	if createBackupPolicyOptions.Plans != nil {
-		body["plans"] = createBackupPolicyOptions.Plans
-	}
-	if createBackupPolicyOptions.ResourceGroup != nil {
-		body["resource_group"] = createBackupPolicyOptions.ResourceGroup
-	}
-	if createBackupPolicyOptions.Scope != nil {
-		body["scope"] = createBackupPolicyOptions.Scope
-	}
-	_, err = builder.SetBodyContentJSON(body)
+	_, err = builder.SetBodyContentJSON(createBackupPolicyOptions.BackupPolicyPrototype)
 	if err != nil {
 		return
 	}
@@ -10512,12 +10891,12 @@ func (vpc *VpcV1) UpdateBackupPolicyPlanWithContext(ctx context.Context, updateB
 //
 // If the request is accepted, the backup policy `status` will be set to `deleting`. Once deletion processing completes,
 // the backup policy will no longer be retrievable.
-func (vpc *VpcV1) DeleteBackupPolicy(deleteBackupPolicyOptions *DeleteBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) DeleteBackupPolicy(deleteBackupPolicyOptions *DeleteBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	return vpc.DeleteBackupPolicyWithContext(context.Background(), deleteBackupPolicyOptions)
 }
 
 // DeleteBackupPolicyWithContext is an alternate form of the DeleteBackupPolicy method which supports a Context parameter
-func (vpc *VpcV1) DeleteBackupPolicyWithContext(ctx context.Context, deleteBackupPolicyOptions *DeleteBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) DeleteBackupPolicyWithContext(ctx context.Context, deleteBackupPolicyOptions *DeleteBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	err = core.ValidateNotNil(deleteBackupPolicyOptions, "deleteBackupPolicyOptions cannot be nil")
 	if err != nil {
 		return
@@ -10578,12 +10957,12 @@ func (vpc *VpcV1) DeleteBackupPolicyWithContext(ctx context.Context, deleteBacku
 
 // GetBackupPolicy : Retrieve a backup policy
 // This request retrieves a single backup policy specified by the identifier in the URL.
-func (vpc *VpcV1) GetBackupPolicy(getBackupPolicyOptions *GetBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) GetBackupPolicy(getBackupPolicyOptions *GetBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	return vpc.GetBackupPolicyWithContext(context.Background(), getBackupPolicyOptions)
 }
 
 // GetBackupPolicyWithContext is an alternate form of the GetBackupPolicy method which supports a Context parameter
-func (vpc *VpcV1) GetBackupPolicyWithContext(ctx context.Context, getBackupPolicyOptions *GetBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) GetBackupPolicyWithContext(ctx context.Context, getBackupPolicyOptions *GetBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	err = core.ValidateNotNil(getBackupPolicyOptions, "getBackupPolicyOptions cannot be nil")
 	if err != nil {
 		return
@@ -10642,12 +11021,12 @@ func (vpc *VpcV1) GetBackupPolicyWithContext(ctx context.Context, getBackupPolic
 // UpdateBackupPolicy : Update a backup policy
 // This request updates a backup policy with the information in a provided backup policy patch. The backup policy patch
 // object is structured in the same way as a retrieved backup policy and contains only the information to be updated.
-func (vpc *VpcV1) UpdateBackupPolicy(updateBackupPolicyOptions *UpdateBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) UpdateBackupPolicy(updateBackupPolicyOptions *UpdateBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	return vpc.UpdateBackupPolicyWithContext(context.Background(), updateBackupPolicyOptions)
 }
 
 // UpdateBackupPolicyWithContext is an alternate form of the UpdateBackupPolicy method which supports a Context parameter
-func (vpc *VpcV1) UpdateBackupPolicyWithContext(ctx context.Context, updateBackupPolicyOptions *UpdateBackupPolicyOptions) (result *BackupPolicy, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) UpdateBackupPolicyWithContext(ctx context.Context, updateBackupPolicyOptions *UpdateBackupPolicyOptions) (result BackupPolicyIntf, response *core.DetailedResponse, err error) {
 	err = core.ValidateNotNil(updateBackupPolicyOptions, "updateBackupPolicyOptions cannot be nil")
 	if err != nil {
 		return
@@ -11276,38 +11655,7 @@ func (vpc *VpcV1) CreateBareMetalServerWithContext(ctx context.Context, createBa
 	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
 	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
 
-	body := make(map[string]interface{})
-	if createBareMetalServerOptions.Initialization != nil {
-		body["initialization"] = createBareMetalServerOptions.Initialization
-	}
-	if createBareMetalServerOptions.PrimaryNetworkInterface != nil {
-		body["primary_network_interface"] = createBareMetalServerOptions.PrimaryNetworkInterface
-	}
-	if createBareMetalServerOptions.Profile != nil {
-		body["profile"] = createBareMetalServerOptions.Profile
-	}
-	if createBareMetalServerOptions.Zone != nil {
-		body["zone"] = createBareMetalServerOptions.Zone
-	}
-	if createBareMetalServerOptions.EnableSecureBoot != nil {
-		body["enable_secure_boot"] = createBareMetalServerOptions.EnableSecureBoot
-	}
-	if createBareMetalServerOptions.Name != nil {
-		body["name"] = createBareMetalServerOptions.Name
-	}
-	if createBareMetalServerOptions.NetworkInterfaces != nil {
-		body["network_interfaces"] = createBareMetalServerOptions.NetworkInterfaces
-	}
-	if createBareMetalServerOptions.ResourceGroup != nil {
-		body["resource_group"] = createBareMetalServerOptions.ResourceGroup
-	}
-	if createBareMetalServerOptions.TrustedPlatformModule != nil {
-		body["trusted_platform_module"] = createBareMetalServerOptions.TrustedPlatformModule
-	}
-	if createBareMetalServerOptions.VPC != nil {
-		body["vpc"] = createBareMetalServerOptions.VPC
-	}
-	_, err = builder.SetBodyContentJSON(body)
+	_, err = builder.SetBodyContentJSON(createBareMetalServerOptions.BareMetalServerPrototype)
 	if err != nil {
 		return
 	}
@@ -11611,11 +11959,353 @@ func (vpc *VpcV1) UpdateBareMetalServerDiskWithContext(ctx context.Context, upda
 	return
 }
 
+// ListBareMetalServerNetworkAttachments : List all network attachments on a bare metal server
+// This request lists all network attachments on a bare metal server. A bare metal server network attachment is an
+// abstract representation of a network device and attaches a bare metal server to a single subnet. Each network
+// interface on a bare metal server can attach to any subnet in the zone, including subnets that are already attached to
+// the bare metal server.
+//
+// The network attachments will be sorted by their `created_at` property values, with newest network attachments first.
+// Network attachments with identical `created_at` property values will in turn be sorted by ascending `name` property
+// values.
+func (vpc *VpcV1) ListBareMetalServerNetworkAttachments(listBareMetalServerNetworkAttachmentsOptions *ListBareMetalServerNetworkAttachmentsOptions) (result *BareMetalServerNetworkAttachmentCollection, response *core.DetailedResponse, err error) {
+	return vpc.ListBareMetalServerNetworkAttachmentsWithContext(context.Background(), listBareMetalServerNetworkAttachmentsOptions)
+}
+
+// ListBareMetalServerNetworkAttachmentsWithContext is an alternate form of the ListBareMetalServerNetworkAttachments method which supports a Context parameter
+func (vpc *VpcV1) ListBareMetalServerNetworkAttachmentsWithContext(ctx context.Context, listBareMetalServerNetworkAttachmentsOptions *ListBareMetalServerNetworkAttachmentsOptions) (result *BareMetalServerNetworkAttachmentCollection, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(listBareMetalServerNetworkAttachmentsOptions, "listBareMetalServerNetworkAttachmentsOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(listBareMetalServerNetworkAttachmentsOptions, "listBareMetalServerNetworkAttachmentsOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"bare_metal_server_id": *listBareMetalServerNetworkAttachmentsOptions.BareMetalServerID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/bare_metal_servers/{bare_metal_server_id}/network_attachments`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range listBareMetalServerNetworkAttachmentsOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "ListBareMetalServerNetworkAttachments")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+	if listBareMetalServerNetworkAttachmentsOptions.Start != nil {
+		builder.AddQuery("start", fmt.Sprint(*listBareMetalServerNetworkAttachmentsOptions.Start))
+	}
+	if listBareMetalServerNetworkAttachmentsOptions.Limit != nil {
+		builder.AddQuery("limit", fmt.Sprint(*listBareMetalServerNetworkAttachmentsOptions.Limit))
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalBareMetalServerNetworkAttachmentCollection)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// CreateBareMetalServerNetworkAttachment : Create a network attachment on a bare metal server
+// This request creates a new bare metal server network attachment from a bare metal server network attachment prototype
+// object. The prototype object is structured in the same way as a retrieved bare metal server network attachment, and
+// contains the information necessary to create the new bare metal server network attachment.
+func (vpc *VpcV1) CreateBareMetalServerNetworkAttachment(createBareMetalServerNetworkAttachmentOptions *CreateBareMetalServerNetworkAttachmentOptions) (result BareMetalServerNetworkAttachmentIntf, response *core.DetailedResponse, err error) {
+	return vpc.CreateBareMetalServerNetworkAttachmentWithContext(context.Background(), createBareMetalServerNetworkAttachmentOptions)
+}
+
+// CreateBareMetalServerNetworkAttachmentWithContext is an alternate form of the CreateBareMetalServerNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) CreateBareMetalServerNetworkAttachmentWithContext(ctx context.Context, createBareMetalServerNetworkAttachmentOptions *CreateBareMetalServerNetworkAttachmentOptions) (result BareMetalServerNetworkAttachmentIntf, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(createBareMetalServerNetworkAttachmentOptions, "createBareMetalServerNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(createBareMetalServerNetworkAttachmentOptions, "createBareMetalServerNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"bare_metal_server_id": *createBareMetalServerNetworkAttachmentOptions.BareMetalServerID,
+	}
+
+	builder := core.NewRequestBuilder(core.POST)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/bare_metal_servers/{bare_metal_server_id}/network_attachments`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range createBareMetalServerNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "CreateBareMetalServerNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+	builder.AddHeader("Content-Type", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	_, err = builder.SetBodyContentJSON(createBareMetalServerNetworkAttachmentOptions.BareMetalServerNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalBareMetalServerNetworkAttachment)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// DeleteBareMetalServerNetworkAttachment : Delete a bare metal server network attachment
+// This request deletes a bare metal server network attachment. This operation cannot be reversed. Any floating IPs
+// associated with the bare metal server network attachment are implicitly disassociated.
+//
+// The bare metal server's primary network attachment cannot be deleted.
+func (vpc *VpcV1) DeleteBareMetalServerNetworkAttachment(deleteBareMetalServerNetworkAttachmentOptions *DeleteBareMetalServerNetworkAttachmentOptions) (response *core.DetailedResponse, err error) {
+	return vpc.DeleteBareMetalServerNetworkAttachmentWithContext(context.Background(), deleteBareMetalServerNetworkAttachmentOptions)
+}
+
+// DeleteBareMetalServerNetworkAttachmentWithContext is an alternate form of the DeleteBareMetalServerNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) DeleteBareMetalServerNetworkAttachmentWithContext(ctx context.Context, deleteBareMetalServerNetworkAttachmentOptions *DeleteBareMetalServerNetworkAttachmentOptions) (response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(deleteBareMetalServerNetworkAttachmentOptions, "deleteBareMetalServerNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(deleteBareMetalServerNetworkAttachmentOptions, "deleteBareMetalServerNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"bare_metal_server_id": *deleteBareMetalServerNetworkAttachmentOptions.BareMetalServerID,
+		"id":                   *deleteBareMetalServerNetworkAttachmentOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.DELETE)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/bare_metal_servers/{bare_metal_server_id}/network_attachments/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range deleteBareMetalServerNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "DeleteBareMetalServerNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	response, err = vpc.Service.Request(request, nil)
+
+	return
+}
+
+// GetBareMetalServerNetworkAttachment : Retrieve a bare metal server network attachment
+// This request retrieves a single bare metal server network attachment specified by the identifier in the URL.
+func (vpc *VpcV1) GetBareMetalServerNetworkAttachment(getBareMetalServerNetworkAttachmentOptions *GetBareMetalServerNetworkAttachmentOptions) (result BareMetalServerNetworkAttachmentIntf, response *core.DetailedResponse, err error) {
+	return vpc.GetBareMetalServerNetworkAttachmentWithContext(context.Background(), getBareMetalServerNetworkAttachmentOptions)
+}
+
+// GetBareMetalServerNetworkAttachmentWithContext is an alternate form of the GetBareMetalServerNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) GetBareMetalServerNetworkAttachmentWithContext(ctx context.Context, getBareMetalServerNetworkAttachmentOptions *GetBareMetalServerNetworkAttachmentOptions) (result BareMetalServerNetworkAttachmentIntf, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(getBareMetalServerNetworkAttachmentOptions, "getBareMetalServerNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(getBareMetalServerNetworkAttachmentOptions, "getBareMetalServerNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"bare_metal_server_id": *getBareMetalServerNetworkAttachmentOptions.BareMetalServerID,
+		"id":                   *getBareMetalServerNetworkAttachmentOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/bare_metal_servers/{bare_metal_server_id}/network_attachments/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range getBareMetalServerNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "GetBareMetalServerNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalBareMetalServerNetworkAttachment)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// UpdateBareMetalServerNetworkAttachment : Update a bare metal server network attachment
+// This request updates a bare metal server network attachment with the information provided in a bare metal server
+// network attachment patch object. The bare metal server network attachment patch object is structured in the same way
+// as a retrieved bare metal server network attachment and contains only the information to be updated.
+func (vpc *VpcV1) UpdateBareMetalServerNetworkAttachment(updateBareMetalServerNetworkAttachmentOptions *UpdateBareMetalServerNetworkAttachmentOptions) (result BareMetalServerNetworkAttachmentIntf, response *core.DetailedResponse, err error) {
+	return vpc.UpdateBareMetalServerNetworkAttachmentWithContext(context.Background(), updateBareMetalServerNetworkAttachmentOptions)
+}
+
+// UpdateBareMetalServerNetworkAttachmentWithContext is an alternate form of the UpdateBareMetalServerNetworkAttachment method which supports a Context parameter
+func (vpc *VpcV1) UpdateBareMetalServerNetworkAttachmentWithContext(ctx context.Context, updateBareMetalServerNetworkAttachmentOptions *UpdateBareMetalServerNetworkAttachmentOptions) (result BareMetalServerNetworkAttachmentIntf, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(updateBareMetalServerNetworkAttachmentOptions, "updateBareMetalServerNetworkAttachmentOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(updateBareMetalServerNetworkAttachmentOptions, "updateBareMetalServerNetworkAttachmentOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"bare_metal_server_id": *updateBareMetalServerNetworkAttachmentOptions.BareMetalServerID,
+		"id":                   *updateBareMetalServerNetworkAttachmentOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.PATCH)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/bare_metal_servers/{bare_metal_server_id}/network_attachments/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range updateBareMetalServerNetworkAttachmentOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "UpdateBareMetalServerNetworkAttachment")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+	builder.AddHeader("Content-Type", "application/merge-patch+json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	_, err = builder.SetBodyContentJSON(updateBareMetalServerNetworkAttachmentOptions.BareMetalServerNetworkAttachmentPatch)
+	if err != nil {
+		return
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalBareMetalServerNetworkAttachment)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
 // ListBareMetalServerNetworkInterfaces : List all network interfaces on a bare metal server
 // This request lists all network interfaces on a bare metal server. A bare metal server network interface is an
 // abstract representation of a network device and attaches a bare metal server to a single subnet. Each network
 // interface on a bare metal server can attach to any subnet in the zone, including subnets that are already attached to
 // the bare metal server.
+//
+// If this bare metal server has network attachments, each returned network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface.
 func (vpc *VpcV1) ListBareMetalServerNetworkInterfaces(listBareMetalServerNetworkInterfacesOptions *ListBareMetalServerNetworkInterfacesOptions) (result *BareMetalServerNetworkInterfaceCollection, response *core.DetailedResponse, err error) {
 	return vpc.ListBareMetalServerNetworkInterfacesWithContext(context.Background(), listBareMetalServerNetworkInterfacesOptions)
 }
@@ -11689,6 +12379,10 @@ func (vpc *VpcV1) ListBareMetalServerNetworkInterfacesWithContext(ctx context.Co
 // contains the information necessary to create the new bare metal server network interface. Any subnet in the bare
 // metal server's VPC may be specified, even if it is already attached to another bare metal server network interface.
 // Addresses on the bare metal server network interface must be within the specified subnet's CIDR blocks.
+//
+// If this bare metal server has network attachments, each network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface, and new network interfaces are not allowed to be created.
 func (vpc *VpcV1) CreateBareMetalServerNetworkInterface(createBareMetalServerNetworkInterfaceOptions *CreateBareMetalServerNetworkInterfaceOptions) (result BareMetalServerNetworkInterfaceIntf, response *core.DetailedResponse, err error) {
 	return vpc.CreateBareMetalServerNetworkInterfaceWithContext(context.Background(), createBareMetalServerNetworkInterfaceOptions)
 }
@@ -11760,6 +12454,10 @@ func (vpc *VpcV1) CreateBareMetalServerNetworkInterfaceWithContext(ctx context.C
 // This request deletes a bare metal server network interface. This operation cannot be reversed. Any floating IPs
 // associated with the bare metal server network interface are implicitly disassociated.  The primary bare metal server
 // network interface is not allowed to be deleted.
+//
+// If this bare metal server has network attachments, this network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface, and is not allowed to be deleted.
 func (vpc *VpcV1) DeleteBareMetalServerNetworkInterface(deleteBareMetalServerNetworkInterfaceOptions *DeleteBareMetalServerNetworkInterfaceOptions) (response *core.DetailedResponse, err error) {
 	return vpc.DeleteBareMetalServerNetworkInterfaceWithContext(context.Background(), deleteBareMetalServerNetworkInterfaceOptions)
 }
@@ -11812,6 +12510,10 @@ func (vpc *VpcV1) DeleteBareMetalServerNetworkInterfaceWithContext(ctx context.C
 
 // GetBareMetalServerNetworkInterface : Retrieve a bare metal server network interface
 // This request retrieves a single bare metal server network interface specified by the identifier in the URL.
+//
+// If this bare metal server has network attachments, the retrieved network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface.
 func (vpc *VpcV1) GetBareMetalServerNetworkInterface(getBareMetalServerNetworkInterfaceOptions *GetBareMetalServerNetworkInterfaceOptions) (result BareMetalServerNetworkInterfaceIntf, response *core.DetailedResponse, err error) {
 	return vpc.GetBareMetalServerNetworkInterfaceWithContext(context.Background(), getBareMetalServerNetworkInterfaceOptions)
 }
@@ -11878,6 +12580,10 @@ func (vpc *VpcV1) GetBareMetalServerNetworkInterfaceWithContext(ctx context.Cont
 // This request updates a bare metal server network interface with the information provided in a bare metal server
 // network interface patch object. The bare metal server network interface patch object is structured in the same way as
 // a retrieved bare metal server network interface and needs to contain only the information to be updated.
+//
+// If this bare metal server has network attachments, this network interface is a [read-only
+// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment and
+// its attached virtual network interface, and is not allowed to be updated.
 func (vpc *VpcV1) UpdateBareMetalServerNetworkInterface(updateBareMetalServerNetworkInterfaceOptions *UpdateBareMetalServerNetworkInterfaceOptions) (result BareMetalServerNetworkInterfaceIntf, response *core.DetailedResponse, err error) {
 	return vpc.UpdateBareMetalServerNetworkInterfaceWithContext(context.Background(), updateBareMetalServerNetworkInterfaceOptions)
 }
@@ -12132,8 +12838,13 @@ func (vpc *VpcV1) GetBareMetalServerNetworkInterfaceFloatingIPWithContext(ctx co
 // AddBareMetalServerNetworkInterfaceFloatingIP : Associate a floating IP with a bare metal server network interface
 // This request associates the specified floating IP with the specified bare metal server network interface. If
 // `enable_infrastructure_nat` is `false`, this adds the IP to any existing associations. If `enable_infrastructure_nat`
-// is `true`, this replaces any existing association.  For this request to succeed, the existing floating IP must not be
-// required by another resource, such as a public gateway. A request body is not required, and if provided, is ignored.
+// is `true`, this replaces any existing association.
+//
+// The existing floating IP must:
+// - not be required by another resource, such as a public gateway
+// - be in the same `zone` as the bare metal server
+//
+// A request body is not required, and if provided, is ignored.
 func (vpc *VpcV1) AddBareMetalServerNetworkInterfaceFloatingIP(addBareMetalServerNetworkInterfaceFloatingIPOptions *AddBareMetalServerNetworkInterfaceFloatingIPOptions) (result *FloatingIP, response *core.DetailedResponse, err error) {
 	return vpc.AddBareMetalServerNetworkInterfaceFloatingIPWithContext(context.Background(), addBareMetalServerNetworkInterfaceFloatingIPOptions)
 }
@@ -13202,6 +13913,348 @@ func (vpc *VpcV1) UpdateVolumeWithContext(ctx context.Context, updateVolumeOptio
 	return
 }
 
+// ListSnapshotConsistencyGroups : List all snapshot consistency groups
+// This request lists all snapshot consistency groups in the region. A snapshot consistency group is a collection of
+// individual snapshots taken at the same time.
+func (vpc *VpcV1) ListSnapshotConsistencyGroups(listSnapshotConsistencyGroupsOptions *ListSnapshotConsistencyGroupsOptions) (result *SnapshotConsistencyGroupCollection, response *core.DetailedResponse, err error) {
+	return vpc.ListSnapshotConsistencyGroupsWithContext(context.Background(), listSnapshotConsistencyGroupsOptions)
+}
+
+// ListSnapshotConsistencyGroupsWithContext is an alternate form of the ListSnapshotConsistencyGroups method which supports a Context parameter
+func (vpc *VpcV1) ListSnapshotConsistencyGroupsWithContext(ctx context.Context, listSnapshotConsistencyGroupsOptions *ListSnapshotConsistencyGroupsOptions) (result *SnapshotConsistencyGroupCollection, response *core.DetailedResponse, err error) {
+	err = core.ValidateStruct(listSnapshotConsistencyGroupsOptions, "listSnapshotConsistencyGroupsOptions")
+	if err != nil {
+		return
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/snapshot_consistency_groups`, nil)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range listSnapshotConsistencyGroupsOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "ListSnapshotConsistencyGroups")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+	if listSnapshotConsistencyGroupsOptions.Start != nil {
+		builder.AddQuery("start", fmt.Sprint(*listSnapshotConsistencyGroupsOptions.Start))
+	}
+	if listSnapshotConsistencyGroupsOptions.Limit != nil {
+		builder.AddQuery("limit", fmt.Sprint(*listSnapshotConsistencyGroupsOptions.Limit))
+	}
+	if listSnapshotConsistencyGroupsOptions.ResourceGroupID != nil {
+		builder.AddQuery("resource_group.id", fmt.Sprint(*listSnapshotConsistencyGroupsOptions.ResourceGroupID))
+	}
+	if listSnapshotConsistencyGroupsOptions.Name != nil {
+		builder.AddQuery("name", fmt.Sprint(*listSnapshotConsistencyGroupsOptions.Name))
+	}
+	if listSnapshotConsistencyGroupsOptions.Sort != nil {
+		builder.AddQuery("sort", fmt.Sprint(*listSnapshotConsistencyGroupsOptions.Sort))
+	}
+	if listSnapshotConsistencyGroupsOptions.BackupPolicyPlanID != nil {
+		builder.AddQuery("backup_policy_plan.id", fmt.Sprint(*listSnapshotConsistencyGroupsOptions.BackupPolicyPlanID))
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalSnapshotConsistencyGroupCollection)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// CreateSnapshotConsistencyGroup : Create a snapshot consistency group
+// This request creates a new snapshot consistency group from a snapshot consistency group object.  The prototype object
+// is structured in the same way as a retrieved consistency group, and contains the information necessary to provision
+// the new snapshot consistency group.
+func (vpc *VpcV1) CreateSnapshotConsistencyGroup(createSnapshotConsistencyGroupOptions *CreateSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	return vpc.CreateSnapshotConsistencyGroupWithContext(context.Background(), createSnapshotConsistencyGroupOptions)
+}
+
+// CreateSnapshotConsistencyGroupWithContext is an alternate form of the CreateSnapshotConsistencyGroup method which supports a Context parameter
+func (vpc *VpcV1) CreateSnapshotConsistencyGroupWithContext(ctx context.Context, createSnapshotConsistencyGroupOptions *CreateSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(createSnapshotConsistencyGroupOptions, "createSnapshotConsistencyGroupOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(createSnapshotConsistencyGroupOptions, "createSnapshotConsistencyGroupOptions")
+	if err != nil {
+		return
+	}
+
+	builder := core.NewRequestBuilder(core.POST)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/snapshot_consistency_groups`, nil)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range createSnapshotConsistencyGroupOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "CreateSnapshotConsistencyGroup")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+	builder.AddHeader("Content-Type", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	_, err = builder.SetBodyContentJSON(createSnapshotConsistencyGroupOptions.SnapshotConsistencyGroupPrototype)
+	if err != nil {
+		return
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalSnapshotConsistencyGroup)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// DeleteSnapshotConsistencyGroup : Delete a snapshot consistency group
+// This request deletes snapshot consistency group. This operation cannot be reversed. If the
+// `delete_snapshots_on_delete` property is `true`, all snapshots in the consistency group will also be deleted.
+func (vpc *VpcV1) DeleteSnapshotConsistencyGroup(deleteSnapshotConsistencyGroupOptions *DeleteSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	return vpc.DeleteSnapshotConsistencyGroupWithContext(context.Background(), deleteSnapshotConsistencyGroupOptions)
+}
+
+// DeleteSnapshotConsistencyGroupWithContext is an alternate form of the DeleteSnapshotConsistencyGroup method which supports a Context parameter
+func (vpc *VpcV1) DeleteSnapshotConsistencyGroupWithContext(ctx context.Context, deleteSnapshotConsistencyGroupOptions *DeleteSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(deleteSnapshotConsistencyGroupOptions, "deleteSnapshotConsistencyGroupOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(deleteSnapshotConsistencyGroupOptions, "deleteSnapshotConsistencyGroupOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"id": *deleteSnapshotConsistencyGroupOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.DELETE)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/snapshot_consistency_groups/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range deleteSnapshotConsistencyGroupOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "DeleteSnapshotConsistencyGroup")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalSnapshotConsistencyGroup)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// GetSnapshotConsistencyGroup : Retrieve a snapshot consistency group
+// This request retrieves a single snapshot consistency group specified by the identifier in the URL.
+func (vpc *VpcV1) GetSnapshotConsistencyGroup(getSnapshotConsistencyGroupOptions *GetSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	return vpc.GetSnapshotConsistencyGroupWithContext(context.Background(), getSnapshotConsistencyGroupOptions)
+}
+
+// GetSnapshotConsistencyGroupWithContext is an alternate form of the GetSnapshotConsistencyGroup method which supports a Context parameter
+func (vpc *VpcV1) GetSnapshotConsistencyGroupWithContext(ctx context.Context, getSnapshotConsistencyGroupOptions *GetSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(getSnapshotConsistencyGroupOptions, "getSnapshotConsistencyGroupOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(getSnapshotConsistencyGroupOptions, "getSnapshotConsistencyGroupOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"id": *getSnapshotConsistencyGroupOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/snapshot_consistency_groups/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range getSnapshotConsistencyGroupOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "GetSnapshotConsistencyGroup")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalSnapshotConsistencyGroup)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// UpdateSnapshotConsistencyGroup : Update a snapshot consistency group
+// This request updates a snapshot consistency group with the information in a provided snapshot consistency group
+// patch. The snapshot consistency group patch object is structured in the same way as a retrieved snapshot consistency
+// group and contains only the information to be updated.
+func (vpc *VpcV1) UpdateSnapshotConsistencyGroup(updateSnapshotConsistencyGroupOptions *UpdateSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	return vpc.UpdateSnapshotConsistencyGroupWithContext(context.Background(), updateSnapshotConsistencyGroupOptions)
+}
+
+// UpdateSnapshotConsistencyGroupWithContext is an alternate form of the UpdateSnapshotConsistencyGroup method which supports a Context parameter
+func (vpc *VpcV1) UpdateSnapshotConsistencyGroupWithContext(ctx context.Context, updateSnapshotConsistencyGroupOptions *UpdateSnapshotConsistencyGroupOptions) (result *SnapshotConsistencyGroup, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(updateSnapshotConsistencyGroupOptions, "updateSnapshotConsistencyGroupOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(updateSnapshotConsistencyGroupOptions, "updateSnapshotConsistencyGroupOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"id": *updateSnapshotConsistencyGroupOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.PATCH)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/snapshot_consistency_groups/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range updateSnapshotConsistencyGroupOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "UpdateSnapshotConsistencyGroup")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+	builder.AddHeader("Content-Type", "application/merge-patch+json")
+	if updateSnapshotConsistencyGroupOptions.IfMatch != nil {
+		builder.AddHeader("If-Match", fmt.Sprint(*updateSnapshotConsistencyGroupOptions.IfMatch))
+	}
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	_, err = builder.SetBodyContentJSON(updateSnapshotConsistencyGroupOptions.SnapshotConsistencyGroupPatch)
+	if err != nil {
+		return
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalSnapshotConsistencyGroup)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
 // DeleteSnapshots : Delete a filtered collection of snapshots
 // This request deletes all snapshots created from a specific source volume.
 func (vpc *VpcV1) DeleteSnapshots(deleteSnapshotsOptions *DeleteSnapshotsOptions) (response *core.DetailedResponse, err error) {
@@ -13343,6 +14396,12 @@ func (vpc *VpcV1) ListSnapshotsWithContext(ctx context.Context, listSnapshotsOpt
 	}
 	if listSnapshotsOptions.ClonesZoneName != nil {
 		builder.AddQuery("clones[].zone.name", fmt.Sprint(*listSnapshotsOptions.ClonesZoneName))
+	}
+	if listSnapshotsOptions.SnapshotConsistencyGroupID != nil {
+		builder.AddQuery("snapshot_consistency_group.id", fmt.Sprint(*listSnapshotsOptions.SnapshotConsistencyGroupID))
+	}
+	if listSnapshotsOptions.SnapshotConsistencyGroupCRN != nil {
+		builder.AddQuery("snapshot_consistency_group.crn", fmt.Sprint(*listSnapshotsOptions.SnapshotConsistencyGroupCRN))
 	}
 
 	request, err := builder.Build()
@@ -14824,12 +15883,12 @@ func (vpc *VpcV1) DeleteShareSourceWithContext(ctx context.Context, deleteShareS
 // GetShareSource : Retrieve the source file share for a replica file share
 // This request retrieves the source file share associated with the replica file share specified by the identifier in
 // the URL.
-func (vpc *VpcV1) GetShareSource(getShareSourceOptions *GetShareSourceOptions) (result *Share, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) GetShareSource(getShareSourceOptions *GetShareSourceOptions) (result *ShareReference, response *core.DetailedResponse, err error) {
 	return vpc.GetShareSourceWithContext(context.Background(), getShareSourceOptions)
 }
 
 // GetShareSourceWithContext is an alternate form of the GetShareSource method which supports a Context parameter
-func (vpc *VpcV1) GetShareSourceWithContext(ctx context.Context, getShareSourceOptions *GetShareSourceOptions) (result *Share, response *core.DetailedResponse, err error) {
+func (vpc *VpcV1) GetShareSourceWithContext(ctx context.Context, getShareSourceOptions *GetShareSourceOptions) (result *ShareReference, response *core.DetailedResponse, err error) {
 	err = core.ValidateNotNil(getShareSourceOptions, "getShareSourceOptions cannot be nil")
 	if err != nil {
 		return
@@ -14875,7 +15934,7 @@ func (vpc *VpcV1) GetShareSourceWithContext(ctx context.Context, getShareSourceO
 		return
 	}
 	if rawResponse != nil {
-		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalShare)
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalShareReference)
 		if err != nil {
 			return
 		}
@@ -15204,6 +16263,154 @@ func (vpc *VpcV1) ListVirtualNetworkInterfacesWithContext(ctx context.Context, l
 	return
 }
 
+// CreateVirtualNetworkInterface : Create a virtual network interface
+// This request creates a new virtual network interface from a virtual network interface prototype object. The prototype
+// object is structured in the same way as a retrieved virtual network interface, and contains the information necessary
+// to create the new virtual network interface.
+func (vpc *VpcV1) CreateVirtualNetworkInterface(createVirtualNetworkInterfaceOptions *CreateVirtualNetworkInterfaceOptions) (result *VirtualNetworkInterface, response *core.DetailedResponse, err error) {
+	return vpc.CreateVirtualNetworkInterfaceWithContext(context.Background(), createVirtualNetworkInterfaceOptions)
+}
+
+// CreateVirtualNetworkInterfaceWithContext is an alternate form of the CreateVirtualNetworkInterface method which supports a Context parameter
+func (vpc *VpcV1) CreateVirtualNetworkInterfaceWithContext(ctx context.Context, createVirtualNetworkInterfaceOptions *CreateVirtualNetworkInterfaceOptions) (result *VirtualNetworkInterface, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(createVirtualNetworkInterfaceOptions, "createVirtualNetworkInterfaceOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(createVirtualNetworkInterfaceOptions, "createVirtualNetworkInterfaceOptions")
+	if err != nil {
+		return
+	}
+
+	builder := core.NewRequestBuilder(core.POST)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces`, nil)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range createVirtualNetworkInterfaceOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "CreateVirtualNetworkInterface")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+	builder.AddHeader("Content-Type", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	body := make(map[string]interface{})
+	if createVirtualNetworkInterfaceOptions.AllowIPSpoofing != nil {
+		body["allow_ip_spoofing"] = createVirtualNetworkInterfaceOptions.AllowIPSpoofing
+	}
+	if createVirtualNetworkInterfaceOptions.AutoDelete != nil {
+		body["auto_delete"] = createVirtualNetworkInterfaceOptions.AutoDelete
+	}
+	if createVirtualNetworkInterfaceOptions.EnableInfrastructureNat != nil {
+		body["enable_infrastructure_nat"] = createVirtualNetworkInterfaceOptions.EnableInfrastructureNat
+	}
+	if createVirtualNetworkInterfaceOptions.Ips != nil {
+		body["ips"] = createVirtualNetworkInterfaceOptions.Ips
+	}
+	if createVirtualNetworkInterfaceOptions.Name != nil {
+		body["name"] = createVirtualNetworkInterfaceOptions.Name
+	}
+	if createVirtualNetworkInterfaceOptions.PrimaryIP != nil {
+		body["primary_ip"] = createVirtualNetworkInterfaceOptions.PrimaryIP
+	}
+	if createVirtualNetworkInterfaceOptions.ResourceGroup != nil {
+		body["resource_group"] = createVirtualNetworkInterfaceOptions.ResourceGroup
+	}
+	if createVirtualNetworkInterfaceOptions.SecurityGroups != nil {
+		body["security_groups"] = createVirtualNetworkInterfaceOptions.SecurityGroups
+	}
+	if createVirtualNetworkInterfaceOptions.Subnet != nil {
+		body["subnet"] = createVirtualNetworkInterfaceOptions.Subnet
+	}
+	_, err = builder.SetBodyContentJSON(body)
+	if err != nil {
+		return
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalVirtualNetworkInterface)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// DeleteVirtualNetworkInterfaces : Delete a virtual network interface
+// This request deletes a virtual network interface. This operation cannot be reversed. For this request to succeed, the
+// virtual network interface must not be required by another resource, such as the primary network attachment for an
+// instance.
+func (vpc *VpcV1) DeleteVirtualNetworkInterfaces(deleteVirtualNetworkInterfacesOptions *DeleteVirtualNetworkInterfacesOptions) (response *core.DetailedResponse, err error) {
+	return vpc.DeleteVirtualNetworkInterfacesWithContext(context.Background(), deleteVirtualNetworkInterfacesOptions)
+}
+
+// DeleteVirtualNetworkInterfacesWithContext is an alternate form of the DeleteVirtualNetworkInterfaces method which supports a Context parameter
+func (vpc *VpcV1) DeleteVirtualNetworkInterfacesWithContext(ctx context.Context, deleteVirtualNetworkInterfacesOptions *DeleteVirtualNetworkInterfacesOptions) (response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(deleteVirtualNetworkInterfacesOptions, "deleteVirtualNetworkInterfacesOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(deleteVirtualNetworkInterfacesOptions, "deleteVirtualNetworkInterfacesOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"id": *deleteVirtualNetworkInterfacesOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.DELETE)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range deleteVirtualNetworkInterfacesOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "DeleteVirtualNetworkInterfaces")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	response, err = vpc.Service.Request(request, nil)
+
+	return
+}
+
 // GetVirtualNetworkInterface : Retrieve a virtual network interface
 // This request retrieves a single virtual network interface specified by the identifier in the URL.
 func (vpc *VpcV1) GetVirtualNetworkInterface(getVirtualNetworkInterfaceOptions *GetVirtualNetworkInterfaceOptions) (result *VirtualNetworkInterface, response *core.DetailedResponse, err error) {
@@ -15329,6 +16536,533 @@ func (vpc *VpcV1) UpdateVirtualNetworkInterfaceWithContext(ctx context.Context, 
 	}
 	if rawResponse != nil {
 		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalVirtualNetworkInterface)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// ListNetworkInterfaceFloatingIps : List all floating IPs associated with a virtual network interface
+// This request lists all floating IPs associated with a virtual network interface.
+func (vpc *VpcV1) ListNetworkInterfaceFloatingIps(listNetworkInterfaceFloatingIpsOptions *ListNetworkInterfaceFloatingIpsOptions) (result *FloatingIPCollectionVirtualNetworkInterfaceContext, response *core.DetailedResponse, err error) {
+	return vpc.ListNetworkInterfaceFloatingIpsWithContext(context.Background(), listNetworkInterfaceFloatingIpsOptions)
+}
+
+// ListNetworkInterfaceFloatingIpsWithContext is an alternate form of the ListNetworkInterfaceFloatingIps method which supports a Context parameter
+func (vpc *VpcV1) ListNetworkInterfaceFloatingIpsWithContext(ctx context.Context, listNetworkInterfaceFloatingIpsOptions *ListNetworkInterfaceFloatingIpsOptions) (result *FloatingIPCollectionVirtualNetworkInterfaceContext, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(listNetworkInterfaceFloatingIpsOptions, "listNetworkInterfaceFloatingIpsOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(listNetworkInterfaceFloatingIpsOptions, "listNetworkInterfaceFloatingIpsOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *listNetworkInterfaceFloatingIpsOptions.VirtualNetworkInterfaceID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/floating_ips`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range listNetworkInterfaceFloatingIpsOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "ListNetworkInterfaceFloatingIps")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+	if listNetworkInterfaceFloatingIpsOptions.Start != nil {
+		builder.AddQuery("start", fmt.Sprint(*listNetworkInterfaceFloatingIpsOptions.Start))
+	}
+	if listNetworkInterfaceFloatingIpsOptions.Limit != nil {
+		builder.AddQuery("limit", fmt.Sprint(*listNetworkInterfaceFloatingIpsOptions.Limit))
+	}
+	if listNetworkInterfaceFloatingIpsOptions.Sort != nil {
+		builder.AddQuery("sort", fmt.Sprint(*listNetworkInterfaceFloatingIpsOptions.Sort))
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContext)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// RemoveNetworkInterfaceFloatingIP : Disassociate a floating IP from a virtual network interface
+// This request disassociates the specified floating IP from the specified virtual network interface.
+func (vpc *VpcV1) RemoveNetworkInterfaceFloatingIP(removeNetworkInterfaceFloatingIPOptions *RemoveNetworkInterfaceFloatingIPOptions) (response *core.DetailedResponse, err error) {
+	return vpc.RemoveNetworkInterfaceFloatingIPWithContext(context.Background(), removeNetworkInterfaceFloatingIPOptions)
+}
+
+// RemoveNetworkInterfaceFloatingIPWithContext is an alternate form of the RemoveNetworkInterfaceFloatingIP method which supports a Context parameter
+func (vpc *VpcV1) RemoveNetworkInterfaceFloatingIPWithContext(ctx context.Context, removeNetworkInterfaceFloatingIPOptions *RemoveNetworkInterfaceFloatingIPOptions) (response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(removeNetworkInterfaceFloatingIPOptions, "removeNetworkInterfaceFloatingIPOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(removeNetworkInterfaceFloatingIPOptions, "removeNetworkInterfaceFloatingIPOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *removeNetworkInterfaceFloatingIPOptions.VirtualNetworkInterfaceID,
+		"id":                           *removeNetworkInterfaceFloatingIPOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.DELETE)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/floating_ips/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range removeNetworkInterfaceFloatingIPOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "RemoveNetworkInterfaceFloatingIP")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	response, err = vpc.Service.Request(request, nil)
+
+	return
+}
+
+// GetNetworkInterfaceFloatingIP : Retrieve associated floating IP
+// This request retrieves a specified floating IP if it is associated with the virtual network interface specified in
+// the URL.
+func (vpc *VpcV1) GetNetworkInterfaceFloatingIP(getNetworkInterfaceFloatingIPOptions *GetNetworkInterfaceFloatingIPOptions) (result *FloatingIPReference, response *core.DetailedResponse, err error) {
+	return vpc.GetNetworkInterfaceFloatingIPWithContext(context.Background(), getNetworkInterfaceFloatingIPOptions)
+}
+
+// GetNetworkInterfaceFloatingIPWithContext is an alternate form of the GetNetworkInterfaceFloatingIP method which supports a Context parameter
+func (vpc *VpcV1) GetNetworkInterfaceFloatingIPWithContext(ctx context.Context, getNetworkInterfaceFloatingIPOptions *GetNetworkInterfaceFloatingIPOptions) (result *FloatingIPReference, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(getNetworkInterfaceFloatingIPOptions, "getNetworkInterfaceFloatingIPOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(getNetworkInterfaceFloatingIPOptions, "getNetworkInterfaceFloatingIPOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *getNetworkInterfaceFloatingIPOptions.VirtualNetworkInterfaceID,
+		"id":                           *getNetworkInterfaceFloatingIPOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/floating_ips/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range getNetworkInterfaceFloatingIPOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "GetNetworkInterfaceFloatingIP")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalFloatingIPReference)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// AddNetworkInterfaceFloatingIP : Add an association between a floating IP and a virtual network interface
+// This request adds an association between the specified floating IP and the specified virtual network interface.
+//
+// If the virtual network interface has `enable_infrastructure_nat` set to `true`, no more than one floating IP can be
+// associated, and network address translation is performed between the floating IP address and the virtual network
+// interface's `primary_ip` address.
+//
+// If the virtual network interface has `enable_infrastructure_nat` set to `false`, packets are passed unchanged to/from
+// the virtual network interface.
+//
+// The floating IP must:
+// - be in the same `zone` as the virtual network interface
+// - not currently be associated with another resource
+//
+// The virtual network interface's `target` must not currently be a file share mount target.
+//
+// A request body is not required, and if provided, is ignored.
+func (vpc *VpcV1) AddNetworkInterfaceFloatingIP(addNetworkInterfaceFloatingIPOptions *AddNetworkInterfaceFloatingIPOptions) (result *FloatingIPReference, response *core.DetailedResponse, err error) {
+	return vpc.AddNetworkInterfaceFloatingIPWithContext(context.Background(), addNetworkInterfaceFloatingIPOptions)
+}
+
+// AddNetworkInterfaceFloatingIPWithContext is an alternate form of the AddNetworkInterfaceFloatingIP method which supports a Context parameter
+func (vpc *VpcV1) AddNetworkInterfaceFloatingIPWithContext(ctx context.Context, addNetworkInterfaceFloatingIPOptions *AddNetworkInterfaceFloatingIPOptions) (result *FloatingIPReference, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(addNetworkInterfaceFloatingIPOptions, "addNetworkInterfaceFloatingIPOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(addNetworkInterfaceFloatingIPOptions, "addNetworkInterfaceFloatingIPOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *addNetworkInterfaceFloatingIPOptions.VirtualNetworkInterfaceID,
+		"id":                           *addNetworkInterfaceFloatingIPOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.PUT)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/floating_ips/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range addNetworkInterfaceFloatingIPOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "AddNetworkInterfaceFloatingIP")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalFloatingIPReference)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// ListVirtualNetworkInterfaceIps : List all reserved IPs bound to a virtual network interface
+// This request lists all reserved IPs bound to a virtual network interface.
+func (vpc *VpcV1) ListVirtualNetworkInterfaceIps(listVirtualNetworkInterfaceIpsOptions *ListVirtualNetworkInterfaceIpsOptions) (result *ReservedIPCollectionVirtualNetworkInterfaceContext, response *core.DetailedResponse, err error) {
+	return vpc.ListVirtualNetworkInterfaceIpsWithContext(context.Background(), listVirtualNetworkInterfaceIpsOptions)
+}
+
+// ListVirtualNetworkInterfaceIpsWithContext is an alternate form of the ListVirtualNetworkInterfaceIps method which supports a Context parameter
+func (vpc *VpcV1) ListVirtualNetworkInterfaceIpsWithContext(ctx context.Context, listVirtualNetworkInterfaceIpsOptions *ListVirtualNetworkInterfaceIpsOptions) (result *ReservedIPCollectionVirtualNetworkInterfaceContext, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(listVirtualNetworkInterfaceIpsOptions, "listVirtualNetworkInterfaceIpsOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(listVirtualNetworkInterfaceIpsOptions, "listVirtualNetworkInterfaceIpsOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *listVirtualNetworkInterfaceIpsOptions.VirtualNetworkInterfaceID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/ips`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range listVirtualNetworkInterfaceIpsOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "ListVirtualNetworkInterfaceIps")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+	if listVirtualNetworkInterfaceIpsOptions.Start != nil {
+		builder.AddQuery("start", fmt.Sprint(*listVirtualNetworkInterfaceIpsOptions.Start))
+	}
+	if listVirtualNetworkInterfaceIpsOptions.Limit != nil {
+		builder.AddQuery("limit", fmt.Sprint(*listVirtualNetworkInterfaceIpsOptions.Limit))
+	}
+	if listVirtualNetworkInterfaceIpsOptions.Sort != nil {
+		builder.AddQuery("sort", fmt.Sprint(*listVirtualNetworkInterfaceIpsOptions.Sort))
+	}
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalReservedIPCollectionVirtualNetworkInterfaceContext)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// RemoveVirtualNetworkInterfaceIP : Unbind a reserved IP from a virtual network interface
+// This request unbinds the specified reserved IP from the specified virtual network interface. If the reserved IP has
+// `auto_delete` set to `true`, the reserved IP will be deleted.
+//
+// The reserved IP for the `primary_ip` cannot be unbound.
+func (vpc *VpcV1) RemoveVirtualNetworkInterfaceIP(removeVirtualNetworkInterfaceIPOptions *RemoveVirtualNetworkInterfaceIPOptions) (response *core.DetailedResponse, err error) {
+	return vpc.RemoveVirtualNetworkInterfaceIPWithContext(context.Background(), removeVirtualNetworkInterfaceIPOptions)
+}
+
+// RemoveVirtualNetworkInterfaceIPWithContext is an alternate form of the RemoveVirtualNetworkInterfaceIP method which supports a Context parameter
+func (vpc *VpcV1) RemoveVirtualNetworkInterfaceIPWithContext(ctx context.Context, removeVirtualNetworkInterfaceIPOptions *RemoveVirtualNetworkInterfaceIPOptions) (response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(removeVirtualNetworkInterfaceIPOptions, "removeVirtualNetworkInterfaceIPOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(removeVirtualNetworkInterfaceIPOptions, "removeVirtualNetworkInterfaceIPOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *removeVirtualNetworkInterfaceIPOptions.VirtualNetworkInterfaceID,
+		"id":                           *removeVirtualNetworkInterfaceIPOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.DELETE)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/ips/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range removeVirtualNetworkInterfaceIPOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "RemoveVirtualNetworkInterfaceIP")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	response, err = vpc.Service.Request(request, nil)
+
+	return
+}
+
+// GetVirtualNetworkInterfaceIP : Retrieve bound reserved IP
+// This request retrieves the specified reserved IP address if it is bound to the virtual network interface specified in
+// the URL.
+func (vpc *VpcV1) GetVirtualNetworkInterfaceIP(getVirtualNetworkInterfaceIPOptions *GetVirtualNetworkInterfaceIPOptions) (result *ReservedIPReference, response *core.DetailedResponse, err error) {
+	return vpc.GetVirtualNetworkInterfaceIPWithContext(context.Background(), getVirtualNetworkInterfaceIPOptions)
+}
+
+// GetVirtualNetworkInterfaceIPWithContext is an alternate form of the GetVirtualNetworkInterfaceIP method which supports a Context parameter
+func (vpc *VpcV1) GetVirtualNetworkInterfaceIPWithContext(ctx context.Context, getVirtualNetworkInterfaceIPOptions *GetVirtualNetworkInterfaceIPOptions) (result *ReservedIPReference, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(getVirtualNetworkInterfaceIPOptions, "getVirtualNetworkInterfaceIPOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(getVirtualNetworkInterfaceIPOptions, "getVirtualNetworkInterfaceIPOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *getVirtualNetworkInterfaceIPOptions.VirtualNetworkInterfaceID,
+		"id":                           *getVirtualNetworkInterfaceIPOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.GET)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/ips/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range getVirtualNetworkInterfaceIPOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "GetVirtualNetworkInterfaceIP")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalReservedIPReference)
+		if err != nil {
+			return
+		}
+		response.Result = result
+	}
+
+	return
+}
+
+// AddVirtualNetworkInterfaceIP : Bind a reserved IP to a virtual network interface
+// This request binds the specified reserved IP to the specified virtual network interface.
+//
+// The reserved IP must currently be unbound and in the primary IP's subnet. The virtual network interface's `target`
+// must not currently be a file share mount target.
+func (vpc *VpcV1) AddVirtualNetworkInterfaceIP(addVirtualNetworkInterfaceIPOptions *AddVirtualNetworkInterfaceIPOptions) (result *ReservedIPReference, response *core.DetailedResponse, err error) {
+	return vpc.AddVirtualNetworkInterfaceIPWithContext(context.Background(), addVirtualNetworkInterfaceIPOptions)
+}
+
+// AddVirtualNetworkInterfaceIPWithContext is an alternate form of the AddVirtualNetworkInterfaceIP method which supports a Context parameter
+func (vpc *VpcV1) AddVirtualNetworkInterfaceIPWithContext(ctx context.Context, addVirtualNetworkInterfaceIPOptions *AddVirtualNetworkInterfaceIPOptions) (result *ReservedIPReference, response *core.DetailedResponse, err error) {
+	err = core.ValidateNotNil(addVirtualNetworkInterfaceIPOptions, "addVirtualNetworkInterfaceIPOptions cannot be nil")
+	if err != nil {
+		return
+	}
+	err = core.ValidateStruct(addVirtualNetworkInterfaceIPOptions, "addVirtualNetworkInterfaceIPOptions")
+	if err != nil {
+		return
+	}
+
+	pathParamsMap := map[string]string{
+		"virtual_network_interface_id": *addVirtualNetworkInterfaceIPOptions.VirtualNetworkInterfaceID,
+		"id":                           *addVirtualNetworkInterfaceIPOptions.ID,
+	}
+
+	builder := core.NewRequestBuilder(core.PUT)
+	builder = builder.WithContext(ctx)
+	builder.EnableGzipCompression = vpc.GetEnableGzipCompression()
+	_, err = builder.ResolveRequestURL(vpc.Service.Options.URL, `/virtual_network_interfaces/{virtual_network_interface_id}/ips/{id}`, pathParamsMap)
+	if err != nil {
+		return
+	}
+
+	for headerName, headerValue := range addVirtualNetworkInterfaceIPOptions.Headers {
+		builder.AddHeader(headerName, headerValue)
+	}
+
+	sdkHeaders := common.GetSdkHeaders("vpc", "V1", "AddVirtualNetworkInterfaceIP")
+	for headerName, headerValue := range sdkHeaders {
+		builder.AddHeader(headerName, headerValue)
+	}
+	builder.AddHeader("Accept", "application/json")
+
+	builder.AddQuery("version", fmt.Sprint(*vpc.Version))
+	builder.AddQuery("generation", fmt.Sprint(*vpc.generation))
+
+	request, err := builder.Build()
+	if err != nil {
+		return
+	}
+
+	var rawResponse map[string]json.RawMessage
+	response, err = vpc.Service.Request(request, &rawResponse)
+	if err != nil {
+		return
+	}
+	if rawResponse != nil {
+		err = core.UnmarshalModel(rawResponse, "", &result, UnmarshalReservedIPReference)
 		if err != nil {
 			return
 		}
@@ -15720,6 +17454,18 @@ func (vpc *VpcV1) ListFloatingIpsWithContext(ctx context.Context, listFloatingIp
 	}
 	if listFloatingIpsOptions.Sort != nil {
 		builder.AddQuery("sort", fmt.Sprint(*listFloatingIpsOptions.Sort))
+	}
+	if listFloatingIpsOptions.TargetID != nil {
+		builder.AddQuery("target.id", fmt.Sprint(*listFloatingIpsOptions.TargetID))
+	}
+	if listFloatingIpsOptions.TargetCRN != nil {
+		builder.AddQuery("target.crn", fmt.Sprint(*listFloatingIpsOptions.TargetCRN))
+	}
+	if listFloatingIpsOptions.TargetName != nil {
+		builder.AddQuery("target.name", fmt.Sprint(*listFloatingIpsOptions.TargetName))
+	}
+	if listFloatingIpsOptions.TargetResourceType != nil {
+		builder.AddQuery("target.resource_type", fmt.Sprint(*listFloatingIpsOptions.TargetResourceType))
 	}
 
 	request, err := builder.Build()
@@ -17387,7 +19133,7 @@ func (vpc *VpcV1) ListSecurityGroupTargetsWithContext(ctx context.Context, listS
 // - A bare metal server network interface identifier
 // - A virtual network interface identifier
 // - A VPN server identifier
-// - An application load balancer identifier
+// - A load balancer identifier
 // - An endpoint gateway identifier
 // - An instance network interface identifier
 //
@@ -17514,7 +19260,7 @@ func (vpc *VpcV1) GetSecurityGroupTargetWithContext(ctx context.Context, getSecu
 // - A bare metal server network interface identifier
 // - A virtual network interface identifier
 // - A VPN server identifier
-// - An application load balancer identifier
+// - A load balancer identifier
 // - An endpoint gateway identifier
 // - An instance network interface identifier
 //
@@ -20716,9 +22462,6 @@ func (vpc *VpcV1) CreateLoadBalancerWithContext(ctx context.Context, createLoadB
 	if createLoadBalancerOptions.Subnets != nil {
 		body["subnets"] = createLoadBalancerOptions.Subnets
 	}
-	if createLoadBalancerOptions.Datapath != nil {
-		body["datapath"] = createLoadBalancerOptions.Datapath
-	}
 	if createLoadBalancerOptions.Dns != nil {
 		body["dns"] = createLoadBalancerOptions.Dns
 	}
@@ -20774,7 +22517,7 @@ func (vpc *VpcV1) CreateLoadBalancerWithContext(ctx context.Context, createLoadB
 
 // DeleteLoadBalancer : Delete a load balancer
 // This request deletes a load balancer. This operation cannot be reversed. A load balancer cannot be deleted if its
-// `provisioning_status` is `delete_pending`.
+// `provisioning_status` is `delete_pending` or it is referenced by a resource.
 func (vpc *VpcV1) DeleteLoadBalancer(deleteLoadBalancerOptions *DeleteLoadBalancerOptions) (response *core.DetailedResponse, err error) {
 	return vpc.DeleteLoadBalancerWithContext(context.Background(), deleteLoadBalancerOptions)
 }
@@ -23169,7 +24912,7 @@ func (vpc *VpcV1) GetEndpointGatewayIPWithContext(ctx context.Context, getEndpoi
 // AddEndpointGatewayIP : Bind a reserved IP to an endpoint gateway
 // This request binds the specified reserved IP to the specified endpoint gateway. The reserved IP:
 //
-// - must currently be unbound
+// - must currently be unbound, or not required by its target
 // - must not be in the same zone as any other reserved IP bound to the endpoint gateway.
 func (vpc *VpcV1) AddEndpointGatewayIP(addEndpointGatewayIPOptions *AddEndpointGatewayIPOptions) (result *ReservedIP, response *core.DetailedResponse, err error) {
 	return vpc.AddEndpointGatewayIPWithContext(context.Background(), addEndpointGatewayIPOptions)
@@ -23421,7 +25164,7 @@ func (vpc *VpcV1) UpdateEndpointGatewayWithContext(ctx context.Context, updateEn
 
 // ListFlowLogCollectors : List all flow log collectors
 // This request lists all flow log collectors in the region. A flow log collector summarizes data sent over the instance
-// network interfaces contained within its target.
+// network interfaces and instance network attachments contained within its target.
 func (vpc *VpcV1) ListFlowLogCollectors(listFlowLogCollectorsOptions *ListFlowLogCollectorsOptions) (result *FlowLogCollectorCollection, response *core.DetailedResponse, err error) {
 	return vpc.ListFlowLogCollectorsWithContext(context.Background(), listFlowLogCollectorsOptions)
 }
@@ -23936,6 +25679,82 @@ func (options *AddInstanceNetworkInterfaceFloatingIPOptions) SetHeaders(param ma
 	return options
 }
 
+// AddNetworkInterfaceFloatingIPOptions : The AddNetworkInterfaceFloatingIP options.
+type AddNetworkInterfaceFloatingIPOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// The floating IP identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewAddNetworkInterfaceFloatingIPOptions : Instantiate AddNetworkInterfaceFloatingIPOptions
+func (*VpcV1) NewAddNetworkInterfaceFloatingIPOptions(virtualNetworkInterfaceID string, id string) *AddNetworkInterfaceFloatingIPOptions {
+	return &AddNetworkInterfaceFloatingIPOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+		ID:                        core.StringPtr(id),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *AddNetworkInterfaceFloatingIPOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *AddNetworkInterfaceFloatingIPOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *AddNetworkInterfaceFloatingIPOptions) SetID(id string) *AddNetworkInterfaceFloatingIPOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *AddNetworkInterfaceFloatingIPOptions) SetHeaders(param map[string]string) *AddNetworkInterfaceFloatingIPOptions {
+	options.Headers = param
+	return options
+}
+
+// AddVirtualNetworkInterfaceIPOptions : The AddVirtualNetworkInterfaceIP options.
+type AddVirtualNetworkInterfaceIPOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// The reserved IP identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewAddVirtualNetworkInterfaceIPOptions : Instantiate AddVirtualNetworkInterfaceIPOptions
+func (*VpcV1) NewAddVirtualNetworkInterfaceIPOptions(virtualNetworkInterfaceID string, id string) *AddVirtualNetworkInterfaceIPOptions {
+	return &AddVirtualNetworkInterfaceIPOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+		ID:                        core.StringPtr(id),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *AddVirtualNetworkInterfaceIPOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *AddVirtualNetworkInterfaceIPOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *AddVirtualNetworkInterfaceIPOptions) SetID(id string) *AddVirtualNetworkInterfaceIPOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *AddVirtualNetworkInterfaceIPOptions) SetHeaders(param map[string]string) *AddVirtualNetworkInterfaceIPOptions {
+	options.Headers = param
+	return options
+}
+
 // AddVPNGatewayConnectionLocalCIDROptions : The AddVPNGatewayConnectionLocalCIDR options.
 type AddVPNGatewayConnectionLocalCIDROptions struct {
 	// The VPN gateway identifier.
@@ -24249,6 +26068,9 @@ func (addressPrefixPatch *AddressPrefixPatch) AsPatch() (_patch map[string]inter
 }
 
 // BackupPolicy : BackupPolicy struct
+// Models which "extend" this model:
+// - BackupPolicyMatchResourceTypeInstance
+// - BackupPolicyMatchResourceTypeVolume
 type BackupPolicy struct {
 	// The date and time that the backup policy was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
@@ -24286,13 +26108,13 @@ type BackupPolicy struct {
 	// The lifecycle state of the backup policy.
 	LifecycleState *string `json:"lifecycle_state" validate:"required"`
 
-	// The resource types this backup policy applies to. Resources that have both a matching type and a matching user tag
+	// The resource type this backup policy applies to. Resources that have both a matching type and a matching user tag
 	// will be subject to the backup policy.
 	//
-	// The enumerated values for this property will expand in the future. When processing this property, check for and log
+	// The enumerated values for this property may expand in the future. When processing this property, check for and log
 	// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the
 	// unexpected property value was encountered.
-	MatchResourceTypes []string `json:"match_resource_types" validate:"required"`
+	MatchResourceType *string `json:"match_resource_type" validate:"required"`
 
 	// The user tags this backup policy applies to. Resources that have both a matching user tag and a matching type will
 	// be subject to the backup policy.
@@ -24312,6 +26134,15 @@ type BackupPolicy struct {
 
 	// The scope for this backup policy.
 	Scope BackupPolicyScopeIntf `json:"scope" validate:"required"`
+
+	// The included content for backups created using this policy:
+	// - `boot_volume`: Include the instance's boot volume.
+	// - `data_volumes`: Include the instance's data volumes.
+	//
+	// The enumerated values for this property may expand in the future. When processing this property, check for and log
+	// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the
+	// unexpected property value was encountered.
+	IncludedContent []string `json:"included_content,omitempty"`
 }
 
 // Constants associated with the BackupPolicy.HealthState property.
@@ -24341,10 +26172,16 @@ const (
 	BackupPolicyLifecycleStateWaitingConst   = "waiting"
 )
 
-// Constants associated with the BackupPolicy.MatchResourceTypes property.
-// The resource type.
+// Constants associated with the BackupPolicy.MatchResourceType property.
+// The resource type this backup policy applies to. Resources that have both a matching type and a matching user tag
+// will be subject to the backup policy.
+//
+// The enumerated values for this property may expand in the future. When processing this property, check for and log
+// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the unexpected
+// property value was encountered.
 const (
-	BackupPolicyMatchResourceTypesVolumeConst = "volume"
+	BackupPolicyMatchResourceTypeInstanceConst = "instance"
+	BackupPolicyMatchResourceTypeVolumeConst   = "volume"
 )
 
 // Constants associated with the BackupPolicy.ResourceType property.
@@ -24352,6 +26189,21 @@ const (
 const (
 	BackupPolicyResourceTypeBackupPolicyConst = "backup_policy"
 )
+
+// Constants associated with the BackupPolicy.IncludedContent property.
+// An item to include.
+const (
+	BackupPolicyIncludedContentBootVolumeConst  = "boot_volume"
+	BackupPolicyIncludedContentDataVolumesConst = "data_volumes"
+)
+
+func (*BackupPolicy) isaBackupPolicy() bool {
+	return true
+}
+
+type BackupPolicyIntf interface {
+	isaBackupPolicy() bool
+}
 
 // UnmarshalBackupPolicy unmarshals an instance of BackupPolicy from the specified map of raw messages.
 func UnmarshalBackupPolicy(m map[string]json.RawMessage, result interface{}) (err error) {
@@ -24388,7 +26240,7 @@ func UnmarshalBackupPolicy(m map[string]json.RawMessage, result interface{}) (er
 	if err != nil {
 		return
 	}
-	err = core.UnmarshalPrimitive(m, "match_resource_types", &obj.MatchResourceTypes)
+	err = core.UnmarshalPrimitive(m, "match_resource_type", &obj.MatchResourceType)
 	if err != nil {
 		return
 	}
@@ -24416,6 +26268,10 @@ func UnmarshalBackupPolicy(m map[string]json.RawMessage, result interface{}) (er
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalPrimitive(m, "included_content", &obj.IncludedContent)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
@@ -24423,7 +26279,7 @@ func UnmarshalBackupPolicy(m map[string]json.RawMessage, result interface{}) (er
 // BackupPolicyCollection : BackupPolicyCollection struct
 type BackupPolicyCollection struct {
 	// Collection of backup policies.
-	BackupPolicies []BackupPolicy `json:"backup_policies" validate:"required"`
+	BackupPolicies []BackupPolicyIntf `json:"backup_policies" validate:"required"`
 
 	// A link to the first page of resources.
 	First *BackupPolicyCollectionFirst `json:"first" validate:"required"`
@@ -24794,6 +26650,7 @@ func UnmarshalBackupPolicyJobCollectionNext(m map[string]json.RawMessage, result
 // [deleted](https://cloud.ibm.com/apidocs/vpc#deleted-resources)).
 // Models which "extend" this model:
 // - BackupPolicyJobSourceVolumeReference
+// - BackupPolicyJobSourceInstanceReference
 type BackupPolicyJobSource struct {
 	// The CRN for this volume.
 	CRN *string `json:"crn,omitempty"`
@@ -24918,6 +26775,11 @@ func UnmarshalBackupPolicyJobStatusReason(m map[string]json.RawMessage, result i
 
 // BackupPolicyPatch : BackupPolicyPatch struct
 type BackupPolicyPatch struct {
+	// The included content for backups created using this policy:
+	// - `boot_volume`: Include the instance's boot volume.
+	// - `data_volumes`: Include the instance's data volumes.
+	IncludedContent []string `json:"included_content,omitempty"`
+
 	// The user tags this backup policy will apply to (replacing any existing tags). Resources that have both a matching
 	// user tag and a matching type will be subject to the backup policy.
 	MatchUserTags []string `json:"match_user_tags,omitempty"`
@@ -24926,9 +26788,20 @@ type BackupPolicyPatch struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// Constants associated with the BackupPolicyPatch.IncludedContent property.
+// An item to include.
+const (
+	BackupPolicyPatchIncludedContentBootVolumeConst  = "boot_volume"
+	BackupPolicyPatchIncludedContentDataVolumesConst = "data_volumes"
+)
+
 // UnmarshalBackupPolicyPatch unmarshals an instance of BackupPolicyPatch from the specified map of raw messages.
 func UnmarshalBackupPolicyPatch(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(BackupPolicyPatch)
+	err = core.UnmarshalPrimitive(m, "included_content", &obj.IncludedContent)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "match_user_tags", &obj.MatchUserTags)
 	if err != nil {
 		return
@@ -25571,6 +27444,99 @@ func UnmarshalBackupPolicyPlanRemoteRegionPolicyPrototype(m map[string]json.RawM
 	return
 }
 
+// BackupPolicyPrototype : BackupPolicyPrototype struct
+// Models which "extend" this model:
+// - BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype
+// - BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype
+type BackupPolicyPrototype struct {
+	// The resource type this backup policy will apply to. Resources that have both a matching type and a matching user tag
+	// will be subject to the backup policy.
+	MatchResourceType *string `json:"match_resource_type" validate:"required"`
+
+	// The user tags this backup policy will apply to. Resources that have both a matching user tag and a matching type
+	// will be subject to the backup policy.
+	MatchUserTags []string `json:"match_user_tags" validate:"required"`
+
+	// The name for this backup policy. The name must not be used by another backup policy in the region. If unspecified,
+	// the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The prototype objects for backup plans to be created for this backup policy.
+	Plans []BackupPolicyPlanPrototype `json:"plans,omitempty"`
+
+	// The resource group to use. If unspecified, the account's [default resource
+	// group](https://cloud.ibm.com/apidocs/resource-manager#introduction) will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The scope to use for this backup policy.
+	//
+	// If unspecified, the policy will be scoped to the account.
+	Scope BackupPolicyScopePrototypeIntf `json:"scope,omitempty"`
+
+	// The included content for backups created using this policy:
+	// - `boot_volume`: Include the instance's boot volume.
+	// - `data_volumes`: Include the instance's data volumes.
+	IncludedContent []string `json:"included_content,omitempty"`
+}
+
+// Constants associated with the BackupPolicyPrototype.MatchResourceType property.
+// The resource type this backup policy will apply to. Resources that have both a matching type and a matching user tag
+// will be subject to the backup policy.
+const (
+	BackupPolicyPrototypeMatchResourceTypeInstanceConst = "instance"
+	BackupPolicyPrototypeMatchResourceTypeVolumeConst   = "volume"
+)
+
+// Constants associated with the BackupPolicyPrototype.IncludedContent property.
+// An item to include.
+const (
+	BackupPolicyPrototypeIncludedContentBootVolumeConst  = "boot_volume"
+	BackupPolicyPrototypeIncludedContentDataVolumesConst = "data_volumes"
+)
+
+func (*BackupPolicyPrototype) isaBackupPolicyPrototype() bool {
+	return true
+}
+
+type BackupPolicyPrototypeIntf interface {
+	isaBackupPolicyPrototype() bool
+}
+
+// UnmarshalBackupPolicyPrototype unmarshals an instance of BackupPolicyPrototype from the specified map of raw messages.
+func UnmarshalBackupPolicyPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BackupPolicyPrototype)
+	err = core.UnmarshalPrimitive(m, "match_resource_type", &obj.MatchResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "match_user_tags", &obj.MatchUserTags)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "plans", &obj.Plans, UnmarshalBackupPolicyPlanPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "scope", &obj.Scope, UnmarshalBackupPolicyScopePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "included_content", &obj.IncludedContent)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // BackupPolicyScope : The scope for this backup policy.
 // Models which "extend" this model:
 // - BackupPolicyScopeEnterpriseReference
@@ -25650,7 +27616,8 @@ func UnmarshalBackupPolicyScopePrototype(m map[string]json.RawMessage, result in
 
 // BareMetalServer : BareMetalServer struct
 type BareMetalServer struct {
-	// The total bandwidth (in megabits per second) shared across the bare metal server network interfaces.
+	// The total bandwidth (in megabits per second) shared across the bare metal server network attachments or bare metal
+	// server network interfaces.
 	Bandwidth *int64 `json:"bandwidth" validate:"required"`
 
 	// The possible resource types for this property are expected to expand in the future.
@@ -25695,10 +27662,25 @@ type BareMetalServer struct {
 	// The name for this bare metal server. The name is unique across all bare metal servers in the region.
 	Name *string `json:"name" validate:"required"`
 
+	// The network attachments for this bare metal server, including the primary network attachment.
+	NetworkAttachments []BareMetalServerNetworkAttachmentReference `json:"network_attachments,omitempty"`
+
 	// The network interfaces for this bare metal server, including the primary network interface.
+	//
+	// If this bare metal server has network attachments, each network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface.
 	NetworkInterfaces []NetworkInterfaceBareMetalServerContextReference `json:"network_interfaces" validate:"required"`
 
+	// The primary network attachment for this bare metal server.
+	PrimaryNetworkAttachment *BareMetalServerNetworkAttachmentReference `json:"primary_network_attachment,omitempty"`
+
 	// The primary network interface for this bare metal server.
+	//
+	// If this bare metal server has network attachments, this primary network interface is
+	// a [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients)
+	// of the primary network attachment and its attached virtual network interface.
 	PrimaryNetworkInterface *NetworkInterfaceBareMetalServerContextReference `json:"primary_network_interface" validate:"required"`
 
 	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-bare-metal-servers-profile)
@@ -25817,7 +27799,15 @@ func UnmarshalBareMetalServer(m map[string]json.RawMessage, result interface{}) 
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalBareMetalServerNetworkAttachmentReference)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfaceBareMetalServerContextReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalBareMetalServerNetworkAttachmentReference)
 	if err != nil {
 		return
 	}
@@ -26434,6 +28424,662 @@ func UnmarshalBareMetalServerLifecycleReason(m map[string]json.RawMessage, resul
 	return
 }
 
+// BareMetalServerNetworkAttachment : BareMetalServerNetworkAttachment struct
+// Models which "extend" this model:
+// - BareMetalServerNetworkAttachmentByPci
+// - BareMetalServerNetworkAttachmentByVlan
+type BareMetalServerNetworkAttachment struct {
+	// The date and time that the bare metal server network attachment was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The URL for this bare metal server network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this bare metal server network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The network attachment's interface type:
+	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+	//   server is stopped
+	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+	//     to use the PCI attachment
+	//   - Cannot directly use an IEEE 802.1Q tag.
+	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
+	//   array of `allowed_vlans`.
+	//   - Must use an IEEE 802.1Q tag.
+	//
+	// The enumerated values for this property are expected to expand in the future. When processing this property, check
+	// for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
+	// unexpected property value was encountered.
+	InterfaceType *string `json:"interface_type" validate:"required"`
+
+	// The lifecycle state of the bare metal server network attachment.
+	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The name for this bare metal server network attachment. The name is unique across all network attachments for the
+	// bare metal server.
+	Name *string `json:"name" validate:"required"`
+
+	// The port speed for this bare metal server network attachment in Mbps.
+	PortSpeed *int64 `json:"port_speed" validate:"required"`
+
+	// The primary IP address of the virtual network interface for the bare metal server
+	// network attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The subnet of the virtual network interface for the bare metal server network
+	// attachment.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+
+	// The bare metal server network attachment type.
+	Type *string `json:"type" validate:"required"`
+
+	// The virtual network interface for this bare metal server network attachment.
+	VirtualNetworkInterface *VirtualNetworkInterfaceReferenceAttachmentContext `json:"virtual_network_interface" validate:"required"`
+
+	// The VLAN IDs allowed for `vlan` attachments using this PCI attachment.
+	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
+
+	// Indicates if the data path for the network attachment can float to another bare metal server. Can only be `true` for
+	// network attachments with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network attachment will be automatically deleted from this bare metal server and a new network attachment with
+	// the same `id`, `name` and `vlan` will be created on the other bare metal server.  The virtual network interface for
+	// this network attachment will be automatically be attached to the new network attachment.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network attachment with `interface_type` of `pci` with `allowed_vlans` including
+	// this network attachment's `vlan`.
+	AllowToFloat *bool `json:"allow_to_float,omitempty"`
+
+	// The IEEE 802.1Q VLAN ID that must be used for all traffic on this attachment.
+	Vlan *int64 `json:"vlan,omitempty"`
+}
+
+// Constants associated with the BareMetalServerNetworkAttachment.InterfaceType property.
+// The network attachment's interface type:
+//   - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+//     server is stopped
+//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+//     to use the PCI attachment
+//   - Cannot directly use an IEEE 802.1Q tag.
+//   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
+//     array of `allowed_vlans`.
+//   - Must use an IEEE 802.1Q tag.
+//
+// The enumerated values for this property are expected to expand in the future. When processing this property, check
+// for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
+// unexpected property value was encountered.
+const (
+	BareMetalServerNetworkAttachmentInterfaceTypePciConst  = "pci"
+	BareMetalServerNetworkAttachmentInterfaceTypeVlanConst = "vlan"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachment.LifecycleState property.
+// The lifecycle state of the bare metal server network attachment.
+const (
+	BareMetalServerNetworkAttachmentLifecycleStateDeletingConst  = "deleting"
+	BareMetalServerNetworkAttachmentLifecycleStateFailedConst    = "failed"
+	BareMetalServerNetworkAttachmentLifecycleStatePendingConst   = "pending"
+	BareMetalServerNetworkAttachmentLifecycleStateStableConst    = "stable"
+	BareMetalServerNetworkAttachmentLifecycleStateSuspendedConst = "suspended"
+	BareMetalServerNetworkAttachmentLifecycleStateUpdatingConst  = "updating"
+	BareMetalServerNetworkAttachmentLifecycleStateWaitingConst   = "waiting"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachment.ResourceType property.
+// The resource type.
+const (
+	BareMetalServerNetworkAttachmentResourceTypeBareMetalServerNetworkAttachmentConst = "bare_metal_server_network_attachment"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachment.Type property.
+// The bare metal server network attachment type.
+const (
+	BareMetalServerNetworkAttachmentTypePrimaryConst   = "primary"
+	BareMetalServerNetworkAttachmentTypeSecondaryConst = "secondary"
+)
+
+func (*BareMetalServerNetworkAttachment) isaBareMetalServerNetworkAttachment() bool {
+	return true
+}
+
+type BareMetalServerNetworkAttachmentIntf interface {
+	isaBareMetalServerNetworkAttachment() bool
+}
+
+// UnmarshalBareMetalServerNetworkAttachment unmarshals an instance of BareMetalServerNetworkAttachment from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachment)
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "port_speed", &obj.PortSpeed)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalVirtualNetworkInterfaceReferenceAttachmentContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allowed_vlans", &obj.AllowedVlans)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allow_to_float", &obj.AllowToFloat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "vlan", &obj.Vlan)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentCollection : BareMetalServerNetworkAttachmentCollection struct
+type BareMetalServerNetworkAttachmentCollection struct {
+	// A link to the first page of resources.
+	First *BareMetalServerNetworkAttachmentCollectionFirst `json:"first" validate:"required"`
+
+	// The maximum number of resources that can be returned by the request.
+	Limit *int64 `json:"limit" validate:"required"`
+
+	// Collection of bare metal server network attachments.
+	NetworkAttachments []BareMetalServerNetworkAttachmentIntf `json:"network_attachments" validate:"required"`
+
+	// A link to the next page of resources. This property is present for all pages
+	// except the last page.
+	Next *BareMetalServerNetworkAttachmentCollectionNext `json:"next,omitempty"`
+
+	// The total number of resources across all pages.
+	TotalCount *int64 `json:"total_count" validate:"required"`
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentCollection unmarshals an instance of BareMetalServerNetworkAttachmentCollection from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentCollection(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentCollection)
+	err = core.UnmarshalModel(m, "first", &obj.First, UnmarshalBareMetalServerNetworkAttachmentCollectionFirst)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "limit", &obj.Limit)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalBareMetalServerNetworkAttachment)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "next", &obj.Next, UnmarshalBareMetalServerNetworkAttachmentCollectionNext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_count", &obj.TotalCount)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// Retrieve the value to be passed to a request to access the next page of results
+func (resp *BareMetalServerNetworkAttachmentCollection) GetNextStart() (*string, error) {
+	if core.IsNil(resp.Next) {
+		return nil, nil
+	}
+	start, err := core.GetQueryParam(resp.Next.Href, "start")
+	if err != nil || start == nil {
+		return nil, err
+	}
+	return start, nil
+}
+
+// BareMetalServerNetworkAttachmentCollectionFirst : A link to the first page of resources.
+type BareMetalServerNetworkAttachmentCollectionFirst struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentCollectionFirst unmarshals an instance of BareMetalServerNetworkAttachmentCollectionFirst from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentCollectionFirst(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentCollectionFirst)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentCollectionNext : A link to the next page of resources. This property is present for all pages except the last page.
+type BareMetalServerNetworkAttachmentCollectionNext struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentCollectionNext unmarshals an instance of BareMetalServerNetworkAttachmentCollectionNext from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentCollectionNext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentCollectionNext)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPatch : BareMetalServerNetworkAttachmentPatch struct
+type BareMetalServerNetworkAttachmentPatch struct {
+	// The VLAN IDs to allow for `vlan` attachments using this PCI attachment, replacing any existing VLAN IDs. The
+	// specified values must include IDs for all `vlan` attachments currently using this PCI attachment.
+	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
+
+	// The name for this network attachment. The name must not be used by another network attachment for the bare metal
+	// server.
+	Name *string `json:"name,omitempty"`
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPatch unmarshals an instance of BareMetalServerNetworkAttachmentPatch from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPatch(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPatch)
+	err = core.UnmarshalPrimitive(m, "allowed_vlans", &obj.AllowedVlans)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// AsPatch returns a generic map representation of the BareMetalServerNetworkAttachmentPatch
+func (bareMetalServerNetworkAttachmentPatch *BareMetalServerNetworkAttachmentPatch) AsPatch() (_patch map[string]interface{}, err error) {
+	var jsonData []byte
+	jsonData, err = json.Marshal(bareMetalServerNetworkAttachmentPatch)
+	if err == nil {
+		err = json.Unmarshal(jsonData, &_patch)
+	}
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototype : BareMetalServerNetworkAttachmentPrototype struct
+// Models which "extend" this model:
+// - BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype
+// - BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype
+type BareMetalServerNetworkAttachmentPrototype struct {
+	// The network attachment's interface type:
+	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+	//   server is stopped
+	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+	//     to use the PCI attachment
+	//   - Cannot directly use an IEEE 802.1Q tag.
+	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`
+	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
+	//   array of `allowed_vlans`.
+	//   - Must use an IEEE 802.1Q tag.
+	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+	InterfaceType *string `json:"interface_type" validate:"required"`
+
+	// The name for this bare metal server network attachment. Names must be unique within the bare metal server the
+	// network attachment resides in. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// A virtual network interface for the bare metal server network attachment. This can be
+	// specified using an existing virtual network interface, or a prototype object for a new
+	// virtual network interface.
+	//
+	// If an existing virtual network interface is specified, it must not be the target of a flow
+	// log collector.
+	VirtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf `json:"virtual_network_interface" validate:"required"`
+
+	// The VLAN IDs to allow for `vlan` attachments using this PCI attachment.
+	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
+
+	// Indicates if the data path for the network attachment can float to another bare metal server. Can only be `true` for
+	// network attachments with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network attachment will be automatically deleted from this bare metal server and a new network attachment with
+	// the same `id`, `name` and `vlan` will be created on the other bare metal server.  The virtual network interface for
+	// this network attachment will be automatically be attached to the new network attachment.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network attachment with `interface_type` of `pci` with `allowed_vlans` including
+	// this network attachment's `vlan`.
+	AllowToFloat *bool `json:"allow_to_float,omitempty"`
+
+	// The IEEE 802.1Q VLAN ID that must be used for all traffic on this attachment.
+	Vlan *int64 `json:"vlan,omitempty"`
+}
+
+// Constants associated with the BareMetalServerNetworkAttachmentPrototype.InterfaceType property.
+// The network attachment's interface type:
+//   - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+//     server is stopped
+//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+//     to use the PCI attachment
+//   - Cannot directly use an IEEE 802.1Q tag.
+//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`
+//   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
+//     array of `allowed_vlans`.
+//   - Must use an IEEE 802.1Q tag.
+//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+const (
+	BareMetalServerNetworkAttachmentPrototypeInterfaceTypePciConst  = "pci"
+	BareMetalServerNetworkAttachmentPrototypeInterfaceTypeVlanConst = "vlan"
+)
+
+func (*BareMetalServerNetworkAttachmentPrototype) isaBareMetalServerNetworkAttachmentPrototype() bool {
+	return true
+}
+
+type BareMetalServerNetworkAttachmentPrototypeIntf interface {
+	isaBareMetalServerNetworkAttachmentPrototype() bool
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototype unmarshals an instance of BareMetalServerNetworkAttachmentPrototype from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototype)
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allowed_vlans", &obj.AllowedVlans)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allow_to_float", &obj.AllowToFloat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "vlan", &obj.Vlan)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface : A virtual network interface for the bare metal server network attachment. This can be specified using an existing
+// virtual network interface, or a prototype object for a new virtual network interface.
+//
+// If an existing virtual network interface is specified, it must not be the target of a flow log collector.
+// Models which "extend" this model:
+// - BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext
+// - BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// Additional IP addresses to bind to the virtual network interface. Each item may be either a reserved IP identity, or
+	// a reserved IP prototype object which will be used to create a new reserved IP. All IP addresses must be in the
+	// primary IP's subnet.
+	//
+	// If reserved IP identities are provided, the specified reserved IPs must be unbound.
+	//
+	// If reserved IP prototype objects with addresses are provided, the addresses must be available on the virtual network
+	// interface's subnet. For any prototype objects that do not specify an address, an available address on the subnet
+	// will be automatically selected and reserved.
+	Ips []VirtualNetworkInterfaceIPPrototypeIntf `json:"ips,omitempty"`
+
+	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
+	// VPC. If unspecified, the name will be a hyphenated list of randomly-selected words. Names beginning with `ibm-` are
+	// reserved for provider-owned resources, and are not allowed.
+	Name *string `json:"name,omitempty"`
+
+	// The primary IP address to bind to the virtual network interface. May be either a
+	// reserved IP identity, or a reserved IP prototype object which will be used to create a
+	// new reserved IP.
+	//
+	// If a reserved IP identity is provided, the specified reserved IP must be unbound.
+	//
+	// If a reserved IP prototype object with an address is provided, the address must be
+	// available on the virtual network interface's subnet. If no address is specified,
+	// an available address on the subnet will be automatically selected and reserved.
+	PrimaryIP VirtualNetworkInterfacePrimaryIPPrototypeIntf `json:"primary_ip,omitempty"`
+
+	// The resource group to use for this virtual network interface. If unspecified, the
+	// bare metal server's resource group will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The security groups to use for this virtual network interface. If unspecified, the default security group of the VPC
+	// for the subnet is used.
+	SecurityGroups []SecurityGroupIdentityIntf `json:"security_groups,omitempty"`
+
+	// The associated subnet. Required if `primary_ip` does not specify a reserved IP
+	// identity.
+	Subnet SubnetIdentityIntf `json:"subnet,omitempty"`
+
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf interface {
+	isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface() bool
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalVirtualNetworkInterfaceIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalVirtualNetworkInterfacePrimaryIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "security_groups", &obj.SecurityGroups, UnmarshalSecurityGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentReference : BareMetalServerNetworkAttachmentReference struct
+type BareMetalServerNetworkAttachmentReference struct {
+	// If present, this property indicates the referenced resource has been deleted, and provides
+	// some supplementary information.
+	Deleted *BareMetalServerNetworkAttachmentReferenceDeleted `json:"deleted,omitempty"`
+
+	// The URL for this bare metal server network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this bare metal server network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this bare metal server network attachment. The name is unique across all network attachments for the
+	// bare metal server.
+	Name *string `json:"name" validate:"required"`
+
+	// The primary IP address of the virtual network interface for the bare metal server
+	// network attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The subnet of the virtual network interface for the bare metal server network
+	// attachment.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerNetworkAttachmentReference.ResourceType property.
+// The resource type.
+const (
+	BareMetalServerNetworkAttachmentReferenceResourceTypeBareMetalServerNetworkAttachmentConst = "bare_metal_server_network_attachment"
+)
+
+// UnmarshalBareMetalServerNetworkAttachmentReference unmarshals an instance of BareMetalServerNetworkAttachmentReference from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentReference(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentReference)
+	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalBareMetalServerNetworkAttachmentReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentReferenceDeleted : If present, this property indicates the referenced resource has been deleted, and provides some supplementary
+// information.
+type BareMetalServerNetworkAttachmentReferenceDeleted struct {
+	// Link to documentation about deleted resources.
+	MoreInfo *string `json:"more_info" validate:"required"`
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentReferenceDeleted unmarshals an instance of BareMetalServerNetworkAttachmentReferenceDeleted from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentReferenceDeleted(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentReferenceDeleted)
+	err = core.UnmarshalPrimitive(m, "more_info", &obj.MoreInfo)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // BareMetalServerNetworkInterface : BareMetalServerNetworkInterface struct
 // Models which "extend" this model:
 // - BareMetalServerNetworkInterfaceByHiperSocket
@@ -26441,9 +29087,18 @@ func UnmarshalBareMetalServerLifecycleReason(m map[string]json.RawMessage, resul
 // - BareMetalServerNetworkInterfaceByVlan
 type BareMetalServerNetworkInterface struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing" validate:"required"`
 
 	// The date and time that the bare metal server network interface was created.
+	//
+	// If this bare metal server has network attachments, this network interface was created as a [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) when its corresponding network attachment
+	// was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
 	// If `true`:
@@ -26455,15 +29110,34 @@ type BareMetalServerNetworkInterface struct {
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat" validate:"required"`
 
 	// The floating IPs associated with this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the floating IPs are associated with the attached virtual
+	// network interface.
 	FloatingIps []FloatingIPReference `json:"floating_ips" validate:"required"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The interface type:
@@ -26473,12 +29147,17 @@ type BareMetalServerNetworkInterface struct {
 	//   server is stopped
 	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 	//     to use the PCI interface
-	//   - Cannot directly use an IEEE 802.1q VLAN tag.
+	//   - Cannot directly use an IEEE 802.1Q tag.
 	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
 	//   array of `allowed_vlans`.
-	//   - Must use an IEEE 802.1q tag.
+	//   - Must use an IEEE 802.1Q tag.
 	//   - Has its own security groups and does not inherit those of the PCI device through
 	//     which traffic flows.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the interface type is that of the corresponding network
+	// attachment.
 	//
 	// The enumerated values for this property are expected to expand in the future. When processing this property, check
 	// for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
@@ -26487,12 +29166,26 @@ type BareMetalServerNetworkInterface struct {
 
 	// The MAC address of this bare metal server network interface. If the MAC address has not yet been selected, the value
 	// will be an empty string.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the MAC address is that of the attached virtual network
+	// interface.
 	MacAddress *string `json:"mac_address" validate:"required"`
 
 	// The name for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the name matches its corresponding network attachment.
 	Name *string `json:"name" validate:"required"`
 
 	// The bare metal server network interface port speed in Mbps.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the port speed is that of its corresponding network
+	// attachment.
 	PortSpeed *int64 `json:"port_speed" validate:"required"`
 
 	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
@@ -26501,26 +29194,61 @@ type BareMetalServerNetworkInterface struct {
 	ResourceType *string `json:"resource_type" validate:"required"`
 
 	// The security groups targeting this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the security groups are associated with the attached
+	// virtual network interface.
 	SecurityGroups []SecurityGroupReference `json:"security_groups" validate:"required"`
 
 	// The status of the bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a read-only representation of its
+	// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+	// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 	Status *string `json:"status" validate:"required"`
 
 	// The associated subnet.
 	Subnet *SubnetReference `json:"subnet" validate:"required"`
 
 	// The bare metal server network interface type.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 	Type *string `json:"type" validate:"required"`
 
-	// Indicates what VLAN IDs (for VLAN type only) can use this physical (PCI type) interface.
+	// The VLAN IDs allowed for `vlan` interfaces using this PCI interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the VLAN IDs match the `allow_vlans` of the corresponding
+	// network attachment.
 	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
 
-	// Indicates if the interface can float to any other server within the same
-	// `resource_group`. The interface will float automatically if the network detects a GARP or RARP on another bare metal
-	// server in the resource group.  Applies only to `vlan` type interfaces.
+	// Indicates if the data path for the network interface can float to another bare metal server. Can only be `true` for
+	// network interfaces with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network interface will be automatically deleted from this bare metal server and a new network interface with the
+	// same `id`, `name` and `vlan` will be created on the other bare metal server.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network interface with `interface_type` of `pci` with `allowed_vlans` including
+	// this network interface's `vlan`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the value of this property matches that of the
+	// `allow_to_float` property of the corresponding network attachment.
 	AllowInterfaceToFloat *bool `json:"allow_interface_to_float,omitempty"`
 
-	// Indicates the 802.1Q VLAN ID tag that must be used for all traffic on this interface.
+	// The VLAN ID used in the IEEE 802.1Q tag present in all traffic on this interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the VLAN ID matches the `vlan` of the corresponding
+	// network attachment.
 	Vlan *int64 `json:"vlan,omitempty"`
 }
 
@@ -26532,12 +29260,17 @@ type BareMetalServerNetworkInterface struct {
 //     server is stopped
 //   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 //     to use the PCI interface
-//   - Cannot directly use an IEEE 802.1q VLAN tag.
+//   - Cannot directly use an IEEE 802.1Q tag.
 //   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
 //     array of `allowed_vlans`.
-//   - Must use an IEEE 802.1q tag.
+//   - Must use an IEEE 802.1Q tag.
 //   - Has its own security groups and does not inherit those of the PCI device through
 //     which traffic flows.
+//
+// If this bare metal server has network attachments, this network interface is a
+// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+// attachment and its attached virtual network interface, and the interface type is that of the corresponding network
+// attachment.
 //
 // The enumerated values for this property are expected to expand in the future. When processing this property, check
 // for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
@@ -26556,6 +29289,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterface.Status property.
 // The status of the bare metal server network interface.
+//
+// If this bare metal server has network attachments, this network interface is a read-only representation of its
+// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 const (
 	BareMetalServerNetworkInterfaceStatusAvailableConst = "available"
 	BareMetalServerNetworkInterfaceStatusDeletingConst  = "deleting"
@@ -26565,6 +29302,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterface.Type property.
 // The bare metal server network interface type.
+//
+// If this bare metal server has network attachments, this network interface is a
+// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 const (
 	BareMetalServerNetworkInterfaceTypePrimaryConst   = "primary"
 	BareMetalServerNetworkInterfaceTypeSecondaryConst = "secondary"
@@ -26698,9 +29439,15 @@ func UnmarshalBareMetalServerNetworkInterfaceCollectionNext(m map[string]json.Ra
 // BareMetalServerNetworkInterfacePatch : BareMetalServerNetworkInterfacePatch struct
 type BareMetalServerNetworkInterfacePatch struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
-	// Indicates what VLAN IDs (for VLAN type only) can use this physical (PCI type) interface.
+	// The VLAN IDs to allow for `vlan` interfaces using this PCI interface, replacing any existing VLAN IDs. The specified
+	// values must include IDs for all `vlan` interfaces currently using this PCI interface.
 	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
 
 	// If `true`:
@@ -26712,6 +29459,11 @@ type BareMetalServerNetworkInterfacePatch struct {
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
 
 	// The name for this bare metal server network interface. The name must not be used by another network interface on the
@@ -26759,6 +29511,11 @@ func (bareMetalServerNetworkInterfacePatch *BareMetalServerNetworkInterfacePatch
 // - BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByVlanPrototype
 type BareMetalServerNetworkInterfacePrototype struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
 	// If `true`:
@@ -26770,6 +29527,11 @@ type BareMetalServerNetworkInterfacePrototype struct {
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
 
 	// The interface type:
@@ -26780,11 +29542,11 @@ type BareMetalServerNetworkInterfacePrototype struct {
 	//   server is stopped
 	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 	//     to use the PCI interface
-	//   - Cannot directly use an IEEE 802.1q VLAN tag.
+	//   - Cannot directly use an IEEE 802.1Q tag.
 	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`
 	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
 	//   array of `allowed_vlans`.
-	//   - Must use an IEEE 802.1q tag.
+	//   - Must use an IEEE 802.1Q tag.
 	//   - Has its own security groups and does not inherit those of the PCI device through
 	//     which traffic flows.
 	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
@@ -26809,15 +29571,32 @@ type BareMetalServerNetworkInterfacePrototype struct {
 	// The associated subnet.
 	Subnet SubnetIdentityIntf `json:"subnet" validate:"required"`
 
-	// Indicates what VLAN IDs (for VLAN type only) can use this physical (PCI type) interface.
+	// The VLAN IDs to allow for `vlan` interfaces using this PCI interface.
 	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
 
-	// Indicates if the interface can float to any other server within the same
-	// `resource_group`. The interface will float automatically if the network detects a GARP or RARP on another bare metal
-	// server in the resource group.  Applies only to `vlan` type interfaces.
+	// Indicates if the data path for the network interface can float to another bare metal server. Can only be `true` for
+	// network interfaces with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network interface will be automatically deleted from this bare metal server and a new network interface with the
+	// same `id`, `name` and `vlan` will be created on the other bare metal server.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network interface with `interface_type` of `pci` with `allowed_vlans` including
+	// this network interface's `vlan`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the value of this property matches that of the
+	// `allow_to_float` property of the corresponding network attachment.
 	AllowInterfaceToFloat *bool `json:"allow_interface_to_float,omitempty"`
 
-	// Indicates the 802.1Q VLAN ID tag that must be used for all traffic on this interface.
+	// The VLAN ID used in the IEEE 802.1Q tag present in all traffic on this interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the VLAN ID matches the `vlan` of the corresponding
+	// network attachment.
 	Vlan *int64 `json:"vlan,omitempty"`
 }
 
@@ -26830,11 +29609,11 @@ type BareMetalServerNetworkInterfacePrototype struct {
 //     server is stopped
 //   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 //     to use the PCI interface
-//   - Cannot directly use an IEEE 802.1q VLAN tag.
+//   - Cannot directly use an IEEE 802.1Q tag.
 //   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`
 //   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its
 //     array of `allowed_vlans`.
-//   - Must use an IEEE 802.1q tag.
+//   - Must use an IEEE 802.1Q tag.
 //   - Has its own security groups and does not inherit those of the PCI device through
 //     which traffic flows.
 //   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
@@ -26958,12 +29737,94 @@ func (bareMetalServerPatch *BareMetalServerPatch) AsPatch() (_patch map[string]i
 	return
 }
 
+// BareMetalServerPrimaryNetworkAttachmentPrototype : BareMetalServerPrimaryNetworkAttachmentPrototype struct
+// Models which "extend" this model:
+// - BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype
+type BareMetalServerPrimaryNetworkAttachmentPrototype struct {
+	// The network attachment's interface type:
+	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+	//   server is stopped
+	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+	//     to use the PCI attachment
+	//   - Cannot directly use an IEEE 802.1Q tag.
+	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+	InterfaceType *string `json:"interface_type,omitempty"`
+
+	// The name for this bare metal server network attachment. Names must be unique within the bare metal server the
+	// network attachment resides in. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// A virtual network interface for the bare metal server network attachment. This can be
+	// specified using an existing virtual network interface, or a prototype object for a new
+	// virtual network interface.
+	//
+	// If an existing virtual network interface is specified, it must not be the target of a flow
+	// log collector.
+	VirtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf `json:"virtual_network_interface" validate:"required"`
+
+	// The VLAN IDs to allow for `vlan` attachments using this PCI attachment.
+	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
+}
+
+// Constants associated with the BareMetalServerPrimaryNetworkAttachmentPrototype.InterfaceType property.
+// The network attachment's interface type:
+//   - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+//     server is stopped
+//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+//     to use the PCI attachment
+//   - Cannot directly use an IEEE 802.1Q tag.
+//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+const (
+	BareMetalServerPrimaryNetworkAttachmentPrototypeInterfaceTypePciConst = "pci"
+)
+
+func (*BareMetalServerPrimaryNetworkAttachmentPrototype) isaBareMetalServerPrimaryNetworkAttachmentPrototype() bool {
+	return true
+}
+
+type BareMetalServerPrimaryNetworkAttachmentPrototypeIntf interface {
+	isaBareMetalServerPrimaryNetworkAttachmentPrototype() bool
+}
+
+// UnmarshalBareMetalServerPrimaryNetworkAttachmentPrototype unmarshals an instance of BareMetalServerPrimaryNetworkAttachmentPrototype from the specified map of raw messages.
+func UnmarshalBareMetalServerPrimaryNetworkAttachmentPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerPrimaryNetworkAttachmentPrototype)
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allowed_vlans", &obj.AllowedVlans)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // BareMetalServerPrimaryNetworkInterfacePrototype : BareMetalServerPrimaryNetworkInterfacePrototype struct
 type BareMetalServerPrimaryNetworkInterfacePrototype struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
-	// Indicates what VLAN IDs (for VLAN type only) can use this physical (PCI type) interface.
+	// The VLAN IDs allowed for `vlan` interfaces using this PCI interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the VLAN IDs match the `allow_vlans` of the corresponding
+	// network attachment.
 	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
 
 	// If `true`:
@@ -26975,6 +29836,11 @@ type BareMetalServerPrimaryNetworkInterfacePrototype struct {
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
 
 	// The interface type:
@@ -26985,7 +29851,7 @@ type BareMetalServerPrimaryNetworkInterfacePrototype struct {
 	//   server is stopped
 	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 	//     to use the PCI interface
-	//   - Cannot directly use an IEEE 802.1q VLAN tag.
+	//   - Cannot directly use an IEEE 802.1Q tag.
 	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
 	InterfaceType *string `json:"interface_type,omitempty"`
 
@@ -27018,7 +29884,7 @@ type BareMetalServerPrimaryNetworkInterfacePrototype struct {
 //     server is stopped
 //   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 //     to use the PCI interface
-//   - Cannot directly use an IEEE 802.1q VLAN tag.
+//   - Cannot directly use an IEEE 802.1Q tag.
 //   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
 const (
 	BareMetalServerPrimaryNetworkInterfacePrototypeInterfaceTypeHipersocketConst = "hipersocket"
@@ -27100,6 +29966,8 @@ type BareMetalServerProfile struct {
 	// The name for this bare metal server profile.
 	Name *string `json:"name" validate:"required"`
 
+	NetworkAttachmentCount BareMetalServerProfileNetworkAttachmentCountIntf `json:"network_attachment_count" validate:"required"`
+
 	NetworkInterfaceCount BareMetalServerProfileNetworkInterfaceCountIntf `json:"network_interface_count" validate:"required"`
 
 	OsArchitecture *BareMetalServerProfileOsArchitecture `json:"os_architecture" validate:"required"`
@@ -27109,6 +29977,9 @@ type BareMetalServerProfile struct {
 
 	// The supported trusted platform module modes for this bare metal server profile.
 	SupportedTrustedPlatformModuleModes *BareMetalServerProfileSupportedTrustedPlatformModuleModes `json:"supported_trusted_platform_module_modes" validate:"required"`
+
+	// Indicates whether this profile supports virtual network interfaces.
+	VirtualNetworkInterfacesSupported *BareMetalServerProfileVirtualNetworkInterfacesSupported `json:"virtual_network_interfaces_supported" validate:"required"`
 }
 
 // Constants associated with the BareMetalServerProfile.ResourceType property.
@@ -27160,6 +30031,10 @@ func UnmarshalBareMetalServerProfile(m map[string]json.RawMessage, result interf
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachment_count", &obj.NetworkAttachmentCount, UnmarshalBareMetalServerProfileNetworkAttachmentCount)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalModel(m, "network_interface_count", &obj.NetworkInterfaceCount, UnmarshalBareMetalServerProfileNetworkInterfaceCount)
 	if err != nil {
 		return
@@ -27173,6 +30048,10 @@ func UnmarshalBareMetalServerProfile(m map[string]json.RawMessage, result interf
 		return
 	}
 	err = core.UnmarshalModel(m, "supported_trusted_platform_module_modes", &obj.SupportedTrustedPlatformModuleModes, UnmarshalBareMetalServerProfileSupportedTrustedPlatformModuleModes)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interfaces_supported", &obj.VirtualNetworkInterfacesSupported, UnmarshalBareMetalServerProfileVirtualNetworkInterfacesSupported)
 	if err != nil {
 		return
 	}
@@ -27954,6 +30833,54 @@ func UnmarshalBareMetalServerProfileMemory(m map[string]json.RawMessage, result 
 	return
 }
 
+// BareMetalServerProfileNetworkAttachmentCount : BareMetalServerProfileNetworkAttachmentCount struct
+// Models which "extend" this model:
+// - BareMetalServerProfileNetworkAttachmentCountRange
+// - BareMetalServerProfileNetworkAttachmentCountDependent
+type BareMetalServerProfileNetworkAttachmentCount struct {
+	// The maximum value for this profile field.
+	Max *int64 `json:"max,omitempty"`
+
+	// The minimum value for this profile field.
+	Min *int64 `json:"min,omitempty"`
+
+	// The type for this profile field.
+	Type *string `json:"type,omitempty"`
+}
+
+// Constants associated with the BareMetalServerProfileNetworkAttachmentCount.Type property.
+// The type for this profile field.
+const (
+	BareMetalServerProfileNetworkAttachmentCountTypeRangeConst = "range"
+)
+
+func (*BareMetalServerProfileNetworkAttachmentCount) isaBareMetalServerProfileNetworkAttachmentCount() bool {
+	return true
+}
+
+type BareMetalServerProfileNetworkAttachmentCountIntf interface {
+	isaBareMetalServerProfileNetworkAttachmentCount() bool
+}
+
+// UnmarshalBareMetalServerProfileNetworkAttachmentCount unmarshals an instance of BareMetalServerProfileNetworkAttachmentCount from the specified map of raw messages.
+func UnmarshalBareMetalServerProfileNetworkAttachmentCount(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerProfileNetworkAttachmentCount)
+	err = core.UnmarshalPrimitive(m, "max", &obj.Max)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "min", &obj.Min)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // BareMetalServerProfileNetworkInterfaceCount : BareMetalServerProfileNetworkInterfaceCount struct
 // Models which "extend" this model:
 // - BareMetalServerProfileNetworkInterfaceCountRange
@@ -28112,6 +31039,148 @@ func UnmarshalBareMetalServerProfileSupportedTrustedPlatformModuleModes(m map[st
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "values", &obj.Values)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerProfileVirtualNetworkInterfacesSupported : Indicates whether this profile supports virtual network interfaces.
+type BareMetalServerProfileVirtualNetworkInterfacesSupported struct {
+	// The type for this profile field.
+	Type *string `json:"type" validate:"required"`
+
+	// The value for this profile field.
+	Value *bool `json:"value" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerProfileVirtualNetworkInterfacesSupported.Type property.
+// The type for this profile field.
+const (
+	BareMetalServerProfileVirtualNetworkInterfacesSupportedTypeFixedConst = "fixed"
+)
+
+// UnmarshalBareMetalServerProfileVirtualNetworkInterfacesSupported unmarshals an instance of BareMetalServerProfileVirtualNetworkInterfacesSupported from the specified map of raw messages.
+func UnmarshalBareMetalServerProfileVirtualNetworkInterfacesSupported(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerProfileVirtualNetworkInterfacesSupported)
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "value", &obj.Value)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerPrototype : BareMetalServerPrototype struct
+// Models which "extend" this model:
+// - BareMetalServerPrototypeBareMetalServerByNetworkAttachment
+// - BareMetalServerPrototypeBareMetalServerByNetworkInterface
+type BareMetalServerPrototype struct {
+	// Indicates whether secure boot is enabled. If enabled, the image must support secure boot or the server will fail to
+	// boot.
+	EnableSecureBoot *bool `json:"enable_secure_boot,omitempty"`
+
+	Initialization *BareMetalServerInitializationPrototype `json:"initialization" validate:"required"`
+
+	// The name for this bare metal server. The name must not be used by another bare metal server in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-bare-metal-servers-profile)
+	// to use for this bare metal server.
+	Profile BareMetalServerProfileIdentityIntf `json:"profile" validate:"required"`
+
+	// The resource group to use. If unspecified, the account's [default resource
+	// group](https://cloud.ibm.com/apidocs/resource-manager#introduction) will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	TrustedPlatformModule *BareMetalServerTrustedPlatformModulePrototype `json:"trusted_platform_module,omitempty"`
+
+	// The VPC this bare metal server will reside in.
+	//
+	// If specified, it must match the VPC for the subnets that the network attachments or
+	// network interfaces of the bare metal server are attached to.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The zone this bare metal server will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the bare metal server.
+	NetworkAttachments []BareMetalServerNetworkAttachmentPrototypeIntf `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the bare metal server.
+	PrimaryNetworkAttachment BareMetalServerPrimaryNetworkAttachmentPrototypeIntf `json:"primary_network_attachment,omitempty"`
+
+	// The additional bare metal server network interfaces to create.
+	NetworkInterfaces []BareMetalServerNetworkInterfacePrototypeIntf `json:"network_interfaces,omitempty"`
+
+	// The primary bare metal server network interface to create.
+	PrimaryNetworkInterface *BareMetalServerPrimaryNetworkInterfacePrototype `json:"primary_network_interface,omitempty"`
+}
+
+func (*BareMetalServerPrototype) isaBareMetalServerPrototype() bool {
+	return true
+}
+
+type BareMetalServerPrototypeIntf interface {
+	isaBareMetalServerPrototype() bool
+}
+
+// UnmarshalBareMetalServerPrototype unmarshals an instance of BareMetalServerPrototype from the specified map of raw messages.
+func UnmarshalBareMetalServerPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerPrototype)
+	err = core.UnmarshalPrimitive(m, "enable_secure_boot", &obj.EnableSecureBoot)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "initialization", &obj.Initialization, UnmarshalBareMetalServerInitializationPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalBareMetalServerProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "trusted_platform_module", &obj.TrustedPlatformModule, UnmarshalBareMetalServerTrustedPlatformModulePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalBareMetalServerNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalBareMetalServerPrimaryNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalBareMetalServerNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalBareMetalServerPrimaryNetworkInterfacePrototype)
 	if err != nil {
 		return
 	}
@@ -28603,80 +31672,23 @@ func UnmarshalCloudObjectStorageObjectReference(m map[string]json.RawMessage, re
 
 // CreateBackupPolicyOptions : The CreateBackupPolicy options.
 type CreateBackupPolicyOptions struct {
-	// The user tags this backup policy will apply to. Resources that have both a matching user tag and a matching type
-	// will be subject to the backup policy.
-	MatchUserTags []string `json:"match_user_tags" validate:"required"`
-
-	// The resource types this backup policy will apply to. Resources that have both a matching type and a matching user
-	// tag will be subject to the backup policy.
-	MatchResourceTypes []string `json:"match_resource_types,omitempty"`
-
-	// The name for this backup policy. The name must not be used by another backup policy in the region. If unspecified,
-	// the name will be a hyphenated list of randomly-selected words.
-	Name *string `json:"name,omitempty"`
-
-	// The prototype objects for backup plans to be created for this backup policy.
-	Plans []BackupPolicyPlanPrototype `json:"plans,omitempty"`
-
-	// The resource group to use. If unspecified, the account's [default resource
-	// group](https://cloud.ibm.com/apidocs/resource-manager#introduction) will be used.
-	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
-
-	// The scope to use for this backup policy.
-	//
-	// If unspecified, the policy will be scoped to the account.
-	Scope BackupPolicyScopePrototypeIntf `json:"scope,omitempty"`
+	// The backup policy prototype object.
+	BackupPolicyPrototype BackupPolicyPrototypeIntf `json:"BackupPolicyPrototype" validate:"required"`
 
 	// Allows users to set headers on API requests
 	Headers map[string]string
 }
 
-// Constants associated with the CreateBackupPolicyOptions.MatchResourceTypes property.
-// The resource type.
-const (
-	CreateBackupPolicyOptionsMatchResourceTypesVolumeConst = "volume"
-)
-
 // NewCreateBackupPolicyOptions : Instantiate CreateBackupPolicyOptions
-func (*VpcV1) NewCreateBackupPolicyOptions(matchUserTags []string) *CreateBackupPolicyOptions {
+func (*VpcV1) NewCreateBackupPolicyOptions(backupPolicyPrototype BackupPolicyPrototypeIntf) *CreateBackupPolicyOptions {
 	return &CreateBackupPolicyOptions{
-		MatchUserTags: matchUserTags,
+		BackupPolicyPrototype: backupPolicyPrototype,
 	}
 }
 
-// SetMatchUserTags : Allow user to set MatchUserTags
-func (_options *CreateBackupPolicyOptions) SetMatchUserTags(matchUserTags []string) *CreateBackupPolicyOptions {
-	_options.MatchUserTags = matchUserTags
-	return _options
-}
-
-// SetMatchResourceTypes : Allow user to set MatchResourceTypes
-func (_options *CreateBackupPolicyOptions) SetMatchResourceTypes(matchResourceTypes []string) *CreateBackupPolicyOptions {
-	_options.MatchResourceTypes = matchResourceTypes
-	return _options
-}
-
-// SetName : Allow user to set Name
-func (_options *CreateBackupPolicyOptions) SetName(name string) *CreateBackupPolicyOptions {
-	_options.Name = core.StringPtr(name)
-	return _options
-}
-
-// SetPlans : Allow user to set Plans
-func (_options *CreateBackupPolicyOptions) SetPlans(plans []BackupPolicyPlanPrototype) *CreateBackupPolicyOptions {
-	_options.Plans = plans
-	return _options
-}
-
-// SetResourceGroup : Allow user to set ResourceGroup
-func (_options *CreateBackupPolicyOptions) SetResourceGroup(resourceGroup ResourceGroupIdentityIntf) *CreateBackupPolicyOptions {
-	_options.ResourceGroup = resourceGroup
-	return _options
-}
-
-// SetScope : Allow user to set Scope
-func (_options *CreateBackupPolicyOptions) SetScope(scope BackupPolicyScopePrototypeIntf) *CreateBackupPolicyOptions {
-	_options.Scope = scope
+// SetBackupPolicyPrototype : Allow user to set BackupPolicyPrototype
+func (_options *CreateBackupPolicyOptions) SetBackupPolicyPrototype(backupPolicyPrototype BackupPolicyPrototypeIntf) *CreateBackupPolicyOptions {
+	_options.BackupPolicyPrototype = backupPolicyPrototype
 	return _options
 }
 
@@ -28849,6 +31861,44 @@ func (options *CreateBareMetalServerConsoleAccessTokenOptions) SetHeaders(param 
 	return options
 }
 
+// CreateBareMetalServerNetworkAttachmentOptions : The CreateBareMetalServerNetworkAttachment options.
+type CreateBareMetalServerNetworkAttachmentOptions struct {
+	// The bare metal server identifier.
+	BareMetalServerID *string `json:"bare_metal_server_id" validate:"required,ne="`
+
+	// The bare metal server network attachment prototype object.
+	BareMetalServerNetworkAttachmentPrototype BareMetalServerNetworkAttachmentPrototypeIntf `json:"BareMetalServerNetworkAttachmentPrototype" validate:"required"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewCreateBareMetalServerNetworkAttachmentOptions : Instantiate CreateBareMetalServerNetworkAttachmentOptions
+func (*VpcV1) NewCreateBareMetalServerNetworkAttachmentOptions(bareMetalServerID string, bareMetalServerNetworkAttachmentPrototype BareMetalServerNetworkAttachmentPrototypeIntf) *CreateBareMetalServerNetworkAttachmentOptions {
+	return &CreateBareMetalServerNetworkAttachmentOptions{
+		BareMetalServerID:                         core.StringPtr(bareMetalServerID),
+		BareMetalServerNetworkAttachmentPrototype: bareMetalServerNetworkAttachmentPrototype,
+	}
+}
+
+// SetBareMetalServerID : Allow user to set BareMetalServerID
+func (_options *CreateBareMetalServerNetworkAttachmentOptions) SetBareMetalServerID(bareMetalServerID string) *CreateBareMetalServerNetworkAttachmentOptions {
+	_options.BareMetalServerID = core.StringPtr(bareMetalServerID)
+	return _options
+}
+
+// SetBareMetalServerNetworkAttachmentPrototype : Allow user to set BareMetalServerNetworkAttachmentPrototype
+func (_options *CreateBareMetalServerNetworkAttachmentOptions) SetBareMetalServerNetworkAttachmentPrototype(bareMetalServerNetworkAttachmentPrototype BareMetalServerNetworkAttachmentPrototypeIntf) *CreateBareMetalServerNetworkAttachmentOptions {
+	_options.BareMetalServerNetworkAttachmentPrototype = bareMetalServerNetworkAttachmentPrototype
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *CreateBareMetalServerNetworkAttachmentOptions) SetHeaders(param map[string]string) *CreateBareMetalServerNetworkAttachmentOptions {
+	options.Headers = param
+	return options
+}
+
 // CreateBareMetalServerNetworkInterfaceOptions : The CreateBareMetalServerNetworkInterface options.
 type CreateBareMetalServerNetworkInterfaceOptions struct {
 	// The bare metal server identifier.
@@ -28889,114 +31939,23 @@ func (options *CreateBareMetalServerNetworkInterfaceOptions) SetHeaders(param ma
 
 // CreateBareMetalServerOptions : The CreateBareMetalServer options.
 type CreateBareMetalServerOptions struct {
-	Initialization *BareMetalServerInitializationPrototype `json:"initialization" validate:"required"`
-
-	// The primary bare metal server network interface to create.
-	PrimaryNetworkInterface *BareMetalServerPrimaryNetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
-
-	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-bare-metal-servers-profile)
-	// to use for this bare metal server.
-	Profile BareMetalServerProfileIdentityIntf `json:"profile" validate:"required"`
-
-	// The zone this bare metal server will reside in.
-	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
-
-	// Indicates whether secure boot is enabled. If enabled, the image must support secure boot or the server will fail to
-	// boot.
-	EnableSecureBoot *bool `json:"enable_secure_boot,omitempty"`
-
-	// The name for this bare metal server. The name must not be used by another bare metal server in the region. If
-	// unspecified, the name will be a hyphenated list of randomly-selected words.
-	//
-	// The system hostname will be based on this name.
-	Name *string `json:"name,omitempty"`
-
-	// The additional bare metal server network interfaces to create.
-	NetworkInterfaces []BareMetalServerNetworkInterfacePrototypeIntf `json:"network_interfaces,omitempty"`
-
-	// The resource group to use. If unspecified, the account's [default resource
-	// group](https://cloud.ibm.com/apidocs/resource-manager#introduction) will be used.
-	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
-
-	TrustedPlatformModule *BareMetalServerTrustedPlatformModulePrototype `json:"trusted_platform_module,omitempty"`
-
-	// The VPC this bare metal server will reside in.
-	//
-	// If specified, it must match the VPC for the subnets that the network interfaces of
-	// the bare metal server are attached to.
-	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+	// The bare metal server prototype object.
+	BareMetalServerPrototype BareMetalServerPrototypeIntf `json:"BareMetalServerPrototype" validate:"required"`
 
 	// Allows users to set headers on API requests
 	Headers map[string]string
 }
 
 // NewCreateBareMetalServerOptions : Instantiate CreateBareMetalServerOptions
-func (*VpcV1) NewCreateBareMetalServerOptions(initialization *BareMetalServerInitializationPrototype, primaryNetworkInterface *BareMetalServerPrimaryNetworkInterfacePrototype, profile BareMetalServerProfileIdentityIntf, zone ZoneIdentityIntf) *CreateBareMetalServerOptions {
+func (*VpcV1) NewCreateBareMetalServerOptions(bareMetalServerPrototype BareMetalServerPrototypeIntf) *CreateBareMetalServerOptions {
 	return &CreateBareMetalServerOptions{
-		Initialization:          initialization,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Profile:                 profile,
-		Zone:                    zone,
+		BareMetalServerPrototype: bareMetalServerPrototype,
 	}
 }
 
-// SetInitialization : Allow user to set Initialization
-func (_options *CreateBareMetalServerOptions) SetInitialization(initialization *BareMetalServerInitializationPrototype) *CreateBareMetalServerOptions {
-	_options.Initialization = initialization
-	return _options
-}
-
-// SetPrimaryNetworkInterface : Allow user to set PrimaryNetworkInterface
-func (_options *CreateBareMetalServerOptions) SetPrimaryNetworkInterface(primaryNetworkInterface *BareMetalServerPrimaryNetworkInterfacePrototype) *CreateBareMetalServerOptions {
-	_options.PrimaryNetworkInterface = primaryNetworkInterface
-	return _options
-}
-
-// SetProfile : Allow user to set Profile
-func (_options *CreateBareMetalServerOptions) SetProfile(profile BareMetalServerProfileIdentityIntf) *CreateBareMetalServerOptions {
-	_options.Profile = profile
-	return _options
-}
-
-// SetZone : Allow user to set Zone
-func (_options *CreateBareMetalServerOptions) SetZone(zone ZoneIdentityIntf) *CreateBareMetalServerOptions {
-	_options.Zone = zone
-	return _options
-}
-
-// SetEnableSecureBoot : Allow user to set EnableSecureBoot
-func (_options *CreateBareMetalServerOptions) SetEnableSecureBoot(enableSecureBoot bool) *CreateBareMetalServerOptions {
-	_options.EnableSecureBoot = core.BoolPtr(enableSecureBoot)
-	return _options
-}
-
-// SetName : Allow user to set Name
-func (_options *CreateBareMetalServerOptions) SetName(name string) *CreateBareMetalServerOptions {
-	_options.Name = core.StringPtr(name)
-	return _options
-}
-
-// SetNetworkInterfaces : Allow user to set NetworkInterfaces
-func (_options *CreateBareMetalServerOptions) SetNetworkInterfaces(networkInterfaces []BareMetalServerNetworkInterfacePrototypeIntf) *CreateBareMetalServerOptions {
-	_options.NetworkInterfaces = networkInterfaces
-	return _options
-}
-
-// SetResourceGroup : Allow user to set ResourceGroup
-func (_options *CreateBareMetalServerOptions) SetResourceGroup(resourceGroup ResourceGroupIdentityIntf) *CreateBareMetalServerOptions {
-	_options.ResourceGroup = resourceGroup
-	return _options
-}
-
-// SetTrustedPlatformModule : Allow user to set TrustedPlatformModule
-func (_options *CreateBareMetalServerOptions) SetTrustedPlatformModule(trustedPlatformModule *BareMetalServerTrustedPlatformModulePrototype) *CreateBareMetalServerOptions {
-	_options.TrustedPlatformModule = trustedPlatformModule
-	return _options
-}
-
-// SetVPC : Allow user to set VPC
-func (_options *CreateBareMetalServerOptions) SetVPC(vpc VPCIdentityIntf) *CreateBareMetalServerOptions {
-	_options.VPC = vpc
+// SetBareMetalServerPrototype : Allow user to set BareMetalServerPrototype
+func (_options *CreateBareMetalServerOptions) SetBareMetalServerPrototype(bareMetalServerPrototype BareMetalServerPrototypeIntf) *CreateBareMetalServerOptions {
+	_options.BareMetalServerPrototype = bareMetalServerPrototype
 	return _options
 }
 
@@ -29233,12 +32192,18 @@ type CreateFlowLogCollectorOptions struct {
 	// The Cloud Object Storage bucket where the collected flows will be logged.
 	// The bucket must exist and an IAM service authorization must grant
 	// `IBM Cloud Flow Logs` resources of `VPC Infrastructure Services` writer
-	// access to the bucket.
+	// access to the bucket. For more information, see [Creating a flow log
+	// collector](https://cloud.ibm.com/docs/vpc?topic=vpc-ordering-flow-log-collector).
 	StorageBucket LegacyCloudObjectStorageBucketIdentityIntf `json:"storage_bucket" validate:"required"`
 
-	// The target this collector will collect flow logs for. If the target is an instance,
-	// subnet, or VPC, flow logs will not be collected for any instance network interfaces within
-	// the target that are themselves the target of a more specific flow log collector.
+	// The target this collector will collect flow logs for.
+	//
+	// If the target is an instance, subnet, or VPC, flow logs will not be collected for any
+	// instance network attachments, virtual network interfaces or instance network interfaces
+	// within the target that are themselves the target of a more specific flow log collector.
+	//
+	// The target must not be a virtual network interface that is attached to a bare metal server
+	// network attachment or to a file share mount target.
 	Target FlowLogCollectorTargetPrototypeIntf `json:"target" validate:"required"`
 
 	// Indicates whether this collector will be active upon creation.
@@ -29855,6 +32820,59 @@ func (options *CreateInstanceGroupOptions) SetHeaders(param map[string]string) *
 	return options
 }
 
+// CreateInstanceNetworkAttachmentOptions : The CreateInstanceNetworkAttachment options.
+type CreateInstanceNetworkAttachmentOptions struct {
+	// The virtual server instance identifier.
+	InstanceID *string `json:"instance_id" validate:"required,ne="`
+
+	// A virtual network interface for the instance network attachment. This can be specified
+	// using an existing virtual network interface, or a prototype object for a new virtual
+	// network interface.
+	//
+	// If an existing virtual network interface is specified, `enable_infrastructure_nat` must be
+	// `true`.
+	VirtualNetworkInterface InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf `json:"virtual_network_interface" validate:"required"`
+
+	// The name for this network attachment. Names must be unique within the instance the network attachment resides in. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewCreateInstanceNetworkAttachmentOptions : Instantiate CreateInstanceNetworkAttachmentOptions
+func (*VpcV1) NewCreateInstanceNetworkAttachmentOptions(instanceID string, virtualNetworkInterface InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf) *CreateInstanceNetworkAttachmentOptions {
+	return &CreateInstanceNetworkAttachmentOptions{
+		InstanceID:              core.StringPtr(instanceID),
+		VirtualNetworkInterface: virtualNetworkInterface,
+	}
+}
+
+// SetInstanceID : Allow user to set InstanceID
+func (_options *CreateInstanceNetworkAttachmentOptions) SetInstanceID(instanceID string) *CreateInstanceNetworkAttachmentOptions {
+	_options.InstanceID = core.StringPtr(instanceID)
+	return _options
+}
+
+// SetVirtualNetworkInterface : Allow user to set VirtualNetworkInterface
+func (_options *CreateInstanceNetworkAttachmentOptions) SetVirtualNetworkInterface(virtualNetworkInterface InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf) *CreateInstanceNetworkAttachmentOptions {
+	_options.VirtualNetworkInterface = virtualNetworkInterface
+	return _options
+}
+
+// SetName : Allow user to set Name
+func (_options *CreateInstanceNetworkAttachmentOptions) SetName(name string) *CreateInstanceNetworkAttachmentOptions {
+	_options.Name = core.StringPtr(name)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *CreateInstanceNetworkAttachmentOptions) SetHeaders(param map[string]string) *CreateInstanceNetworkAttachmentOptions {
+	options.Headers = param
+	return options
+}
+
 // CreateInstanceNetworkInterfaceOptions : The CreateInstanceNetworkInterface options.
 type CreateInstanceNetworkInterfaceOptions struct {
 	// The virtual server instance identifier.
@@ -29863,7 +32881,12 @@ type CreateInstanceNetworkInterfaceOptions struct {
 	// The associated subnet.
 	Subnet SubnetIdentityIntf `json:"subnet" validate:"required"`
 
-	// Indicates whether source IP spoofing is allowed on this instance interface.
+	// Indicates whether source IP spoofing is allowed on this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
 	// The name for the instance network interface. The name must not be used by another network interface on the virtual
@@ -30673,9 +33696,6 @@ type CreateLoadBalancerOptions struct {
 	// Load balancers in the `network` family allow only one subnet to be specified.
 	Subnets []SubnetIdentityIntf `json:"subnets" validate:"required"`
 
-	// The datapath logging configuration for this load balancer.
-	Datapath *LoadBalancerLoggingDatapathPrototype `json:"datapath,omitempty"`
-
 	// The DNS configuration for this load balancer.
 	//
 	// If unspecified, DNS `A` records for this load balancer's `hostname` property will be added
@@ -30688,7 +33708,7 @@ type CreateLoadBalancerOptions struct {
 
 	// The logging configuration to use for this load balancer. See [VPC Datapath
 	// Logging](https://cloud.ibm.com/docs/vpc?topic=vpc-datapath-logging) on the logging
-	// format, fields and permitted values.
+	// format, fields and permitted values. If unspecified, `datapath.active` will be `false`.
 	//
 	// To activate logging, the load balancer profile must support the specified logging type.
 	Logging *LoadBalancerLoggingPrototype `json:"logging,omitempty"`
@@ -30740,12 +33760,6 @@ func (_options *CreateLoadBalancerOptions) SetIsPublic(isPublic bool) *CreateLoa
 // SetSubnets : Allow user to set Subnets
 func (_options *CreateLoadBalancerOptions) SetSubnets(subnets []SubnetIdentityIntf) *CreateLoadBalancerOptions {
 	_options.Subnets = subnets
-	return _options
-}
-
-// SetDatapath : Allow user to set Datapath
-func (_options *CreateLoadBalancerOptions) SetDatapath(datapath *LoadBalancerLoggingDatapathPrototype) *CreateLoadBalancerOptions {
-	_options.Datapath = datapath
 	return _options
 }
 
@@ -31459,6 +34473,34 @@ func (options *CreateSnapshotCloneOptions) SetHeaders(param map[string]string) *
 	return options
 }
 
+// CreateSnapshotConsistencyGroupOptions : The CreateSnapshotConsistencyGroup options.
+type CreateSnapshotConsistencyGroupOptions struct {
+	// The snapshot consistency group prototype object.
+	SnapshotConsistencyGroupPrototype SnapshotConsistencyGroupPrototypeIntf `json:"SnapshotConsistencyGroupPrototype" validate:"required"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewCreateSnapshotConsistencyGroupOptions : Instantiate CreateSnapshotConsistencyGroupOptions
+func (*VpcV1) NewCreateSnapshotConsistencyGroupOptions(snapshotConsistencyGroupPrototype SnapshotConsistencyGroupPrototypeIntf) *CreateSnapshotConsistencyGroupOptions {
+	return &CreateSnapshotConsistencyGroupOptions{
+		SnapshotConsistencyGroupPrototype: snapshotConsistencyGroupPrototype,
+	}
+}
+
+// SetSnapshotConsistencyGroupPrototype : Allow user to set SnapshotConsistencyGroupPrototype
+func (_options *CreateSnapshotConsistencyGroupOptions) SetSnapshotConsistencyGroupPrototype(snapshotConsistencyGroupPrototype SnapshotConsistencyGroupPrototypeIntf) *CreateSnapshotConsistencyGroupOptions {
+	_options.SnapshotConsistencyGroupPrototype = snapshotConsistencyGroupPrototype
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *CreateSnapshotConsistencyGroupOptions) SetHeaders(param map[string]string) *CreateSnapshotConsistencyGroupOptions {
+	options.Headers = param
+	return options
+}
+
 // CreateSnapshotOptions : The CreateSnapshot options.
 type CreateSnapshotOptions struct {
 	// The snapshot prototype object.
@@ -31536,8 +34578,9 @@ type CreateSubnetReservedIPOptions struct {
 
 	// The target to bind this reserved IP to.  The target must be in the same VPC.
 	//
-	// At present, only endpoint gateway targets are supported.  The endpoint gateway must
-	// not be already bound to a reserved IP in the subnet's zone.
+	// The following targets are supported:
+	// - An endpoint gateway not already bound to a reserved IP in the subnet's zone.
+	// - A virtual network interface.
 	//
 	// If unspecified, the reserved IP will be created unbound.
 	Target ReservedIPTargetPrototypeIntf `json:"target,omitempty"`
@@ -31585,6 +34628,136 @@ func (_options *CreateSubnetReservedIPOptions) SetTarget(target ReservedIPTarget
 
 // SetHeaders : Allow user to set Headers
 func (options *CreateSubnetReservedIPOptions) SetHeaders(param map[string]string) *CreateSubnetReservedIPOptions {
+	options.Headers = param
+	return options
+}
+
+// CreateVirtualNetworkInterfaceOptions : The CreateVirtualNetworkInterface options.
+type CreateVirtualNetworkInterfaceOptions struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted. Must be `false` if the virtual network interface is unbound.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// Additional IP addresses to bind to the virtual network interface. Each item may be either a reserved IP identity, or
+	// a reserved IP prototype object which will be used to create a new reserved IP. All IP addresses must be in the
+	// primary IP's subnet.
+	//
+	// If reserved IP identities are provided, the specified reserved IPs must be unbound.
+	//
+	// If reserved IP prototype objects with addresses are provided, the addresses must be available on the virtual network
+	// interface's subnet. For any prototype objects that do not specify an address, an available address on the subnet
+	// will be automatically selected and reserved.
+	Ips []VirtualNetworkInterfaceIPPrototypeIntf `json:"ips,omitempty"`
+
+	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
+	// VPC. If unspecified, the name will be a hyphenated list of randomly-selected words. Names beginning with `ibm-` are
+	// reserved for provider-owned resources, and are not allowed.
+	Name *string `json:"name,omitempty"`
+
+	// The primary IP address to bind to the virtual network interface. May be either a
+	// reserved IP identity, or a reserved IP prototype object which will be used to create a
+	// new reserved IP.
+	//
+	// If a reserved IP identity is provided, the specified reserved IP must be unbound.
+	//
+	// If a reserved IP prototype object with an address is provided, the address must be
+	// available on the virtual network interface's subnet. If no address is specified,
+	// an available address on the subnet will be automatically selected and reserved.
+	PrimaryIP VirtualNetworkInterfacePrimaryIPPrototypeIntf `json:"primary_ip,omitempty"`
+
+	// The resource group to use. If unspecified, the account's [default resource
+	// group](https://cloud.ibm.com/apidocs/resource-manager#introduction) will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The security groups to use for this virtual network interface. If unspecified, the default security group of the VPC
+	// for the subnet is used.
+	SecurityGroups []SecurityGroupIdentityIntf `json:"security_groups,omitempty"`
+
+	// The associated subnet. Required if `primary_ip` does not specify a reserved IP
+	// identity.
+	Subnet SubnetIdentityIntf `json:"subnet,omitempty"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewCreateVirtualNetworkInterfaceOptions : Instantiate CreateVirtualNetworkInterfaceOptions
+func (*VpcV1) NewCreateVirtualNetworkInterfaceOptions() *CreateVirtualNetworkInterfaceOptions {
+	return &CreateVirtualNetworkInterfaceOptions{}
+}
+
+// SetAllowIPSpoofing : Allow user to set AllowIPSpoofing
+func (_options *CreateVirtualNetworkInterfaceOptions) SetAllowIPSpoofing(allowIPSpoofing bool) *CreateVirtualNetworkInterfaceOptions {
+	_options.AllowIPSpoofing = core.BoolPtr(allowIPSpoofing)
+	return _options
+}
+
+// SetAutoDelete : Allow user to set AutoDelete
+func (_options *CreateVirtualNetworkInterfaceOptions) SetAutoDelete(autoDelete bool) *CreateVirtualNetworkInterfaceOptions {
+	_options.AutoDelete = core.BoolPtr(autoDelete)
+	return _options
+}
+
+// SetEnableInfrastructureNat : Allow user to set EnableInfrastructureNat
+func (_options *CreateVirtualNetworkInterfaceOptions) SetEnableInfrastructureNat(enableInfrastructureNat bool) *CreateVirtualNetworkInterfaceOptions {
+	_options.EnableInfrastructureNat = core.BoolPtr(enableInfrastructureNat)
+	return _options
+}
+
+// SetIps : Allow user to set Ips
+func (_options *CreateVirtualNetworkInterfaceOptions) SetIps(ips []VirtualNetworkInterfaceIPPrototypeIntf) *CreateVirtualNetworkInterfaceOptions {
+	_options.Ips = ips
+	return _options
+}
+
+// SetName : Allow user to set Name
+func (_options *CreateVirtualNetworkInterfaceOptions) SetName(name string) *CreateVirtualNetworkInterfaceOptions {
+	_options.Name = core.StringPtr(name)
+	return _options
+}
+
+// SetPrimaryIP : Allow user to set PrimaryIP
+func (_options *CreateVirtualNetworkInterfaceOptions) SetPrimaryIP(primaryIP VirtualNetworkInterfacePrimaryIPPrototypeIntf) *CreateVirtualNetworkInterfaceOptions {
+	_options.PrimaryIP = primaryIP
+	return _options
+}
+
+// SetResourceGroup : Allow user to set ResourceGroup
+func (_options *CreateVirtualNetworkInterfaceOptions) SetResourceGroup(resourceGroup ResourceGroupIdentityIntf) *CreateVirtualNetworkInterfaceOptions {
+	_options.ResourceGroup = resourceGroup
+	return _options
+}
+
+// SetSecurityGroups : Allow user to set SecurityGroups
+func (_options *CreateVirtualNetworkInterfaceOptions) SetSecurityGroups(securityGroups []SecurityGroupIdentityIntf) *CreateVirtualNetworkInterfaceOptions {
+	_options.SecurityGroups = securityGroups
+	return _options
+}
+
+// SetSubnet : Allow user to set Subnet
+func (_options *CreateVirtualNetworkInterfaceOptions) SetSubnet(subnet SubnetIdentityIntf) *CreateVirtualNetworkInterfaceOptions {
+	_options.Subnet = subnet
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *CreateVirtualNetworkInterfaceOptions) SetHeaders(param map[string]string) *CreateVirtualNetworkInterfaceOptions {
 	options.Headers = param
 	return options
 }
@@ -31855,6 +35028,13 @@ type CreateVPCRouteOptions struct {
 	// - `drop`: drop the packet.
 	Action *string `json:"action,omitempty"`
 
+	// Indicates whether this route will be advertised to the ingress sources specified by the `advertise_routes_to`
+	// routing table property.
+	//
+	// All routes in a routing table with the same `destination` and `zone` must have the same
+	// `advertise` value.
+	Advertise *bool `json:"advertise,omitempty"`
+
 	// The name for this route. The name must not be used by another route in the routing table. Names starting with `ibm-`
 	// are reserved for system-provided routes, and are not allowed. If unspecified, the name will be a hyphenated list of
 	// randomly-selected words.
@@ -31924,6 +35104,12 @@ func (_options *CreateVPCRouteOptions) SetAction(action string) *CreateVPCRouteO
 	return _options
 }
 
+// SetAdvertise : Allow user to set Advertise
+func (_options *CreateVPCRouteOptions) SetAdvertise(advertise bool) *CreateVPCRouteOptions {
+	_options.Advertise = core.BoolPtr(advertise)
+	return _options
+}
+
 // SetName : Allow user to set Name
 func (_options *CreateVPCRouteOptions) SetName(name string) *CreateVPCRouteOptions {
 	_options.Name = core.StringPtr(name)
@@ -31958,6 +35144,10 @@ type CreateVPCRoutingTableOptions struct {
 	// At present, only the `resource_type` filter is permitted, and only the `vpn_server` value is supported, but filter
 	// support is expected to expand in the future.
 	AcceptRoutesFrom []ResourceFilter `json:"accept_routes_from,omitempty"`
+
+	// The ingress sources to advertise routes to. Routes in the table with `advertise` enabled will be advertised to these
+	// sources.
+	AdvertiseRoutesTo []string `json:"advertise_routes_to,omitempty"`
 
 	// The name for this routing table. The name must not be used by another routing table in the VPC. If unspecified, the
 	// name will be a hyphenated list of randomly-selected words.
@@ -32016,6 +35206,16 @@ type CreateVPCRoutingTableOptions struct {
 	Headers map[string]string
 }
 
+// Constants associated with the CreateVPCRoutingTableOptions.AdvertiseRoutesTo property.
+// An ingress source that routes can be advertised to:
+//
+// - `direct_link` (requires `route_direct_link_ingress` be set to `true`)
+// - `transit_gateway` (requires `route_transit_gateway_ingress` be set to `true`).
+const (
+	CreateVPCRoutingTableOptionsAdvertiseRoutesToDirectLinkConst     = "direct_link"
+	CreateVPCRoutingTableOptionsAdvertiseRoutesToTransitGatewayConst = "transit_gateway"
+)
+
 // NewCreateVPCRoutingTableOptions : Instantiate CreateVPCRoutingTableOptions
 func (*VpcV1) NewCreateVPCRoutingTableOptions(vpcID string) *CreateVPCRoutingTableOptions {
 	return &CreateVPCRoutingTableOptions{
@@ -32032,6 +35232,12 @@ func (_options *CreateVPCRoutingTableOptions) SetVPCID(vpcID string) *CreateVPCR
 // SetAcceptRoutesFrom : Allow user to set AcceptRoutesFrom
 func (_options *CreateVPCRoutingTableOptions) SetAcceptRoutesFrom(acceptRoutesFrom []ResourceFilter) *CreateVPCRoutingTableOptions {
 	_options.AcceptRoutesFrom = acceptRoutesFrom
+	return _options
+}
+
+// SetAdvertiseRoutesTo : Allow user to set AdvertiseRoutesTo
+func (_options *CreateVPCRoutingTableOptions) SetAdvertiseRoutesTo(advertiseRoutesTo []string) *CreateVPCRoutingTableOptions {
+	_options.AdvertiseRoutesTo = advertiseRoutesTo
 	return _options
 }
 
@@ -32101,6 +35307,13 @@ type CreateVPCRoutingTableRouteOptions struct {
 	// - `deliver`: deliver the packet to the specified `next_hop`
 	// - `drop`: drop the packet.
 	Action *string `json:"action,omitempty"`
+
+	// Indicates whether this route will be advertised to the ingress sources specified by the `advertise_routes_to`
+	// routing table property.
+	//
+	// All routes in a routing table with the same `destination` and `zone` must have the same
+	// `advertise` value.
+	Advertise *bool `json:"advertise,omitempty"`
 
 	// The name for this route. The name must not be used by another route in the routing table. Names starting with `ibm-`
 	// are reserved for system-provided routes, and are not allowed. If unspecified, the name will be a hyphenated list of
@@ -32175,6 +35388,12 @@ func (_options *CreateVPCRoutingTableRouteOptions) SetZone(zone ZoneIdentityIntf
 // SetAction : Allow user to set Action
 func (_options *CreateVPCRoutingTableRouteOptions) SetAction(action string) *CreateVPCRoutingTableRouteOptions {
 	_options.Action = core.StringPtr(action)
+	return _options
+}
+
+// SetAdvertise : Allow user to set Advertise
+func (_options *CreateVPCRoutingTableRouteOptions) SetAdvertise(advertise bool) *CreateVPCRoutingTableRouteOptions {
+	_options.Advertise = core.BoolPtr(advertise)
 	return _options
 }
 
@@ -34575,6 +37794,14 @@ type DefaultRoutingTable struct {
 	// support is expected to expand in the future.
 	AcceptRoutesFrom []ResourceFilter `json:"accept_routes_from" validate:"required"`
 
+	// The ingress sources to advertise routes to. Routes in the table with `advertise` enabled will be advertised to these
+	// sources.
+	//
+	// The enumerated values for this property are expected to expand in the future. When processing this property, check
+	// for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
+	// unexpected property value was encountered.
+	AdvertiseRoutesTo []string `json:"advertise_routes_to" validate:"required"`
+
 	// The date and time that this routing table was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
@@ -34643,6 +37870,16 @@ type DefaultRoutingTable struct {
 	Subnets []SubnetReference `json:"subnets" validate:"required"`
 }
 
+// Constants associated with the DefaultRoutingTable.AdvertiseRoutesTo property.
+// An ingress source that routes can be advertised to:
+//
+// - `direct_link` (requires `route_direct_link_ingress` be set to `true`)
+// - `transit_gateway` (requires `route_transit_gateway_ingress` be set to `true`).
+const (
+	DefaultRoutingTableAdvertiseRoutesToDirectLinkConst     = "direct_link"
+	DefaultRoutingTableAdvertiseRoutesToTransitGatewayConst = "transit_gateway"
+)
+
 // Constants associated with the DefaultRoutingTable.LifecycleState property.
 // The lifecycle state of the routing table.
 const (
@@ -34665,6 +37902,10 @@ const (
 func UnmarshalDefaultRoutingTable(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(DefaultRoutingTable)
 	err = core.UnmarshalModel(m, "accept_routes_from", &obj.AcceptRoutesFrom, UnmarshalResourceFilter)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "advertise_routes_to", &obj.AdvertiseRoutesTo)
 	if err != nil {
 		return
 	}
@@ -34880,6 +38121,44 @@ func (_options *DeleteBackupPolicyPlanOptions) SetIfMatch(ifMatch string) *Delet
 
 // SetHeaders : Allow user to set Headers
 func (options *DeleteBackupPolicyPlanOptions) SetHeaders(param map[string]string) *DeleteBackupPolicyPlanOptions {
+	options.Headers = param
+	return options
+}
+
+// DeleteBareMetalServerNetworkAttachmentOptions : The DeleteBareMetalServerNetworkAttachment options.
+type DeleteBareMetalServerNetworkAttachmentOptions struct {
+	// The bare metal server identifier.
+	BareMetalServerID *string `json:"bare_metal_server_id" validate:"required,ne="`
+
+	// The bare metal server network attachment identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewDeleteBareMetalServerNetworkAttachmentOptions : Instantiate DeleteBareMetalServerNetworkAttachmentOptions
+func (*VpcV1) NewDeleteBareMetalServerNetworkAttachmentOptions(bareMetalServerID string, id string) *DeleteBareMetalServerNetworkAttachmentOptions {
+	return &DeleteBareMetalServerNetworkAttachmentOptions{
+		BareMetalServerID: core.StringPtr(bareMetalServerID),
+		ID:                core.StringPtr(id),
+	}
+}
+
+// SetBareMetalServerID : Allow user to set BareMetalServerID
+func (_options *DeleteBareMetalServerNetworkAttachmentOptions) SetBareMetalServerID(bareMetalServerID string) *DeleteBareMetalServerNetworkAttachmentOptions {
+	_options.BareMetalServerID = core.StringPtr(bareMetalServerID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *DeleteBareMetalServerNetworkAttachmentOptions) SetID(id string) *DeleteBareMetalServerNetworkAttachmentOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *DeleteBareMetalServerNetworkAttachmentOptions) SetHeaders(param map[string]string) *DeleteBareMetalServerNetworkAttachmentOptions {
 	options.Headers = param
 	return options
 }
@@ -35436,6 +38715,44 @@ func (_options *DeleteInstanceGroupOptions) SetID(id string) *DeleteInstanceGrou
 
 // SetHeaders : Allow user to set Headers
 func (options *DeleteInstanceGroupOptions) SetHeaders(param map[string]string) *DeleteInstanceGroupOptions {
+	options.Headers = param
+	return options
+}
+
+// DeleteInstanceNetworkAttachmentOptions : The DeleteInstanceNetworkAttachment options.
+type DeleteInstanceNetworkAttachmentOptions struct {
+	// The virtual server instance identifier.
+	InstanceID *string `json:"instance_id" validate:"required,ne="`
+
+	// The instance network attachment identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewDeleteInstanceNetworkAttachmentOptions : Instantiate DeleteInstanceNetworkAttachmentOptions
+func (*VpcV1) NewDeleteInstanceNetworkAttachmentOptions(instanceID string, id string) *DeleteInstanceNetworkAttachmentOptions {
+	return &DeleteInstanceNetworkAttachmentOptions{
+		InstanceID: core.StringPtr(instanceID),
+		ID:         core.StringPtr(id),
+	}
+}
+
+// SetInstanceID : Allow user to set InstanceID
+func (_options *DeleteInstanceNetworkAttachmentOptions) SetInstanceID(instanceID string) *DeleteInstanceNetworkAttachmentOptions {
+	_options.InstanceID = core.StringPtr(instanceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *DeleteInstanceNetworkAttachmentOptions) SetID(id string) *DeleteInstanceNetworkAttachmentOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *DeleteInstanceNetworkAttachmentOptions) SetHeaders(param map[string]string) *DeleteInstanceNetworkAttachmentOptions {
 	options.Headers = param
 	return options
 }
@@ -36262,6 +39579,34 @@ func (options *DeleteSnapshotCloneOptions) SetHeaders(param map[string]string) *
 	return options
 }
 
+// DeleteSnapshotConsistencyGroupOptions : The DeleteSnapshotConsistencyGroup options.
+type DeleteSnapshotConsistencyGroupOptions struct {
+	// The snapshot consistency group identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewDeleteSnapshotConsistencyGroupOptions : Instantiate DeleteSnapshotConsistencyGroupOptions
+func (*VpcV1) NewDeleteSnapshotConsistencyGroupOptions(id string) *DeleteSnapshotConsistencyGroupOptions {
+	return &DeleteSnapshotConsistencyGroupOptions{
+		ID: core.StringPtr(id),
+	}
+}
+
+// SetID : Allow user to set ID
+func (_options *DeleteSnapshotConsistencyGroupOptions) SetID(id string) *DeleteSnapshotConsistencyGroupOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *DeleteSnapshotConsistencyGroupOptions) SetHeaders(param map[string]string) *DeleteSnapshotConsistencyGroupOptions {
+	options.Headers = param
+	return options
+}
+
 // DeleteSnapshotOptions : The DeleteSnapshot options.
 type DeleteSnapshotOptions struct {
 	// The snapshot identifier.
@@ -36389,6 +39734,34 @@ func (_options *DeleteSubnetReservedIPOptions) SetID(id string) *DeleteSubnetRes
 
 // SetHeaders : Allow user to set Headers
 func (options *DeleteSubnetReservedIPOptions) SetHeaders(param map[string]string) *DeleteSubnetReservedIPOptions {
+	options.Headers = param
+	return options
+}
+
+// DeleteVirtualNetworkInterfacesOptions : The DeleteVirtualNetworkInterfaces options.
+type DeleteVirtualNetworkInterfacesOptions struct {
+	// The virtual network interface identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewDeleteVirtualNetworkInterfacesOptions : Instantiate DeleteVirtualNetworkInterfacesOptions
+func (*VpcV1) NewDeleteVirtualNetworkInterfacesOptions(id string) *DeleteVirtualNetworkInterfacesOptions {
+	return &DeleteVirtualNetworkInterfacesOptions{
+		ID: core.StringPtr(id),
+	}
+}
+
+// SetID : Allow user to set ID
+func (_options *DeleteVirtualNetworkInterfacesOptions) SetID(id string) *DeleteVirtualNetworkInterfacesOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *DeleteVirtualNetworkInterfacesOptions) SetHeaders(param map[string]string) *DeleteVirtualNetworkInterfacesOptions {
 	options.Headers = param
 	return options
 }
@@ -36999,6 +40372,10 @@ type EndpointGateway struct {
 	// The reserved IPs bound to this endpoint gateway.
 	Ips []ReservedIPReference `json:"ips" validate:"required"`
 
+	// The reasons for the current `lifecycle_state` (if any):
+	// - `dns_resolution_binding_pending`: the DNS resolution binding is being set up.
+	LifecycleReasons []EndpointGatewayLifecycleReason `json:"lifecycle_reasons" validate:"required"`
+
 	// The lifecycle state of the endpoint gateway.
 	LifecycleState *string `json:"lifecycle_state" validate:"required"`
 
@@ -37089,6 +40466,10 @@ func UnmarshalEndpointGateway(m map[string]json.RawMessage, result interface{}) 
 		return
 	}
 	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "lifecycle_reasons", &obj.LifecycleReasons, UnmarshalEndpointGatewayLifecycleReason)
 	if err != nil {
 		return
 	}
@@ -37217,6 +40598,44 @@ type EndpointGatewayCollectionNext struct {
 func UnmarshalEndpointGatewayCollectionNext(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(EndpointGatewayCollectionNext)
 	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// EndpointGatewayLifecycleReason : EndpointGatewayLifecycleReason struct
+type EndpointGatewayLifecycleReason struct {
+	// A snake case string succinctly identifying the reason for this lifecycle state.
+	Code *string `json:"code" validate:"required"`
+
+	// An explanation of the reason for this lifecycle state.
+	Message *string `json:"message" validate:"required"`
+
+	// Link to documentation about the reason for this lifecycle state.
+	MoreInfo *string `json:"more_info,omitempty"`
+}
+
+// Constants associated with the EndpointGatewayLifecycleReason.Code property.
+// A snake case string succinctly identifying the reason for this lifecycle state.
+const (
+	EndpointGatewayLifecycleReasonCodeDnsResolutionBindingPendingConst = "dns_resolution_binding_pending"
+	EndpointGatewayLifecycleReasonCodeResourceSuspendedByProviderConst = "resource_suspended_by_provider"
+)
+
+// UnmarshalEndpointGatewayLifecycleReason unmarshals an instance of EndpointGatewayLifecycleReason from the specified map of raw messages.
+func UnmarshalEndpointGatewayLifecycleReason(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(EndpointGatewayLifecycleReason)
+	err = core.UnmarshalPrimitive(m, "code", &obj.Code)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "message", &obj.Message)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "more_info", &obj.MoreInfo)
 	if err != nil {
 		return
 	}
@@ -37548,8 +40967,8 @@ type FailoverShareOptions struct {
 	// - `fail`: Fail the operation, resulting in the replication relationship being unchanged.
 	// - `split`: Split the replica from its source, resulting in two individual read-write
 	//     file shares. Because the final sync was not completed, the replica may be
-	//     out-of-date. This is useful in disaster recovery scenarios where the source is known
-	//     to be unreachable.
+	//     out-of-date. This occurs in disaster recovery scenarios where the source is known to
+	//     be unreachable.
 	FallbackPolicy *string `json:"fallback_policy,omitempty"`
 
 	// The failover timeout in seconds.
@@ -37566,8 +40985,8 @@ type FailoverShareOptions struct {
 //   - `fail`: Fail the operation, resulting in the replication relationship being unchanged.
 //   - `split`: Split the replica from its source, resulting in two individual read-write
 //     file shares. Because the final sync was not completed, the replica may be
-//     out-of-date. This is useful in disaster recovery scenarios where the source is known
-//     to be unreachable.
+//     out-of-date. This occurs in disaster recovery scenarios where the source is known to
+//     be unreachable.
 const (
 	FailoverShareOptionsFallbackPolicyFailConst  = "fail"
 	FailoverShareOptionsFallbackPolicySplitConst = "split"
@@ -37785,6 +41204,98 @@ func UnmarshalFloatingIPCollectionNext(m map[string]json.RawMessage, result inte
 	return
 }
 
+// FloatingIPCollectionVirtualNetworkInterfaceContext : FloatingIPCollectionVirtualNetworkInterfaceContext struct
+type FloatingIPCollectionVirtualNetworkInterfaceContext struct {
+	// A link to the first page of resources.
+	First *FloatingIPCollectionVirtualNetworkInterfaceContextFirst `json:"first" validate:"required"`
+
+	// Collection of floating IPs bound to the virtual network interface specified by the identifier in the URL.
+	FloatingIps []FloatingIPReference `json:"floating_ips" validate:"required"`
+
+	// The maximum number of resources that can be returned by the request.
+	Limit *int64 `json:"limit" validate:"required"`
+
+	// A link to the next page of resources. This property is present for all pages
+	// except the last page.
+	Next *FloatingIPCollectionVirtualNetworkInterfaceContextNext `json:"next,omitempty"`
+
+	// The total number of resources across all pages.
+	TotalCount *int64 `json:"total_count" validate:"required"`
+}
+
+// UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContext unmarshals an instance of FloatingIPCollectionVirtualNetworkInterfaceContext from the specified map of raw messages.
+func UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPCollectionVirtualNetworkInterfaceContext)
+	err = core.UnmarshalModel(m, "first", &obj.First, UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContextFirst)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "floating_ips", &obj.FloatingIps, UnmarshalFloatingIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "limit", &obj.Limit)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "next", &obj.Next, UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContextNext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_count", &obj.TotalCount)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// Retrieve the value to be passed to a request to access the next page of results
+func (resp *FloatingIPCollectionVirtualNetworkInterfaceContext) GetNextStart() (*string, error) {
+	if core.IsNil(resp.Next) {
+		return nil, nil
+	}
+	start, err := core.GetQueryParam(resp.Next.Href, "start")
+	if err != nil || start == nil {
+		return nil, err
+	}
+	return start, nil
+}
+
+// FloatingIPCollectionVirtualNetworkInterfaceContextFirst : A link to the first page of resources.
+type FloatingIPCollectionVirtualNetworkInterfaceContextFirst struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContextFirst unmarshals an instance of FloatingIPCollectionVirtualNetworkInterfaceContextFirst from the specified map of raw messages.
+func UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContextFirst(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPCollectionVirtualNetworkInterfaceContextFirst)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FloatingIPCollectionVirtualNetworkInterfaceContextNext : A link to the next page of resources. This property is present for all pages except the last page.
+type FloatingIPCollectionVirtualNetworkInterfaceContextNext struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContextNext unmarshals an instance of FloatingIPCollectionVirtualNetworkInterfaceContextNext from the specified map of raw messages.
+func UnmarshalFloatingIPCollectionVirtualNetworkInterfaceContextNext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPCollectionVirtualNetworkInterfaceContextNext)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FloatingIPPatch : FloatingIPPatch struct
 type FloatingIPPatch struct {
 	// The name for this floating IP. The name must not be used by another floating IP in the region.
@@ -37797,7 +41308,10 @@ type FloatingIPPatch struct {
 	// resource is:
 	//
 	// - an instance network interface
-	// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`.
+	// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`
+	// - a virtual network interface with `enable_infrastructure_nat` set to `true`
+	//
+	// Specify `null` to remove an existing binding.
 	Target FloatingIPTargetPatchIntf `json:"target,omitempty"`
 }
 
@@ -37848,7 +41362,8 @@ type FloatingIPPrototype struct {
 	// resource is:
 	//
 	// - an instance network interface
-	// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`.
+	// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`
+	// - a virtual network interface with `enable_infrastructure_nat` set to `true`.
 	Target FloatingIPTargetPrototypeIntf `json:"target,omitempty"`
 }
 
@@ -37959,15 +41474,25 @@ func UnmarshalFloatingIPReferenceDeleted(m map[string]json.RawMessage, result in
 // - FloatingIPTargetNetworkInterfaceReference
 // - FloatingIPTargetBareMetalServerNetworkInterfaceReference
 // - FloatingIPTargetPublicGatewayReference
+// - FloatingIPTargetVirtualNetworkInterfaceReference
 type FloatingIPTarget struct {
 	// If present, this property indicates the referenced resource has been deleted, and provides
 	// some supplementary information.
 	Deleted *NetworkInterfaceReferenceDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The name for this instance network interface.
@@ -37980,6 +41505,9 @@ type FloatingIPTarget struct {
 
 	// The CRN for this public gateway.
 	CRN *string `json:"crn,omitempty"`
+
+	// The associated subnet.
+	Subnet *SubnetReference `json:"subnet,omitempty"`
 }
 
 // Constants associated with the FloatingIPTarget.ResourceType property.
@@ -38027,6 +41555,10 @@ func UnmarshalFloatingIPTarget(m map[string]json.RawMessage, result interface{})
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
@@ -38037,16 +41569,32 @@ func UnmarshalFloatingIPTarget(m map[string]json.RawMessage, result interface{})
 // The target resource must not already have a floating IP bound to it if the target resource is:
 //
 // - an instance network interface
-// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`.
+// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`
+// - a virtual network interface with `enable_infrastructure_nat` set to `true`
+//
+// Specify `null` to remove an existing binding.
 // Models which "extend" this model:
 // - FloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentity
 // - FloatingIPTargetPatchNetworkInterfaceIdentity
+// - FloatingIPTargetPatchVirtualNetworkInterfaceIdentity
 type FloatingIPTargetPatch struct {
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
 }
 
 func (*FloatingIPTargetPatch) isaFloatingIPTargetPatch() bool {
@@ -38068,6 +41616,10 @@ func UnmarshalFloatingIPTargetPatch(m map[string]json.RawMessage, result interfa
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
@@ -38077,16 +41629,30 @@ func UnmarshalFloatingIPTargetPatch(m map[string]json.RawMessage, result interfa
 // The target resource must not already have a floating IP bound to it if the target resource is:
 //
 // - an instance network interface
-// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`.
+// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`
+// - a virtual network interface with `enable_infrastructure_nat` set to `true`.
 // Models which "extend" this model:
 // - FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentity
 // - FloatingIPTargetPrototypeNetworkInterfaceIdentity
+// - FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity
 type FloatingIPTargetPrototype struct {
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
 }
 
 func (*FloatingIPTargetPrototype) isaFloatingIPTargetPrototype() bool {
@@ -38105,6 +41671,10 @@ func UnmarshalFloatingIPTargetPrototype(m map[string]json.RawMessage, result int
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
 	if err != nil {
 		return
 	}
@@ -38159,21 +41729,29 @@ type FlowLogCollector struct {
 	// The resource group for this flow log collector.
 	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
 
-	// The Cloud Object Storage bucket where the collected flows are logged.
+	// The Cloud Object Storage bucket where the collected flows are logged. For more
+	// information, see [Viewing flow log
+	// objects](https://cloud.ibm.com/docs/vpc?topic=vpc-fl-analyze).
 	StorageBucket *LegacyCloudObjectStorageBucketReference `json:"storage_bucket" validate:"required"`
 
 	// The target this collector is collecting flow logs for.
+	// - If the target is an instance network attachment, flow logs will be collected
+	//   for that instance network attachment.
 	// - If the target is an instance network interface, flow logs will be collected
 	//   for that instance network interface.
+	// - If the target is a virtual network interface, flow logs will be collected for the
+	//   the virtual network interface's `target` resource if the resource is:
+	//   - an instance network attachment
 	// - If the target is a virtual server instance, flow logs will be collected
-	//   for all network interfaces on that instance.
+	//   for all network attachments or network interfaces on that instance.
 	// - If the target is a subnet, flow logs will be collected
-	//   for all instance network interfaces attached to that subnet.
-	// - If the target is a VPC, flow logs will be collected for instance network interfaces
-	//   attached to all subnets within that VPC.
+	//   for all instance network interfaces and virtual network interfaces
+	//   attached to that subnet.
+	// - If the target is a VPC, flow logs will be collected for all instance network
+	//   interfaces and virtual network interfaces  attached to all subnets within that VPC.
 	// If the target is an instance, subnet, or VPC, flow logs will not be collected
-	// for any instance network interfaces within the target that are themselves the target of
-	// a more specific flow log collector.
+	// for any instance network attachments or instance network interfaces within the target
+	// that are themselves the target of a more specific flow log collector.
 	Target FlowLogCollectorTargetIntf `json:"target" validate:"required"`
 
 	// The VPC this flow log collector resides in.
@@ -38375,31 +41953,48 @@ func (flowLogCollectorPatch *FlowLogCollectorPatch) AsPatch() (_patch map[string
 }
 
 // FlowLogCollectorTarget : The target this collector is collecting flow logs for.
+//   - If the target is an instance network attachment, flow logs will be collected
+//     for that instance network attachment.
 //   - If the target is an instance network interface, flow logs will be collected
 //     for that instance network interface.
+//   - If the target is a virtual network interface, flow logs will be collected for the
+//     the virtual network interface's `target` resource if the resource is:
+//   - an instance network attachment
 //   - If the target is a virtual server instance, flow logs will be collected
-//     for all network interfaces on that instance.
+//     for all network attachments or network interfaces on that instance.
 //   - If the target is a subnet, flow logs will be collected
-//     for all instance network interfaces attached to that subnet.
-//   - If the target is a VPC, flow logs will be collected for instance network interfaces
-//     attached to all subnets within that VPC. If the target is an instance, subnet, or VPC, flow logs will not be
+//     for all instance network interfaces and virtual network interfaces
+//     attached to that subnet.
+//   - If the target is a VPC, flow logs will be collected for all instance network
+//     interfaces and virtual network interfaces  attached to all subnets within that VPC. If the target is an instance,
 //
-// collected for any instance network interfaces within the target that are themselves the target of a more specific
-// flow log collector.
+// subnet, or VPC, flow logs will not be collected for any instance network attachments or instance network interfaces
+// within the target that are themselves the target of a more specific flow log collector.
 // Models which "extend" this model:
 // - FlowLogCollectorTargetNetworkInterfaceReferenceTargetContext
 // - FlowLogCollectorTargetInstanceReference
 // - FlowLogCollectorTargetSubnetReference
 // - FlowLogCollectorTargetVPCReference
+// - FlowLogCollectorTargetInstanceNetworkAttachmentReference
+// - FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext
 type FlowLogCollectorTarget struct {
 	// If present, this property indicates the referenced resource has been deleted, and provides
 	// some supplementary information.
 	Deleted *NetworkInterfaceReferenceTargetContextDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The name for this instance network interface.
@@ -38410,6 +42005,13 @@ type FlowLogCollectorTarget struct {
 
 	// The CRN for this virtual server instance.
 	CRN *string `json:"crn,omitempty"`
+
+	// The primary IP address of the virtual network interface for the instance network
+	// attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip,omitempty"`
+
+	// The subnet of the virtual network interface for the instance network attachment.
+	Subnet *SubnetReference `json:"subnet,omitempty"`
 }
 
 // Constants associated with the FlowLogCollectorTarget.ResourceType property.
@@ -38453,23 +42055,47 @@ func UnmarshalFlowLogCollectorTarget(m map[string]json.RawMessage, result interf
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
-// FlowLogCollectorTargetPrototype : The target this collector will collect flow logs for. If the target is an instance, subnet, or VPC, flow logs will
-// not be collected for any instance network interfaces within the target that are themselves the target of a more
+// FlowLogCollectorTargetPrototype : The target this collector will collect flow logs for.
+//
+// If the target is an instance, subnet, or VPC, flow logs will not be collected for any instance network attachments,
+// virtual network interfaces or instance network interfaces within the target that are themselves the target of a more
 // specific flow log collector.
+//
+// The target must not be a virtual network interface that is attached to a bare metal server network attachment or to a
+// file share mount target.
 // Models which "extend" this model:
 // - FlowLogCollectorTargetPrototypeNetworkInterfaceIdentity
 // - FlowLogCollectorTargetPrototypeInstanceIdentity
 // - FlowLogCollectorTargetPrototypeSubnetIdentity
 // - FlowLogCollectorTargetPrototypeVPCIdentity
+// - FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity
+// - FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity
 type FlowLogCollectorTargetPrototype struct {
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 
 	// The CRN for this virtual server instance.
@@ -38687,6 +42313,44 @@ func (_options *GetBareMetalServerInitializationOptions) SetID(id string) *GetBa
 
 // SetHeaders : Allow user to set Headers
 func (options *GetBareMetalServerInitializationOptions) SetHeaders(param map[string]string) *GetBareMetalServerInitializationOptions {
+	options.Headers = param
+	return options
+}
+
+// GetBareMetalServerNetworkAttachmentOptions : The GetBareMetalServerNetworkAttachment options.
+type GetBareMetalServerNetworkAttachmentOptions struct {
+	// The bare metal server identifier.
+	BareMetalServerID *string `json:"bare_metal_server_id" validate:"required,ne="`
+
+	// The bare metal server network attachment identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewGetBareMetalServerNetworkAttachmentOptions : Instantiate GetBareMetalServerNetworkAttachmentOptions
+func (*VpcV1) NewGetBareMetalServerNetworkAttachmentOptions(bareMetalServerID string, id string) *GetBareMetalServerNetworkAttachmentOptions {
+	return &GetBareMetalServerNetworkAttachmentOptions{
+		BareMetalServerID: core.StringPtr(bareMetalServerID),
+		ID:                core.StringPtr(id),
+	}
+}
+
+// SetBareMetalServerID : Allow user to set BareMetalServerID
+func (_options *GetBareMetalServerNetworkAttachmentOptions) SetBareMetalServerID(bareMetalServerID string) *GetBareMetalServerNetworkAttachmentOptions {
+	_options.BareMetalServerID = core.StringPtr(bareMetalServerID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *GetBareMetalServerNetworkAttachmentOptions) SetID(id string) *GetBareMetalServerNetworkAttachmentOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *GetBareMetalServerNetworkAttachmentOptions) SetHeaders(param map[string]string) *GetBareMetalServerNetworkAttachmentOptions {
 	options.Headers = param
 	return options
 }
@@ -39485,6 +43149,44 @@ func (options *GetInstanceInitializationOptions) SetHeaders(param map[string]str
 	return options
 }
 
+// GetInstanceNetworkAttachmentOptions : The GetInstanceNetworkAttachment options.
+type GetInstanceNetworkAttachmentOptions struct {
+	// The virtual server instance identifier.
+	InstanceID *string `json:"instance_id" validate:"required,ne="`
+
+	// The instance network attachment identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewGetInstanceNetworkAttachmentOptions : Instantiate GetInstanceNetworkAttachmentOptions
+func (*VpcV1) NewGetInstanceNetworkAttachmentOptions(instanceID string, id string) *GetInstanceNetworkAttachmentOptions {
+	return &GetInstanceNetworkAttachmentOptions{
+		InstanceID: core.StringPtr(instanceID),
+		ID:         core.StringPtr(id),
+	}
+}
+
+// SetInstanceID : Allow user to set InstanceID
+func (_options *GetInstanceNetworkAttachmentOptions) SetInstanceID(instanceID string) *GetInstanceNetworkAttachmentOptions {
+	_options.InstanceID = core.StringPtr(instanceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *GetInstanceNetworkAttachmentOptions) SetID(id string) *GetInstanceNetworkAttachmentOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *GetInstanceNetworkAttachmentOptions) SetHeaders(param map[string]string) *GetInstanceNetworkAttachmentOptions {
+	options.Headers = param
+	return options
+}
+
 // GetInstanceNetworkInterfaceFloatingIPOptions : The GetInstanceNetworkInterfaceFloatingIP options.
 type GetInstanceNetworkInterfaceFloatingIPOptions struct {
 	// The virtual server instance identifier.
@@ -40177,6 +43879,44 @@ func (options *GetNetworkACLRuleOptions) SetHeaders(param map[string]string) *Ge
 	return options
 }
 
+// GetNetworkInterfaceFloatingIPOptions : The GetNetworkInterfaceFloatingIP options.
+type GetNetworkInterfaceFloatingIPOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// The floating IP identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewGetNetworkInterfaceFloatingIPOptions : Instantiate GetNetworkInterfaceFloatingIPOptions
+func (*VpcV1) NewGetNetworkInterfaceFloatingIPOptions(virtualNetworkInterfaceID string, id string) *GetNetworkInterfaceFloatingIPOptions {
+	return &GetNetworkInterfaceFloatingIPOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+		ID:                        core.StringPtr(id),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *GetNetworkInterfaceFloatingIPOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *GetNetworkInterfaceFloatingIPOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *GetNetworkInterfaceFloatingIPOptions) SetID(id string) *GetNetworkInterfaceFloatingIPOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *GetNetworkInterfaceFloatingIPOptions) SetHeaders(param map[string]string) *GetNetworkInterfaceFloatingIPOptions {
+	options.Headers = param
+	return options
+}
+
 // GetOperatingSystemOptions : The GetOperatingSystem options.
 type GetOperatingSystemOptions struct {
 	// The operating system name.
@@ -40591,6 +44331,34 @@ func (options *GetSnapshotCloneOptions) SetHeaders(param map[string]string) *Get
 	return options
 }
 
+// GetSnapshotConsistencyGroupOptions : The GetSnapshotConsistencyGroup options.
+type GetSnapshotConsistencyGroupOptions struct {
+	// The snapshot consistency group identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewGetSnapshotConsistencyGroupOptions : Instantiate GetSnapshotConsistencyGroupOptions
+func (*VpcV1) NewGetSnapshotConsistencyGroupOptions(id string) *GetSnapshotConsistencyGroupOptions {
+	return &GetSnapshotConsistencyGroupOptions{
+		ID: core.StringPtr(id),
+	}
+}
+
+// SetID : Allow user to set ID
+func (_options *GetSnapshotConsistencyGroupOptions) SetID(id string) *GetSnapshotConsistencyGroupOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *GetSnapshotConsistencyGroupOptions) SetHeaders(param map[string]string) *GetSnapshotConsistencyGroupOptions {
+	options.Headers = param
+	return options
+}
+
 // GetSnapshotOptions : The GetSnapshot options.
 type GetSnapshotOptions struct {
 	// The snapshot identifier.
@@ -40765,6 +44533,44 @@ func (_options *GetSubnetRoutingTableOptions) SetID(id string) *GetSubnetRouting
 
 // SetHeaders : Allow user to set Headers
 func (options *GetSubnetRoutingTableOptions) SetHeaders(param map[string]string) *GetSubnetRoutingTableOptions {
+	options.Headers = param
+	return options
+}
+
+// GetVirtualNetworkInterfaceIPOptions : The GetVirtualNetworkInterfaceIP options.
+type GetVirtualNetworkInterfaceIPOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// The reserved IP identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewGetVirtualNetworkInterfaceIPOptions : Instantiate GetVirtualNetworkInterfaceIPOptions
+func (*VpcV1) NewGetVirtualNetworkInterfaceIPOptions(virtualNetworkInterfaceID string, id string) *GetVirtualNetworkInterfaceIPOptions {
+	return &GetVirtualNetworkInterfaceIPOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+		ID:                        core.StringPtr(id),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *GetVirtualNetworkInterfaceIPOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *GetVirtualNetworkInterfaceIPOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *GetVirtualNetworkInterfaceIPOptions) SetID(id string) *GetVirtualNetworkInterfaceIPOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *GetVirtualNetworkInterfaceIPOptions) SetHeaders(param map[string]string) *GetVirtualNetworkInterfaceIPOptions {
 	options.Headers = param
 	return options
 }
@@ -43301,8 +47107,8 @@ type Instance struct {
 	// The availability policy for this virtual server instance.
 	AvailabilityPolicy *InstanceAvailabilityPolicy `json:"availability_policy" validate:"required"`
 
-	// The total bandwidth (in megabits per second) shared across the instance network interfaces and storage volumes of
-	// virtual server instance.
+	// The total bandwidth (in megabits per second) shared across the instance network attachments or instance network
+	// interfaces and storage volumes of the virtual server instance.
 	Bandwidth *int64 `json:"bandwidth" validate:"required"`
 
 	// Boot volume attachment.
@@ -43355,7 +47161,14 @@ type Instance struct {
 	// The name for this virtual server instance. The name is unique across all virtual server instances in the region.
 	Name *string `json:"name" validate:"required"`
 
+	// The network attachments for this virtual server instance, including the primary network attachment.
+	NetworkAttachments []InstanceNetworkAttachmentReference `json:"network_attachments" validate:"required"`
+
 	// The network interfaces for this instance, including the primary network interface.
+	//
+	// If this instance has network attachments, each network interface is a [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network attachment
+	// and its attached virtual network interface.
 	NetworkInterfaces []NetworkInterfaceInstanceContextReference `json:"network_interfaces" validate:"required"`
 
 	// The number of NUMA nodes this virtual server instance is provisioned on.
@@ -43366,7 +47179,15 @@ type Instance struct {
 	// The placement restrictions for the virtual server instance.
 	PlacementTarget InstancePlacementTargetIntf `json:"placement_target,omitempty"`
 
+	// The primary network attachment for this virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentReference `json:"primary_network_attachment,omitempty"`
+
 	// The primary network interface for this virtual server instance.
+	//
+	// If this instance has network attachments, this primary network interface is a
+	// [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients)
+	// of the primary network attachment and its attached virtual network interface.
 	PrimaryNetworkInterface *NetworkInterfaceInstanceContextReference `json:"primary_network_interface" validate:"required"`
 
 	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) for this virtual
@@ -43396,7 +47217,8 @@ type Instance struct {
 	// unexpected reason code was encountered.
 	StatusReasons []InstanceStatusReason `json:"status_reasons" validate:"required"`
 
-	// The amount of bandwidth (in megabits per second) allocated exclusively to instance network interfaces.
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance network attachments or instance
+	// network interfaces.
 	TotalNetworkBandwidth *int64 `json:"total_network_bandwidth" validate:"required"`
 
 	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
@@ -43523,6 +47345,10 @@ func UnmarshalInstance(m map[string]json.RawMessage, result interface{}) (err er
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentReference)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfaceInstanceContextReference)
 	if err != nil {
 		return
@@ -43532,6 +47358,10 @@ func UnmarshalInstance(m map[string]json.RawMessage, result interface{}) (err er
 		return
 	}
 	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTarget)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentReference)
 	if err != nil {
 		return
 	}
@@ -46492,6 +50322,428 @@ func UnmarshalInstanceMetadataServicePrototype(m map[string]json.RawMessage, res
 	return
 }
 
+// InstanceNetworkAttachment : InstanceNetworkAttachment struct
+type InstanceNetworkAttachment struct {
+	// The date and time that the instance network attachment was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The URL for this instance network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The lifecycle state of the instance network attachment.
+	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The name for this instance network attachment. The name is unique across all network attachments for the instance.
+	Name *string `json:"name" validate:"required"`
+
+	// The port speed for this instance network attachment in Mbps.
+	PortSpeed *int64 `json:"port_speed" validate:"required"`
+
+	// The primary IP address of the virtual network interface for the instance network
+	// attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The subnet of the virtual network interface for the instance network attachment.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+
+	// The instance network attachment type.
+	Type *string `json:"type" validate:"required"`
+
+	// The virtual network interface for this instance network attachment.
+	VirtualNetworkInterface *VirtualNetworkInterfaceReferenceAttachmentContext `json:"virtual_network_interface" validate:"required"`
+}
+
+// Constants associated with the InstanceNetworkAttachment.LifecycleState property.
+// The lifecycle state of the instance network attachment.
+const (
+	InstanceNetworkAttachmentLifecycleStateDeletingConst  = "deleting"
+	InstanceNetworkAttachmentLifecycleStateFailedConst    = "failed"
+	InstanceNetworkAttachmentLifecycleStatePendingConst   = "pending"
+	InstanceNetworkAttachmentLifecycleStateStableConst    = "stable"
+	InstanceNetworkAttachmentLifecycleStateSuspendedConst = "suspended"
+	InstanceNetworkAttachmentLifecycleStateUpdatingConst  = "updating"
+	InstanceNetworkAttachmentLifecycleStateWaitingConst   = "waiting"
+)
+
+// Constants associated with the InstanceNetworkAttachment.ResourceType property.
+// The resource type.
+const (
+	InstanceNetworkAttachmentResourceTypeInstanceNetworkAttachmentConst = "instance_network_attachment"
+)
+
+// Constants associated with the InstanceNetworkAttachment.Type property.
+// The instance network attachment type.
+const (
+	InstanceNetworkAttachmentTypePrimaryConst   = "primary"
+	InstanceNetworkAttachmentTypeSecondaryConst = "secondary"
+)
+
+// UnmarshalInstanceNetworkAttachment unmarshals an instance of InstanceNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachment)
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "port_speed", &obj.PortSpeed)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalVirtualNetworkInterfaceReferenceAttachmentContext)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentCollection : InstanceNetworkAttachmentCollection struct
+type InstanceNetworkAttachmentCollection struct {
+	// Collection of instance network attachments.
+	NetworkAttachments []InstanceNetworkAttachment `json:"network_attachments" validate:"required"`
+}
+
+// UnmarshalInstanceNetworkAttachmentCollection unmarshals an instance of InstanceNetworkAttachmentCollection from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentCollection(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentCollection)
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachment)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentPatch : InstanceNetworkAttachmentPatch struct
+type InstanceNetworkAttachmentPatch struct {
+	// The name for this network attachment. The name must not be used by another network attachment for the instance.
+	Name *string `json:"name,omitempty"`
+}
+
+// UnmarshalInstanceNetworkAttachmentPatch unmarshals an instance of InstanceNetworkAttachmentPatch from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPatch(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPatch)
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// AsPatch returns a generic map representation of the InstanceNetworkAttachmentPatch
+func (instanceNetworkAttachmentPatch *InstanceNetworkAttachmentPatch) AsPatch() (_patch map[string]interface{}, err error) {
+	var jsonData []byte
+	jsonData, err = json.Marshal(instanceNetworkAttachmentPatch)
+	if err == nil {
+		err = json.Unmarshal(jsonData, &_patch)
+	}
+	return
+}
+
+// InstanceNetworkAttachmentPrototype : InstanceNetworkAttachmentPrototype struct
+type InstanceNetworkAttachmentPrototype struct {
+	// The name for this network attachment. Names must be unique within the instance the network attachment resides in. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// A virtual network interface for the instance network attachment. This can be specified
+	// using an existing virtual network interface, or a prototype object for a new virtual
+	// network interface.
+	//
+	// If an existing virtual network interface is specified, `enable_infrastructure_nat` must be
+	// `true`.
+	VirtualNetworkInterface InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf `json:"virtual_network_interface" validate:"required"`
+}
+
+// NewInstanceNetworkAttachmentPrototype : Instantiate InstanceNetworkAttachmentPrototype (Generic Model Constructor)
+func (*VpcV1) NewInstanceNetworkAttachmentPrototype(virtualNetworkInterface InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf) (_model *InstanceNetworkAttachmentPrototype, err error) {
+	_model = &InstanceNetworkAttachmentPrototype{
+		VirtualNetworkInterface: virtualNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+// UnmarshalInstanceNetworkAttachmentPrototype unmarshals an instance of InstanceNetworkAttachmentPrototype from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPrototype)
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterface)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentPrototypeVirtualNetworkInterface : A virtual network interface for the instance network attachment. This can be specified using an existing virtual
+// network interface, or a prototype object for a new virtual network interface.
+//
+// If an existing virtual network interface is specified, `enable_infrastructure_nat` must be
+// `true`.
+// Models which "extend" this model:
+// - InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext
+// - InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterface struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// Additional IP addresses to bind to the virtual network interface. Each item may be either a reserved IP identity, or
+	// a reserved IP prototype object which will be used to create a new reserved IP. All IP addresses must be in the
+	// primary IP's subnet.
+	//
+	// If reserved IP identities are provided, the specified reserved IPs must be unbound.
+	//
+	// If reserved IP prototype objects with addresses are provided, the addresses must be available on the virtual network
+	// interface's subnet. For any prototype objects that do not specify an address, an available address on the subnet
+	// will be automatically selected and reserved.
+	Ips []VirtualNetworkInterfaceIPPrototypeIntf `json:"ips,omitempty"`
+
+	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
+	// VPC. If unspecified, the name will be a hyphenated list of randomly-selected words. Names beginning with `ibm-` are
+	// reserved for provider-owned resources, and are not allowed.
+	Name *string `json:"name,omitempty"`
+
+	// The primary IP address to bind to the virtual network interface. May be either a
+	// reserved IP identity, or a reserved IP prototype object which will be used to create a
+	// new reserved IP.
+	//
+	// If a reserved IP identity is provided, the specified reserved IP must be unbound.
+	//
+	// If a reserved IP prototype object with an address is provided, the address must be
+	// available on the virtual network interface's subnet. If no address is specified,
+	// an available address on the subnet will be automatically selected and reserved.
+	PrimaryIP VirtualNetworkInterfacePrimaryIPPrototypeIntf `json:"primary_ip,omitempty"`
+
+	// The resource group to use for this virtual network interface. If unspecified, the
+	// virtual server instance's resource group will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The security groups to use for this virtual network interface. If unspecified, the default security group of the VPC
+	// for the subnet is used.
+	SecurityGroups []SecurityGroupIdentityIntf `json:"security_groups,omitempty"`
+
+	// The associated subnet. Required if `primary_ip` does not specify a reserved IP
+	// identity.
+	Subnet SubnetIdentityIntf `json:"subnet,omitempty"`
+
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterface) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf interface {
+	isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterface() bool
+}
+
+// UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterface unmarshals an instance of InstanceNetworkAttachmentPrototypeVirtualNetworkInterface from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPrototypeVirtualNetworkInterface)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalVirtualNetworkInterfaceIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalVirtualNetworkInterfacePrimaryIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "security_groups", &obj.SecurityGroups, UnmarshalSecurityGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentReference : InstanceNetworkAttachmentReference struct
+type InstanceNetworkAttachmentReference struct {
+	// If present, this property indicates the referenced resource has been deleted, and provides
+	// some supplementary information.
+	Deleted *InstanceNetworkAttachmentReferenceDeleted `json:"deleted,omitempty"`
+
+	// The URL for this instance network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this instance network attachment. The name is unique across all network attachments for the instance.
+	Name *string `json:"name" validate:"required"`
+
+	// The primary IP address of the virtual network interface for the instance network
+	// attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The subnet of the virtual network interface for the instance network attachment.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+}
+
+// Constants associated with the InstanceNetworkAttachmentReference.ResourceType property.
+// The resource type.
+const (
+	InstanceNetworkAttachmentReferenceResourceTypeInstanceNetworkAttachmentConst = "instance_network_attachment"
+)
+
+// UnmarshalInstanceNetworkAttachmentReference unmarshals an instance of InstanceNetworkAttachmentReference from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentReference(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentReference)
+	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalInstanceNetworkAttachmentReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentReferenceDeleted : If present, this property indicates the referenced resource has been deleted, and provides some supplementary
+// information.
+type InstanceNetworkAttachmentReferenceDeleted struct {
+	// Link to documentation about deleted resources.
+	MoreInfo *string `json:"more_info" validate:"required"`
+}
+
+// UnmarshalInstanceNetworkAttachmentReferenceDeleted unmarshals an instance of InstanceNetworkAttachmentReferenceDeleted from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentReferenceDeleted(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentReferenceDeleted)
+	err = core.UnmarshalPrimitive(m, "more_info", &obj.MoreInfo)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // InstancePatch : InstancePatch struct
 type InstancePatch struct {
 	// The availability policy for this virtual server instance.
@@ -46518,7 +50770,8 @@ type InstancePatch struct {
 	//   instance is placed on a dedicated host, the requested profile `family` must be
 	//   the same as the dedicated host `family`.
 	// - Have the same `vcpu.architecture`.
-	// - Support the number of network interfaces the instance currently has.
+	// - Support the number of network attachments or network interfaces the instance
+	//   currently has.
 	Profile InstancePatchProfileIntf `json:"profile,omitempty"`
 
 	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
@@ -46577,7 +50830,8 @@ func (instancePatch *InstancePatch) AsPatch() (_patch map[string]interface{}, er
 //     instance is placed on a dedicated host, the requested profile `family` must be
 //     the same as the dedicated host `family`.
 //   - Have the same `vcpu.architecture`.
-//   - Support the number of network interfaces the instance currently has.
+//   - Support the number of network attachments or network interfaces the instance
+//     currently has.
 //
 // Models which "extend" this model:
 // - InstancePatchProfileInstanceProfileIdentityByName
@@ -46795,6 +51049,8 @@ type InstanceProfile struct {
 	// The globally unique name for this virtual server instance profile.
 	Name *string `json:"name" validate:"required"`
 
+	NetworkAttachmentCount InstanceProfileNetworkAttachmentCountIntf `json:"network_attachment_count" validate:"required"`
+
 	NetworkInterfaceCount InstanceProfileNetworkInterfaceCountIntf `json:"network_interface_count" validate:"required"`
 
 	NumaCount InstanceProfileNumaCountIntf `json:"numa_count,omitempty"`
@@ -46886,6 +51142,10 @@ func UnmarshalInstanceProfile(m map[string]json.RawMessage, result interface{}) 
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachment_count", &obj.NetworkAttachmentCount, UnmarshalInstanceProfileNetworkAttachmentCount)
 	if err != nil {
 		return
 	}
@@ -47641,6 +51901,54 @@ func UnmarshalInstanceProfileNumaCount(m map[string]json.RawMessage, result inte
 	return
 }
 
+// InstanceProfileNetworkAttachmentCount : InstanceProfileNetworkAttachmentCount struct
+// Models which "extend" this model:
+// - InstanceProfileNetworkAttachmentCountRange
+// - InstanceProfileNetworkAttachmentCountDependent
+type InstanceProfileNetworkAttachmentCount struct {
+	// The maximum value for this profile field.
+	Max *int64 `json:"max,omitempty"`
+
+	// The minimum value for this profile field.
+	Min *int64 `json:"min,omitempty"`
+
+	// The type for this profile field.
+	Type *string `json:"type,omitempty"`
+}
+
+// Constants associated with the InstanceProfileNetworkAttachmentCount.Type property.
+// The type for this profile field.
+const (
+	InstanceProfileNetworkAttachmentCountTypeRangeConst = "range"
+)
+
+func (*InstanceProfileNetworkAttachmentCount) isaInstanceProfileNetworkAttachmentCount() bool {
+	return true
+}
+
+type InstanceProfileNetworkAttachmentCountIntf interface {
+	isaInstanceProfileNetworkAttachmentCount() bool
+}
+
+// UnmarshalInstanceProfileNetworkAttachmentCount unmarshals an instance of InstanceProfileNetworkAttachmentCount from the specified map of raw messages.
+func UnmarshalInstanceProfileNetworkAttachmentCount(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceProfileNetworkAttachmentCount)
+	err = core.UnmarshalPrimitive(m, "max", &obj.Max)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "min", &obj.Min)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // InstanceProfileNetworkInterfaceCount : InstanceProfileNetworkInterfaceCount struct
 // Models which "extend" this model:
 // - InstanceProfileNetworkInterfaceCountRange
@@ -48092,7 +52400,7 @@ type InstancePrototype struct {
 	// The VPC this virtual server instance will reside in.
 	//
 	// If specified, it must match the VPC for the subnets of the instance network
-	// interfaces.
+	// attachments or instance network interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -48109,6 +52417,12 @@ type InstancePrototype struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone,omitempty"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 
 	// The [catalog](https://cloud.ibm.com/docs/account?topic=account-restrict-by-user) offering
 	// or offering version to use when provisioning this virtual server instance.
@@ -48200,6 +52514,14 @@ func UnmarshalInstancePrototype(m map[string]json.RawMessage, result interface{}
 		return
 	}
 	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
 	if err != nil {
 		return
 	}
@@ -48402,7 +52724,7 @@ type InstanceTemplate struct {
 	// The VPC this virtual server instance will reside in.
 	//
 	// If specified, it must match the VPC for the subnets of the instance network
-	// interfaces.
+	// attachments or instance network interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -48419,6 +52741,12 @@ type InstanceTemplate struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone,omitempty"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 
 	// The [catalog](https://cloud.ibm.com/docs/account?topic=account-restrict-by-user) offering
 	// or offering version to use when provisioning this virtual server instance.
@@ -48523,6 +52851,14 @@ func UnmarshalInstanceTemplate(m map[string]json.RawMessage, result interface{})
 		return
 	}
 	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
 	if err != nil {
 		return
 	}
@@ -48752,7 +53088,7 @@ type InstanceTemplatePrototype struct {
 	// The VPC this virtual server instance will reside in.
 	//
 	// If specified, it must match the VPC for the subnets of the instance network
-	// interfaces.
+	// attachments or instance network interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -48769,6 +53105,12 @@ type InstanceTemplatePrototype struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone,omitempty"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 
 	// The [catalog](https://cloud.ibm.com/docs/account?topic=account-restrict-by-user)
 	// offering version to use when provisioning this virtual server instance.
@@ -48861,6 +53203,14 @@ func UnmarshalInstanceTemplatePrototype(m map[string]json.RawMessage, result int
 		return
 	}
 	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
 	if err != nil {
 		return
 	}
@@ -49596,6 +53946,52 @@ func (options *ListBareMetalServerDisksOptions) SetHeaders(param map[string]stri
 	return options
 }
 
+// ListBareMetalServerNetworkAttachmentsOptions : The ListBareMetalServerNetworkAttachments options.
+type ListBareMetalServerNetworkAttachmentsOptions struct {
+	// The bare metal server identifier.
+	BareMetalServerID *string `json:"bare_metal_server_id" validate:"required,ne="`
+
+	// A server-provided token determining what resource to start the page on.
+	Start *string `json:"start,omitempty"`
+
+	// The number of resources to return on a page.
+	Limit *int64 `json:"limit,omitempty"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewListBareMetalServerNetworkAttachmentsOptions : Instantiate ListBareMetalServerNetworkAttachmentsOptions
+func (*VpcV1) NewListBareMetalServerNetworkAttachmentsOptions(bareMetalServerID string) *ListBareMetalServerNetworkAttachmentsOptions {
+	return &ListBareMetalServerNetworkAttachmentsOptions{
+		BareMetalServerID: core.StringPtr(bareMetalServerID),
+	}
+}
+
+// SetBareMetalServerID : Allow user to set BareMetalServerID
+func (_options *ListBareMetalServerNetworkAttachmentsOptions) SetBareMetalServerID(bareMetalServerID string) *ListBareMetalServerNetworkAttachmentsOptions {
+	_options.BareMetalServerID = core.StringPtr(bareMetalServerID)
+	return _options
+}
+
+// SetStart : Allow user to set Start
+func (_options *ListBareMetalServerNetworkAttachmentsOptions) SetStart(start string) *ListBareMetalServerNetworkAttachmentsOptions {
+	_options.Start = core.StringPtr(start)
+	return _options
+}
+
+// SetLimit : Allow user to set Limit
+func (_options *ListBareMetalServerNetworkAttachmentsOptions) SetLimit(limit int64) *ListBareMetalServerNetworkAttachmentsOptions {
+	_options.Limit = core.Int64Ptr(limit)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *ListBareMetalServerNetworkAttachmentsOptions) SetHeaders(param map[string]string) *ListBareMetalServerNetworkAttachmentsOptions {
+	options.Headers = param
+	return options
+}
+
 // ListBareMetalServerNetworkInterfaceFloatingIpsOptions : The ListBareMetalServerNetworkInterfaceFloatingIps options.
 type ListBareMetalServerNetworkInterfaceFloatingIpsOptions struct {
 	// The bare metal server identifier.
@@ -50202,6 +54598,18 @@ type ListFloatingIpsOptions struct {
 	// in descending order, and the value `name` sorts it by the `name` property in ascending order.
 	Sort *string `json:"sort,omitempty"`
 
+	// Filters the collection to resources with a `target.id` property matching the specified identifier.
+	TargetID *string `json:"target.id,omitempty"`
+
+	// Filters the collection to resources with a `target.crn` property matching the specified CRN.
+	TargetCRN *string `json:"target.crn,omitempty"`
+
+	// Filters the collection to resources with a `target.name` property matching the exact specified name.
+	TargetName *string `json:"target.name,omitempty"`
+
+	// Filters the collection to resources with a `target.resource_type` property matching the specified value.
+	TargetResourceType *string `json:"target.resource_type,omitempty"`
+
 	// Allows users to set headers on API requests
 	Headers map[string]string
 }
@@ -50241,6 +54649,30 @@ func (_options *ListFloatingIpsOptions) SetResourceGroupID(resourceGroupID strin
 // SetSort : Allow user to set Sort
 func (_options *ListFloatingIpsOptions) SetSort(sort string) *ListFloatingIpsOptions {
 	_options.Sort = core.StringPtr(sort)
+	return _options
+}
+
+// SetTargetID : Allow user to set TargetID
+func (_options *ListFloatingIpsOptions) SetTargetID(targetID string) *ListFloatingIpsOptions {
+	_options.TargetID = core.StringPtr(targetID)
+	return _options
+}
+
+// SetTargetCRN : Allow user to set TargetCRN
+func (_options *ListFloatingIpsOptions) SetTargetCRN(targetCRN string) *ListFloatingIpsOptions {
+	_options.TargetCRN = core.StringPtr(targetCRN)
+	return _options
+}
+
+// SetTargetName : Allow user to set TargetName
+func (_options *ListFloatingIpsOptions) SetTargetName(targetName string) *ListFloatingIpsOptions {
+	_options.TargetName = core.StringPtr(targetName)
+	return _options
+}
+
+// SetTargetResourceType : Allow user to set TargetResourceType
+func (_options *ListFloatingIpsOptions) SetTargetResourceType(targetResourceType string) *ListFloatingIpsOptions {
+	_options.TargetResourceType = core.StringPtr(targetResourceType)
 	return _options
 }
 
@@ -50800,6 +55232,34 @@ func (_options *ListInstanceGroupsOptions) SetLimit(limit int64) *ListInstanceGr
 
 // SetHeaders : Allow user to set Headers
 func (options *ListInstanceGroupsOptions) SetHeaders(param map[string]string) *ListInstanceGroupsOptions {
+	options.Headers = param
+	return options
+}
+
+// ListInstanceNetworkAttachmentsOptions : The ListInstanceNetworkAttachments options.
+type ListInstanceNetworkAttachmentsOptions struct {
+	// The virtual server instance identifier.
+	InstanceID *string `json:"instance_id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewListInstanceNetworkAttachmentsOptions : Instantiate ListInstanceNetworkAttachmentsOptions
+func (*VpcV1) NewListInstanceNetworkAttachmentsOptions(instanceID string) *ListInstanceNetworkAttachmentsOptions {
+	return &ListInstanceNetworkAttachmentsOptions{
+		InstanceID: core.StringPtr(instanceID),
+	}
+}
+
+// SetInstanceID : Allow user to set InstanceID
+func (_options *ListInstanceNetworkAttachmentsOptions) SetInstanceID(instanceID string) *ListInstanceNetworkAttachmentsOptions {
+	_options.InstanceID = core.StringPtr(instanceID)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *ListInstanceNetworkAttachmentsOptions) SetHeaders(param map[string]string) *ListInstanceNetworkAttachmentsOptions {
 	options.Headers = param
 	return options
 }
@@ -51581,6 +56041,74 @@ func (options *ListNetworkAclsOptions) SetHeaders(param map[string]string) *List
 	return options
 }
 
+// ListNetworkInterfaceFloatingIpsOptions : The ListNetworkInterfaceFloatingIps options.
+type ListNetworkInterfaceFloatingIpsOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// A server-provided token determining what resource to start the page on.
+	Start *string `json:"start,omitempty"`
+
+	// The number of resources to return on a page.
+	Limit *int64 `json:"limit,omitempty"`
+
+	// Sorts the returned collection by the specified property name in ascending order. A `-` may be prepended to the name
+	// to sort in descending order. For example, the value
+	// `-name` sorts the collection by the `name` property in descending order, and the value `name` sorts it by the `name`
+	// property in ascending order.
+	Sort *string `json:"sort,omitempty"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// Constants associated with the ListNetworkInterfaceFloatingIpsOptions.Sort property.
+// Sorts the returned collection by the specified property name in ascending order. A `-` may be prepended to the name
+// to sort in descending order. For example, the value
+// `-name` sorts the collection by the `name` property in descending order, and the value `name` sorts it by the `name`
+// property in ascending order.
+const (
+	ListNetworkInterfaceFloatingIpsOptionsSortAddressConst = "address"
+	ListNetworkInterfaceFloatingIpsOptionsSortNameConst    = "name"
+)
+
+// NewListNetworkInterfaceFloatingIpsOptions : Instantiate ListNetworkInterfaceFloatingIpsOptions
+func (*VpcV1) NewListNetworkInterfaceFloatingIpsOptions(virtualNetworkInterfaceID string) *ListNetworkInterfaceFloatingIpsOptions {
+	return &ListNetworkInterfaceFloatingIpsOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *ListNetworkInterfaceFloatingIpsOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *ListNetworkInterfaceFloatingIpsOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetStart : Allow user to set Start
+func (_options *ListNetworkInterfaceFloatingIpsOptions) SetStart(start string) *ListNetworkInterfaceFloatingIpsOptions {
+	_options.Start = core.StringPtr(start)
+	return _options
+}
+
+// SetLimit : Allow user to set Limit
+func (_options *ListNetworkInterfaceFloatingIpsOptions) SetLimit(limit int64) *ListNetworkInterfaceFloatingIpsOptions {
+	_options.Limit = core.Int64Ptr(limit)
+	return _options
+}
+
+// SetSort : Allow user to set Sort
+func (_options *ListNetworkInterfaceFloatingIpsOptions) SetSort(sort string) *ListNetworkInterfaceFloatingIpsOptions {
+	_options.Sort = core.StringPtr(sort)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *ListNetworkInterfaceFloatingIpsOptions) SetHeaders(param map[string]string) *ListNetworkInterfaceFloatingIpsOptions {
+	options.Headers = param
+	return options
+}
+
 // ListOperatingSystemsOptions : The ListOperatingSystems options.
 type ListOperatingSystemsOptions struct {
 	// A server-provided token determining what resource to start the page on.
@@ -52114,6 +56642,89 @@ func (options *ListSnapshotClonesOptions) SetHeaders(param map[string]string) *L
 	return options
 }
 
+// ListSnapshotConsistencyGroupsOptions : The ListSnapshotConsistencyGroups options.
+type ListSnapshotConsistencyGroupsOptions struct {
+	// A server-provided token determining what resource to start the page on.
+	Start *string `json:"start,omitempty"`
+
+	// The number of resources to return on a page.
+	Limit *int64 `json:"limit,omitempty"`
+
+	// Filters the collection to resources with a `resource_group.id` property matching the specified identifier.
+	ResourceGroupID *string `json:"resource_group.id,omitempty"`
+
+	// Filters the collection to resources with a `name` property matching the exact specified name.
+	Name *string `json:"name,omitempty"`
+
+	// Sorts the returned collection by the specified property name in ascending order. A `-` may be prepended to the name
+	// to sort in descending order. For example, the value `-created_at` sorts the collection by the `created_at` property
+	// in descending order, and the value `name` sorts it by the `name` property in ascending order.
+	Sort *string `json:"sort,omitempty"`
+
+	// Filters the collection to backup policy jobs with a `backup_policy_plan.id` property matching the specified
+	// identifier.
+	BackupPolicyPlanID *string `json:"backup_policy_plan.id,omitempty"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// Constants associated with the ListSnapshotConsistencyGroupsOptions.Sort property.
+// Sorts the returned collection by the specified property name in ascending order. A `-` may be prepended to the name
+// to sort in descending order. For example, the value `-created_at` sorts the collection by the `created_at` property
+// in descending order, and the value `name` sorts it by the `name` property in ascending order.
+const (
+	ListSnapshotConsistencyGroupsOptionsSortCreatedAtConst = "created_at"
+	ListSnapshotConsistencyGroupsOptionsSortNameConst      = "name"
+)
+
+// NewListSnapshotConsistencyGroupsOptions : Instantiate ListSnapshotConsistencyGroupsOptions
+func (*VpcV1) NewListSnapshotConsistencyGroupsOptions() *ListSnapshotConsistencyGroupsOptions {
+	return &ListSnapshotConsistencyGroupsOptions{}
+}
+
+// SetStart : Allow user to set Start
+func (_options *ListSnapshotConsistencyGroupsOptions) SetStart(start string) *ListSnapshotConsistencyGroupsOptions {
+	_options.Start = core.StringPtr(start)
+	return _options
+}
+
+// SetLimit : Allow user to set Limit
+func (_options *ListSnapshotConsistencyGroupsOptions) SetLimit(limit int64) *ListSnapshotConsistencyGroupsOptions {
+	_options.Limit = core.Int64Ptr(limit)
+	return _options
+}
+
+// SetResourceGroupID : Allow user to set ResourceGroupID
+func (_options *ListSnapshotConsistencyGroupsOptions) SetResourceGroupID(resourceGroupID string) *ListSnapshotConsistencyGroupsOptions {
+	_options.ResourceGroupID = core.StringPtr(resourceGroupID)
+	return _options
+}
+
+// SetName : Allow user to set Name
+func (_options *ListSnapshotConsistencyGroupsOptions) SetName(name string) *ListSnapshotConsistencyGroupsOptions {
+	_options.Name = core.StringPtr(name)
+	return _options
+}
+
+// SetSort : Allow user to set Sort
+func (_options *ListSnapshotConsistencyGroupsOptions) SetSort(sort string) *ListSnapshotConsistencyGroupsOptions {
+	_options.Sort = core.StringPtr(sort)
+	return _options
+}
+
+// SetBackupPolicyPlanID : Allow user to set BackupPolicyPlanID
+func (_options *ListSnapshotConsistencyGroupsOptions) SetBackupPolicyPlanID(backupPolicyPlanID string) *ListSnapshotConsistencyGroupsOptions {
+	_options.BackupPolicyPlanID = core.StringPtr(backupPolicyPlanID)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *ListSnapshotConsistencyGroupsOptions) SetHeaders(param map[string]string) *ListSnapshotConsistencyGroupsOptions {
+	options.Headers = param
+	return options
+}
+
 // ListSnapshotsOptions : The ListSnapshots options.
 type ListSnapshotsOptions struct {
 	// A server-provided token determining what resource to start the page on.
@@ -52192,6 +56803,14 @@ type ListSnapshotsOptions struct {
 	// Filters the collection to snapshots with an item in the `clones` property with a `zone.name` property matching the
 	// exact specified name.
 	ClonesZoneName *string `json:"clones[].zone.name,omitempty"`
+
+	// Filters the collection to resources with a `snapshot_consistency_group.id` property matching the specified
+	// identifier.
+	SnapshotConsistencyGroupID *string `json:"snapshot_consistency_group.id,omitempty"`
+
+	// Filters the collection to resources with a `snapshot_consistency_group.crn` property matching the specified
+	// identifier.
+	SnapshotConsistencyGroupCRN *string `json:"snapshot_consistency_group.crn,omitempty"`
 
 	// Allows users to set headers on API requests
 	Headers map[string]string
@@ -52331,6 +56950,18 @@ func (_options *ListSnapshotsOptions) SetClonesZoneName(clonesZoneName string) *
 	return _options
 }
 
+// SetSnapshotConsistencyGroupID : Allow user to set SnapshotConsistencyGroupID
+func (_options *ListSnapshotsOptions) SetSnapshotConsistencyGroupID(snapshotConsistencyGroupID string) *ListSnapshotsOptions {
+	_options.SnapshotConsistencyGroupID = core.StringPtr(snapshotConsistencyGroupID)
+	return _options
+}
+
+// SetSnapshotConsistencyGroupCRN : Allow user to set SnapshotConsistencyGroupCRN
+func (_options *ListSnapshotsOptions) SetSnapshotConsistencyGroupCRN(snapshotConsistencyGroupCRN string) *ListSnapshotsOptions {
+	_options.SnapshotConsistencyGroupCRN = core.StringPtr(snapshotConsistencyGroupCRN)
+	return _options
+}
+
 // SetHeaders : Allow user to set Headers
 func (options *ListSnapshotsOptions) SetHeaders(param map[string]string) *ListSnapshotsOptions {
 	options.Headers = param
@@ -52352,6 +56983,18 @@ type ListSubnetReservedIpsOptions struct {
 	// to sort in descending order. For example, the value `-created_at` sorts the collection by the `created_at` property
 	// in descending order, and the value `name` sorts it by the `name` property in ascending order.
 	Sort *string `json:"sort,omitempty"`
+
+	// Filters the collection to resources with a `target.id` property matching the specified identifier.
+	TargetID *string `json:"target.id,omitempty"`
+
+	// Filters the collection to resources with a `target.crn` property matching the specified CRN.
+	TargetCRN *string `json:"target.crn,omitempty"`
+
+	// Filters the collection to resources with a `target.name` property matching the exact specified name.
+	TargetName *string `json:"target.name,omitempty"`
+
+	// Filters the collection to resources with a `target.resource_type` property matching the specified value.
+	TargetResourceType *string `json:"target.resource_type,omitempty"`
 
 	// Allows users to set headers on API requests
 	Headers map[string]string
@@ -52395,6 +57038,30 @@ func (_options *ListSubnetReservedIpsOptions) SetLimit(limit int64) *ListSubnetR
 // SetSort : Allow user to set Sort
 func (_options *ListSubnetReservedIpsOptions) SetSort(sort string) *ListSubnetReservedIpsOptions {
 	_options.Sort = core.StringPtr(sort)
+	return _options
+}
+
+// SetTargetID : Allow user to set TargetID
+func (_options *ListSubnetReservedIpsOptions) SetTargetID(targetID string) *ListSubnetReservedIpsOptions {
+	_options.TargetID = core.StringPtr(targetID)
+	return _options
+}
+
+// SetTargetCRN : Allow user to set TargetCRN
+func (_options *ListSubnetReservedIpsOptions) SetTargetCRN(targetCRN string) *ListSubnetReservedIpsOptions {
+	_options.TargetCRN = core.StringPtr(targetCRN)
+	return _options
+}
+
+// SetTargetName : Allow user to set TargetName
+func (_options *ListSubnetReservedIpsOptions) SetTargetName(targetName string) *ListSubnetReservedIpsOptions {
+	_options.TargetName = core.StringPtr(targetName)
+	return _options
+}
+
+// SetTargetResourceType : Allow user to set TargetResourceType
+func (_options *ListSubnetReservedIpsOptions) SetTargetResourceType(targetResourceType string) *ListSubnetReservedIpsOptions {
+	_options.TargetResourceType = core.StringPtr(targetResourceType)
 	return _options
 }
 
@@ -52498,6 +57165,74 @@ func (_options *ListSubnetsOptions) SetRoutingTableName(routingTableName string)
 
 // SetHeaders : Allow user to set Headers
 func (options *ListSubnetsOptions) SetHeaders(param map[string]string) *ListSubnetsOptions {
+	options.Headers = param
+	return options
+}
+
+// ListVirtualNetworkInterfaceIpsOptions : The ListVirtualNetworkInterfaceIps options.
+type ListVirtualNetworkInterfaceIpsOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// A server-provided token determining what resource to start the page on.
+	Start *string `json:"start,omitempty"`
+
+	// The number of resources to return on a page.
+	Limit *int64 `json:"limit,omitempty"`
+
+	// Sorts the returned collection by the specified property name in ascending order. A `-` may be prepended to the name
+	// to sort in descending order. For example, the value
+	// `-name` sorts the collection by the `name` property in descending order, and the value `name` sorts it by the `name`
+	// property in ascending order.
+	Sort *string `json:"sort,omitempty"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// Constants associated with the ListVirtualNetworkInterfaceIpsOptions.Sort property.
+// Sorts the returned collection by the specified property name in ascending order. A `-` may be prepended to the name
+// to sort in descending order. For example, the value
+// `-name` sorts the collection by the `name` property in descending order, and the value `name` sorts it by the `name`
+// property in ascending order.
+const (
+	ListVirtualNetworkInterfaceIpsOptionsSortAddressConst = "address"
+	ListVirtualNetworkInterfaceIpsOptionsSortNameConst    = "name"
+)
+
+// NewListVirtualNetworkInterfaceIpsOptions : Instantiate ListVirtualNetworkInterfaceIpsOptions
+func (*VpcV1) NewListVirtualNetworkInterfaceIpsOptions(virtualNetworkInterfaceID string) *ListVirtualNetworkInterfaceIpsOptions {
+	return &ListVirtualNetworkInterfaceIpsOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *ListVirtualNetworkInterfaceIpsOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *ListVirtualNetworkInterfaceIpsOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetStart : Allow user to set Start
+func (_options *ListVirtualNetworkInterfaceIpsOptions) SetStart(start string) *ListVirtualNetworkInterfaceIpsOptions {
+	_options.Start = core.StringPtr(start)
+	return _options
+}
+
+// SetLimit : Allow user to set Limit
+func (_options *ListVirtualNetworkInterfaceIpsOptions) SetLimit(limit int64) *ListVirtualNetworkInterfaceIpsOptions {
+	_options.Limit = core.Int64Ptr(limit)
+	return _options
+}
+
+// SetSort : Allow user to set Sort
+func (_options *ListVirtualNetworkInterfaceIpsOptions) SetSort(sort string) *ListVirtualNetworkInterfaceIpsOptions {
+	_options.Sort = core.StringPtr(sort)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *ListVirtualNetworkInterfaceIpsOptions) SetHeaders(param map[string]string) *ListVirtualNetworkInterfaceIpsOptions {
 	options.Headers = param
 	return options
 }
@@ -53551,6 +58286,8 @@ type LoadBalancer struct {
 
 	// The security groups targeting this load balancer.
 	//
+	// If empty, all inbound and outbound traffic is allowed.
+	//
 	// Applicable only for load balancers that support security groups.
 	SecurityGroups []SecurityGroupReference `json:"security_groups" validate:"required"`
 
@@ -53967,7 +58704,7 @@ type LoadBalancerListener struct {
 	CertificateInstance *CertificateInstanceReference `json:"certificate_instance,omitempty"`
 
 	// The connection limit of the listener.
-	ConnectionLimit *int64 `json:"connection_limit,omitempty"`
+	ConnectionLimit *int64 `json:"connection_limit" validate:"required"`
 
 	// The date and time that this listener was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
@@ -54679,7 +59416,9 @@ type LoadBalancerListenerPolicyReference struct {
 	// The policy's unique identifier.
 	ID *string `json:"id" validate:"required"`
 
-	Name interface{} `json:"name" validate:"required"`
+	// The name for this load balancer listener policy. The name is unique across all policies for the load balancer
+	// listener.
+	Name *string `json:"name" validate:"required"`
 }
 
 // UnmarshalLoadBalancerListenerPolicyReference unmarshals an instance of LoadBalancerListenerPolicyReference from the specified map of raw messages.
@@ -58641,25 +63380,57 @@ func UnmarshalNetworkACLRuleReferenceDeleted(m map[string]json.RawMessage, resul
 
 // NetworkInterface : NetworkInterface struct
 type NetworkInterface struct {
-	// Indicates whether source IP spoofing is allowed on this instance interface.
+	// Indicates whether source IP spoofing is allowed on this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing" validate:"required"`
 
 	// The date and time that the instance network interface was created.
+	//
+	// If this instance has network attachments, this network interface was created as a [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) when its corresponding network attachment
+	// was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
 	// The floating IPs associated with this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the floating IPs are associated with the attached virtual
+	// network interface.
 	FloatingIps []FloatingIPReference `json:"floating_ips" validate:"required"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the name matches its corresponding network attachment.
 	Name *string `json:"name" validate:"required"`
 
 	// The instance network interface port speed in Mbps.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the port speed is that of its corresponding network
+	// attachment.
 	PortSpeed *int64 `json:"port_speed" validate:"required"`
 
 	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
@@ -58668,15 +63439,28 @@ type NetworkInterface struct {
 	ResourceType *string `json:"resource_type" validate:"required"`
 
 	// The security groups targeting this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the security groups are associated with the attached
+	// virtual network interface.
 	SecurityGroups []SecurityGroupReference `json:"security_groups" validate:"required"`
 
 	// The status of the instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a read-only representation of its corresponding
+	// network attachment and its attached virtual network interface, and the status is [computed from
+	// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 	Status *string `json:"status" validate:"required"`
 
 	// The associated subnet.
 	Subnet *SubnetReference `json:"subnet" validate:"required"`
 
 	// The instance network interface type.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 	Type *string `json:"type" validate:"required"`
 }
 
@@ -58688,6 +63472,10 @@ const (
 
 // Constants associated with the NetworkInterface.Status property.
 // The status of the instance network interface.
+//
+// If this instance has network attachments, this network interface is a read-only representation of its corresponding
+// network attachment and its attached virtual network interface, and the status is [computed from
+// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 const (
 	NetworkInterfaceStatusAvailableConst = "available"
 	NetworkInterfaceStatusDeletingConst  = "deleting"
@@ -58697,6 +63485,10 @@ const (
 
 // Constants associated with the NetworkInterface.Type property.
 // The instance network interface type.
+//
+// If this instance has network attachments, this network interface is a
+// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 const (
 	NetworkInterfaceTypePrimaryConst   = "primary"
 	NetworkInterfaceTypeSecondaryConst = "secondary"
@@ -58768,9 +63560,18 @@ type NetworkInterfaceBareMetalServerContextReference struct {
 	Deleted *NetworkInterfaceBareMetalServerContextReferenceDeleted `json:"deleted,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this bare metal server network interface.
@@ -58912,9 +63713,18 @@ type NetworkInterfaceInstanceContextReference struct {
 	Deleted *NetworkInterfaceInstanceContextReferenceDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this instance network interface.
@@ -58990,7 +63800,12 @@ func UnmarshalNetworkInterfaceInstanceContextReferenceDeleted(m map[string]json.
 
 // NetworkInterfacePatch : NetworkInterfacePatch struct
 type NetworkInterfacePatch struct {
-	// Indicates whether source IP spoofing is allowed on this instance interface.
+	// Indicates whether source IP spoofing is allowed on this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
 	// The name for the instance network interface. The name must not be used by another network interface on the virtual
@@ -59025,7 +63840,12 @@ func (networkInterfacePatch *NetworkInterfacePatch) AsPatch() (_patch map[string
 
 // NetworkInterfacePrototype : NetworkInterfacePrototype struct
 type NetworkInterfacePrototype struct {
-	// Indicates whether source IP spoofing is allowed on this instance interface.
+	// Indicates whether source IP spoofing is allowed on this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
 	// The name for the instance network interface. The name must not be used by another network interface on the virtual
@@ -60319,6 +65139,82 @@ func (options *RemoveInstanceNetworkInterfaceFloatingIPOptions) SetHeaders(param
 	return options
 }
 
+// RemoveNetworkInterfaceFloatingIPOptions : The RemoveNetworkInterfaceFloatingIP options.
+type RemoveNetworkInterfaceFloatingIPOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// The floating IP identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewRemoveNetworkInterfaceFloatingIPOptions : Instantiate RemoveNetworkInterfaceFloatingIPOptions
+func (*VpcV1) NewRemoveNetworkInterfaceFloatingIPOptions(virtualNetworkInterfaceID string, id string) *RemoveNetworkInterfaceFloatingIPOptions {
+	return &RemoveNetworkInterfaceFloatingIPOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+		ID:                        core.StringPtr(id),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *RemoveNetworkInterfaceFloatingIPOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *RemoveNetworkInterfaceFloatingIPOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *RemoveNetworkInterfaceFloatingIPOptions) SetID(id string) *RemoveNetworkInterfaceFloatingIPOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *RemoveNetworkInterfaceFloatingIPOptions) SetHeaders(param map[string]string) *RemoveNetworkInterfaceFloatingIPOptions {
+	options.Headers = param
+	return options
+}
+
+// RemoveVirtualNetworkInterfaceIPOptions : The RemoveVirtualNetworkInterfaceIP options.
+type RemoveVirtualNetworkInterfaceIPOptions struct {
+	// The virtual network interface identifier.
+	VirtualNetworkInterfaceID *string `json:"virtual_network_interface_id" validate:"required,ne="`
+
+	// The reserved IP identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewRemoveVirtualNetworkInterfaceIPOptions : Instantiate RemoveVirtualNetworkInterfaceIPOptions
+func (*VpcV1) NewRemoveVirtualNetworkInterfaceIPOptions(virtualNetworkInterfaceID string, id string) *RemoveVirtualNetworkInterfaceIPOptions {
+	return &RemoveVirtualNetworkInterfaceIPOptions{
+		VirtualNetworkInterfaceID: core.StringPtr(virtualNetworkInterfaceID),
+		ID:                        core.StringPtr(id),
+	}
+}
+
+// SetVirtualNetworkInterfaceID : Allow user to set VirtualNetworkInterfaceID
+func (_options *RemoveVirtualNetworkInterfaceIPOptions) SetVirtualNetworkInterfaceID(virtualNetworkInterfaceID string) *RemoveVirtualNetworkInterfaceIPOptions {
+	_options.VirtualNetworkInterfaceID = core.StringPtr(virtualNetworkInterfaceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *RemoveVirtualNetworkInterfaceIPOptions) SetID(id string) *RemoveVirtualNetworkInterfaceIPOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *RemoveVirtualNetworkInterfaceIPOptions) SetHeaders(param map[string]string) *RemoveVirtualNetworkInterfaceIPOptions {
+	options.Headers = param
+	return options
+}
+
 // RemoveVPNGatewayConnectionLocalCIDROptions : The RemoveVPNGatewayConnectionLocalCIDR options.
 type RemoveVPNGatewayConnectionLocalCIDROptions struct {
 	// The VPN gateway identifier.
@@ -61029,6 +65925,98 @@ func UnmarshalReservedIPCollectionNext(m map[string]json.RawMessage, result inte
 	return
 }
 
+// ReservedIPCollectionVirtualNetworkInterfaceContext : ReservedIPCollectionVirtualNetworkInterfaceContext struct
+type ReservedIPCollectionVirtualNetworkInterfaceContext struct {
+	// A link to the first page of resources.
+	First *ReservedIPCollectionVirtualNetworkInterfaceContextFirst `json:"first" validate:"required"`
+
+	// Collection of reserved IPs bound to the virtual network interface specified by the identifier in the URL.
+	Ips []ReservedIPReference `json:"ips" validate:"required"`
+
+	// The maximum number of resources that can be returned by the request.
+	Limit *int64 `json:"limit" validate:"required"`
+
+	// A link to the next page of resources. This property is present for all pages
+	// except the last page.
+	Next *ReservedIPCollectionVirtualNetworkInterfaceContextNext `json:"next,omitempty"`
+
+	// The total number of resources across all pages.
+	TotalCount *int64 `json:"total_count" validate:"required"`
+}
+
+// UnmarshalReservedIPCollectionVirtualNetworkInterfaceContext unmarshals an instance of ReservedIPCollectionVirtualNetworkInterfaceContext from the specified map of raw messages.
+func UnmarshalReservedIPCollectionVirtualNetworkInterfaceContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ReservedIPCollectionVirtualNetworkInterfaceContext)
+	err = core.UnmarshalModel(m, "first", &obj.First, UnmarshalReservedIPCollectionVirtualNetworkInterfaceContextFirst)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "limit", &obj.Limit)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "next", &obj.Next, UnmarshalReservedIPCollectionVirtualNetworkInterfaceContextNext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_count", &obj.TotalCount)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// Retrieve the value to be passed to a request to access the next page of results
+func (resp *ReservedIPCollectionVirtualNetworkInterfaceContext) GetNextStart() (*string, error) {
+	if core.IsNil(resp.Next) {
+		return nil, nil
+	}
+	start, err := core.GetQueryParam(resp.Next.Href, "start")
+	if err != nil || start == nil {
+		return nil, err
+	}
+	return start, nil
+}
+
+// ReservedIPCollectionVirtualNetworkInterfaceContextFirst : A link to the first page of resources.
+type ReservedIPCollectionVirtualNetworkInterfaceContextFirst struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalReservedIPCollectionVirtualNetworkInterfaceContextFirst unmarshals an instance of ReservedIPCollectionVirtualNetworkInterfaceContextFirst from the specified map of raw messages.
+func UnmarshalReservedIPCollectionVirtualNetworkInterfaceContextFirst(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ReservedIPCollectionVirtualNetworkInterfaceContextFirst)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ReservedIPCollectionVirtualNetworkInterfaceContextNext : A link to the next page of resources. This property is present for all pages except the last page.
+type ReservedIPCollectionVirtualNetworkInterfaceContextNext struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalReservedIPCollectionVirtualNetworkInterfaceContextNext unmarshals an instance of ReservedIPCollectionVirtualNetworkInterfaceContextNext from the specified map of raw messages.
+func UnmarshalReservedIPCollectionVirtualNetworkInterfaceContextNext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ReservedIPCollectionVirtualNetworkInterfaceContextNext)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // ReservedIPPatch : ReservedIPPatch struct
 type ReservedIPPatch struct {
 	// Indicates whether this reserved IP member will be automatically deleted when either
@@ -61228,12 +66216,14 @@ func UnmarshalReservedIPTarget(m map[string]json.RawMessage, result interface{})
 
 // ReservedIPTargetPrototype : The target to bind this reserved IP to.  The target must be in the same VPC.
 //
-// At present, only endpoint gateway targets are supported.  The endpoint gateway must not be already bound to a
-// reserved IP in the subnet's zone.
+// The following targets are supported:
+// - An endpoint gateway not already bound to a reserved IP in the subnet's zone.
+// - A virtual network interface.
 //
 // If unspecified, the reserved IP will be created unbound.
 // Models which "extend" this model:
 // - ReservedIPTargetPrototypeEndpointGatewayIdentity
+// - ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity
 type ReservedIPTargetPrototype struct {
 	// The unique identifier for this endpoint gateway.
 	ID *string `json:"id,omitempty"`
@@ -61385,6 +66375,10 @@ type Route struct {
 	// - `drop`: drop the packet.
 	Action *string `json:"action" validate:"required"`
 
+	// Indicates whether this route will be advertised to the ingress sources specified by the `advertise_routes_to`
+	// routing table property.
+	Advertise *bool `json:"advertise" validate:"required"`
+
 	// The date and time that the route was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
@@ -61475,6 +66469,10 @@ const (
 func UnmarshalRoute(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(Route)
 	err = core.UnmarshalPrimitive(m, "action", &obj.Action)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "advertise", &obj.Advertise)
 	if err != nil {
 		return
 	}
@@ -61719,6 +66717,10 @@ type RouteCollectionVPCContextRoutesItem struct {
 	// - `drop`: drop the packet.
 	Action *string `json:"action" validate:"required"`
 
+	// Indicates whether this route will be advertised to the ingress sources specified by the `advertise_routes_to`
+	// routing table property.
+	Advertise *bool `json:"advertise" validate:"required"`
+
 	// The date and time that the route was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
@@ -61809,6 +66811,10 @@ const (
 func UnmarshalRouteCollectionVPCContextRoutesItem(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(RouteCollectionVPCContextRoutesItem)
 	err = core.UnmarshalPrimitive(m, "action", &obj.Action)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "advertise", &obj.Advertise)
 	if err != nil {
 		return
 	}
@@ -62058,6 +67064,15 @@ func UnmarshalRouteNextHopPatch(m map[string]json.RawMessage, result interface{}
 
 // RoutePatch : RoutePatch struct
 type RoutePatch struct {
+	// Indicates whether this route will be advertised to the ingress sources specified by the `advertise_routes_to`
+	// routing table property.
+	//
+	// Since all routes in a routing table with the same `destination` and `zone` must have the same `advertise` value,
+	// this property can only be changed for routes with a unique
+	// `destination` and `zone` in the routing table. For more information, see [Advertising
+	// routes](https://cloud.ibm.com/docs/vpc?topic=vpc-about-custom-routes#rt-advertising-routes).
+	Advertise *bool `json:"advertise,omitempty"`
+
 	// The name for this route. The name must not be used by another route in the routing table. Names starting with `ibm-`
 	// are reserved for system-provided routes, and are not allowed.
 	Name *string `json:"name,omitempty"`
@@ -62080,6 +67095,10 @@ type RoutePatch struct {
 // UnmarshalRoutePatch unmarshals an instance of RoutePatch from the specified map of raw messages.
 func UnmarshalRoutePatch(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(RoutePatch)
+	err = core.UnmarshalPrimitive(m, "advertise", &obj.Advertise)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
 	if err != nil {
 		return
@@ -62114,6 +67133,13 @@ type RoutePrototype struct {
 	// - `deliver`: deliver the packet to the specified `next_hop`
 	// - `drop`: drop the packet.
 	Action *string `json:"action,omitempty"`
+
+	// Indicates whether this route will be advertised to the ingress sources specified by the `advertise_routes_to`
+	// routing table property.
+	//
+	// All routes in a routing table with the same `destination` and `zone` must have the same
+	// `advertise` value.
+	Advertise *bool `json:"advertise,omitempty"`
 
 	// The destination CIDR of the route. The host identifier in the CIDR must be zero.
 	//
@@ -62172,6 +67198,10 @@ func (*VpcV1) NewRoutePrototype(destination string, zone ZoneIdentityIntf) (_mod
 func UnmarshalRoutePrototype(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(RoutePrototype)
 	err = core.UnmarshalPrimitive(m, "action", &obj.Action)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "advertise", &obj.Advertise)
 	if err != nil {
 		return
 	}
@@ -62314,6 +67344,14 @@ type RoutingTable struct {
 	// support is expected to expand in the future.
 	AcceptRoutesFrom []ResourceFilter `json:"accept_routes_from" validate:"required"`
 
+	// The ingress sources to advertise routes to. Routes in the table with `advertise` enabled will be advertised to these
+	// sources.
+	//
+	// The enumerated values for this property are expected to expand in the future. When processing this property, check
+	// for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
+	// unexpected property value was encountered.
+	AdvertiseRoutesTo []string `json:"advertise_routes_to" validate:"required"`
+
 	// The date and time that this routing table was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
@@ -62380,6 +67418,16 @@ type RoutingTable struct {
 	Subnets []SubnetReference `json:"subnets" validate:"required"`
 }
 
+// Constants associated with the RoutingTable.AdvertiseRoutesTo property.
+// An ingress source that routes can be advertised to:
+//
+// - `direct_link` (requires `route_direct_link_ingress` be set to `true`)
+// - `transit_gateway` (requires `route_transit_gateway_ingress` be set to `true`).
+const (
+	RoutingTableAdvertiseRoutesToDirectLinkConst     = "direct_link"
+	RoutingTableAdvertiseRoutesToTransitGatewayConst = "transit_gateway"
+)
+
 // Constants associated with the RoutingTable.LifecycleState property.
 // The lifecycle state of the routing table.
 const (
@@ -62402,6 +67450,10 @@ const (
 func UnmarshalRoutingTable(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(RoutingTable)
 	err = core.UnmarshalModel(m, "accept_routes_from", &obj.AcceptRoutesFrom, UnmarshalResourceFilter)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "advertise_routes_to", &obj.AdvertiseRoutesTo)
 	if err != nil {
 		return
 	}
@@ -62599,6 +67651,10 @@ type RoutingTablePatch struct {
 	// support is expected to expand in the future.
 	AcceptRoutesFrom []ResourceFilter `json:"accept_routes_from,omitempty"`
 
+	// The ingress sources to advertise routes to, replacing any existing sources to advertise to. Routes in the table with
+	// `advertise` enabled will be advertised to these sources.
+	AdvertiseRoutesTo []string `json:"advertise_routes_to,omitempty"`
+
 	// The name for this routing table. The name must not be used by another routing table in the VPC.
 	Name *string `json:"name,omitempty"`
 
@@ -62606,7 +67662,8 @@ type RoutingTablePatch struct {
 	// [Direct Link](https://cloud.ibm.com/docs/dl/) to this VPC. Updating to `true` selects this routing table, provided
 	// no other routing table in the VPC already has this property set to `true`, and no subnets are attached to this
 	// routing table. Updating to
-	// `false` deselects this routing table.
+	// `false` deselects this routing table, provided `direct_link` is absent from
+	// `advertise_routes_to`.
 	//
 	// Incoming traffic will be routed according to the routing table with one exception: routes with an `action` of
 	// `deliver` are treated as `drop` unless the `next_hop` is an IP address in a subnet in the route's `zone` that is
@@ -62630,7 +67687,8 @@ type RoutingTablePatch struct {
 	// Indicates whether this routing table is used to route traffic that originates from
 	// [Transit Gateway](https://cloud.ibm.com/docs/transit-gateway) to this VPC. Updating to
 	// `true` selects this routing table, provided no other routing table in the VPC already has this property set to
-	// `true`, and no subnets are attached to this routing table. Updating to `false` deselects this routing table.
+	// `true`, and no subnets are attached to this routing table. Updating to `false` deselects this routing table,
+	// provided `transit_gateway` is absent from `advertise_routes_to`.
 	//
 	// Incoming traffic will be routed according to the routing table with one exception: routes with an `action` of
 	// `deliver` are treated as `drop` unless the `next_hop` is an IP address in a subnet in the route's `zone` that is
@@ -62654,10 +67712,24 @@ type RoutingTablePatch struct {
 	RouteVPCZoneIngress *bool `json:"route_vpc_zone_ingress,omitempty"`
 }
 
+// Constants associated with the RoutingTablePatch.AdvertiseRoutesTo property.
+// An ingress source that routes can be advertised to:
+//
+// - `direct_link` (requires `route_direct_link_ingress` be set to `true`)
+// - `transit_gateway` (requires `route_transit_gateway_ingress` be set to `true`).
+const (
+	RoutingTablePatchAdvertiseRoutesToDirectLinkConst     = "direct_link"
+	RoutingTablePatchAdvertiseRoutesToTransitGatewayConst = "transit_gateway"
+)
+
 // UnmarshalRoutingTablePatch unmarshals an instance of RoutingTablePatch from the specified map of raw messages.
 func UnmarshalRoutingTablePatch(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(RoutingTablePatch)
 	err = core.UnmarshalModel(m, "accept_routes_from", &obj.AcceptRoutesFrom, UnmarshalResourceFilter)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "advertise_routes_to", &obj.AdvertiseRoutesTo)
 	if err != nil {
 		return
 	}
@@ -63707,9 +68779,18 @@ type SecurityGroupTargetReference struct {
 	Deleted *NetworkInterfaceReferenceTargetContextDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The name for this instance network interface.
@@ -63863,6 +68944,12 @@ type Share struct {
 	// This property will be absent if no jobs have been created for this file share.
 	LatestJob *ShareJob `json:"latest_job,omitempty"`
 
+	// Information about the latest synchronization for this file share.
+	//
+	// This property will be present when the `replication_role` is `replica` and at least
+	// one replication sync has been completed.
+	LatestSync *ShareLatestSync `json:"latest_sync,omitempty"`
+
 	// The lifecycle state of the file share.
 	LifecycleState *string `json:"lifecycle_state" validate:"required"`
 
@@ -63896,6 +68983,8 @@ type Share struct {
 	// The replication status of the file share.
 	//
 	// * `active`: This share is actively participating in replication, and the replica's data is up-to-date with the
+	// replication schedule.
+	// * `degraded`: This is share is participating in replication, but the replica's data has fallen behind the
 	// replication schedule.
 	// * `failover_pending`: This share is performing a replication failover.
 	// * `initializing`: This share is initializing replication.
@@ -63984,12 +69073,15 @@ const (
 //
 // * `active`: This share is actively participating in replication, and the replica's data is up-to-date with the
 // replication schedule.
+// * `degraded`: This is share is participating in replication, but the replica's data has fallen behind the replication
+// schedule.
 // * `failover_pending`: This share is performing a replication failover.
 // * `initializing`: This share is initializing replication.
 // * `none`: This share is not participating in replication.
 // * `split_pending`: This share is performing a replication split.
 const (
 	ShareReplicationStatusActiveConst          = "active"
+	ShareReplicationStatusDegradedConst        = "degraded"
 	ShareReplicationStatusFailoverPendingConst = "failover_pending"
 	ShareReplicationStatusInitializingConst    = "initializing"
 	ShareReplicationStatusNoneConst            = "none"
@@ -64038,6 +69130,10 @@ func UnmarshalShare(m map[string]json.RawMessage, result interface{}) (err error
 		return
 	}
 	err = core.UnmarshalModel(m, "latest_job", &obj.LatestJob, UnmarshalShareJob)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "latest_sync", &obj.LatestSync, UnmarshalShareLatestSync)
 	if err != nil {
 		return
 	}
@@ -64385,6 +69481,40 @@ func UnmarshalShareJobStatusReason(m map[string]json.RawMessage, result interfac
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "more_info", &obj.MoreInfo)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ShareLatestSync : Information about the latest synchronization for this file share.
+//
+// This property will be present when the `replication_role` is `replica` and at least one replication sync has been
+// completed.
+type ShareLatestSync struct {
+	// The completed date and time of last synchronization between the replica share and its source.
+	CompletedAt *strfmt.DateTime `json:"completed_at" validate:"required"`
+
+	// The data transferred (in bytes) in the last synchronization between the replica and its source.
+	DataTransferred *int64 `json:"data_transferred" validate:"required"`
+
+	// The start date and time of last synchronization between the replica share and its source.
+	StartedAt *strfmt.DateTime `json:"started_at" validate:"required"`
+}
+
+// UnmarshalShareLatestSync unmarshals an instance of ShareLatestSync from the specified map of raw messages.
+func UnmarshalShareLatestSync(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ShareLatestSync)
+	err = core.UnmarshalPrimitive(m, "completed_at", &obj.CompletedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "data_transferred", &obj.DataTransferred)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "started_at", &obj.StartedAt)
 	if err != nil {
 		return
 	}
@@ -64828,7 +69958,39 @@ func UnmarshalShareMountTargetReferenceDeleted(m map[string]json.RawMessage, res
 // ShareMountTargetVirtualNetworkInterfacePrototype : ShareMountTargetVirtualNetworkInterfacePrototype struct
 // Models which "extend" this model:
 // - ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePrototypeShareMountTargetContext
+// - ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity
 type ShareMountTargetVirtualNetworkInterfacePrototype struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// Additional IP addresses to bind to the virtual network interface. Each item may be either a reserved IP identity, or
+	// a reserved IP prototype object which will be used to create a new reserved IP. All IP addresses must be in the
+	// primary IP's subnet.
+	//
+	// If reserved IP identities are provided, the specified reserved IPs must be unbound.
+	//
+	// If reserved IP prototype objects with addresses are provided, the addresses must be available on the virtual network
+	// interface's subnet. For any prototype objects that do not specify an address, an available address on the subnet
+	// will be automatically selected and reserved.
+	Ips []VirtualNetworkInterfaceIPPrototypeIntf `json:"ips,omitempty"`
+
 	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
 	// VPC. If unspecified, the name will be a hyphenated list of randomly-selected words. Names beginning with `ibm-` are
 	// reserved for provider-owned resources, and are not allowed.
@@ -64853,8 +70015,18 @@ type ShareMountTargetVirtualNetworkInterfacePrototype struct {
 	// for the subnet is used.
 	SecurityGroups []SecurityGroupIdentityIntf `json:"security_groups,omitempty"`
 
-	// The associated subnet. Required if `primary_ip` does not specify a reserved IP.
+	// The associated subnet. Required if `primary_ip` does not specify a reserved IP
+	// identity.
 	Subnet SubnetIdentityIntf `json:"subnet,omitempty"`
+
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
 }
 
 func (*ShareMountTargetVirtualNetworkInterfacePrototype) isaShareMountTargetVirtualNetworkInterfacePrototype() bool {
@@ -64868,6 +70040,22 @@ type ShareMountTargetVirtualNetworkInterfacePrototypeIntf interface {
 // UnmarshalShareMountTargetVirtualNetworkInterfacePrototype unmarshals an instance of ShareMountTargetVirtualNetworkInterfacePrototype from the specified map of raw messages.
 func UnmarshalShareMountTargetVirtualNetworkInterfacePrototype(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(ShareMountTargetVirtualNetworkInterfacePrototype)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalVirtualNetworkInterfaceIPPrototype)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
 	if err != nil {
 		return
@@ -64885,6 +70073,18 @@ func UnmarshalShareMountTargetVirtualNetworkInterfacePrototype(m map[string]json
 		return
 	}
 	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
 	if err != nil {
 		return
 	}
@@ -65409,7 +70609,9 @@ type SharePrototype struct {
 	UserTags []string `json:"user_tags,omitempty"`
 
 	// The zone this file share will reside in.
-	// For a replica share, this must be a different zone in the same region as the source share.
+	//
+	// For a replica share, this must be a different zone in the same region as the
+	// source share.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
 
 	// The access control mode for the share:
@@ -65447,7 +70649,9 @@ type SharePrototype struct {
 	ReplicationCronSpec *string `json:"replication_cron_spec,omitempty"`
 
 	// The source file share for this replica file share. The specified file share must not
-	// already have a replica, and must not be a replica.
+	// already have a replica, and must not be a replica. If source file share is specified
+	// by CRN, it may be in an [associated partner
+	// region](https://cloud.ibm.com/docs/vpc?topic=vpc-file-storage-replication).
 	SourceShare ShareIdentityIntf `json:"source_share,omitempty"`
 }
 
@@ -65644,6 +70848,10 @@ type ShareReference struct {
 	// The name for this share. The name is unique across all shares in the region.
 	Name *string `json:"name" validate:"required"`
 
+	// If present, this property indicates that the resource associated with this reference
+	// is remote and therefore may not be directly retrievable.
+	Remote *ShareRemote `json:"remote,omitempty"`
+
 	// The resource type.
 	ResourceType *string `json:"resource_type" validate:"required"`
 }
@@ -65677,6 +70885,10 @@ func UnmarshalShareReference(m map[string]json.RawMessage, result interface{}) (
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "remote", &obj.Remote, UnmarshalShareRemote)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
 	if err != nil {
 		return
@@ -65696,6 +70908,25 @@ type ShareReferenceDeleted struct {
 func UnmarshalShareReferenceDeleted(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(ShareReferenceDeleted)
 	err = core.UnmarshalPrimitive(m, "more_info", &obj.MoreInfo)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ShareRemote : If present, this property indicates that the resource associated with this reference is remote and therefore may not
+// be directly retrievable.
+type ShareRemote struct {
+	// If present, this property indicates that the referenced resource is remote to this
+	// region, and identifies the native region.
+	Region *RegionReference `json:"region,omitempty"`
+}
+
+// UnmarshalShareRemote unmarshals an instance of ShareRemote from the specified map of raw messages.
+func UnmarshalShareRemote(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ShareRemote)
+	err = core.UnmarshalModel(m, "region", &obj.Region, UnmarshalRegionReference)
 	if err != nil {
 		return
 	}
@@ -65812,6 +71043,9 @@ type Snapshot struct {
 
 	// The size of this snapshot rounded up to the next gigabyte.
 	Size *int64 `json:"size" validate:"required"`
+
+	// If present, the snapshot consistency group which created this snapshot.
+	SnapshotConsistencyGroup *SnapshotConsistencyGroupReference `json:"snapshot_consistency_group,omitempty"`
 
 	// If present, the image from which the data on this snapshot was most directly
 	// provisioned.
@@ -65933,6 +71167,10 @@ func UnmarshalSnapshot(m map[string]json.RawMessage, result interface{}) (err er
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "size", &obj.Size)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "snapshot_consistency_group", &obj.SnapshotConsistencyGroup, UnmarshalSnapshotConsistencyGroupReference)
 	if err != nil {
 		return
 	}
@@ -66116,6 +71354,529 @@ type SnapshotCollectionNext struct {
 func UnmarshalSnapshotCollectionNext(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(SnapshotCollectionNext)
 	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroup : SnapshotConsistencyGroup struct
+type SnapshotConsistencyGroup struct {
+	// If present, the backup policy plan which created this snapshot consistency group.
+	BackupPolicyPlan *BackupPolicyPlanReference `json:"backup_policy_plan,omitempty"`
+
+	// The date and time that this snapshot consistency group was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN of this snapshot consistency group.
+	CRN *string `json:"crn" validate:"required"`
+
+	// Indicates whether deleting the snapshot consistency group will also delete the snapshots in the group.
+	DeleteSnapshotsOnDelete *bool `json:"delete_snapshots_on_delete" validate:"required"`
+
+	// The URL for this snapshot consistency group.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this snapshot consistency group.
+	ID *string `json:"id" validate:"required"`
+
+	// The lifecycle state of this snapshot consistency group.
+	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The name for this snapshot consistency group. The name is unique across all snapshot consistency groups in the
+	// region.
+	Name *string `json:"name" validate:"required"`
+
+	// The resource group for this snapshot consistency group.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The [service tags](https://cloud.ibm.com/apidocs/tagging#types-of-tags) associated with this snapshot consistency
+	// group. Each tag is prefixed with
+	// [is.instance:](https://cloud.ibm.com/docs/vpc?topic=vpc-snapshots-vpc-faqs).
+	ServiceTags []string `json:"service_tags" validate:"required"`
+
+	// The member snapshots that are data-consistent with respect to captured time. (may be
+	// [deleted](https://cloud.ibm.com/apidocs/vpc#deleted-resources)).
+	Snapshots []SnapshotConsistencyGroupSnapshotsItem `json:"snapshots" validate:"required"`
+}
+
+// Constants associated with the SnapshotConsistencyGroup.LifecycleState property.
+// The lifecycle state of this snapshot consistency group.
+const (
+	SnapshotConsistencyGroupLifecycleStateDeletingConst  = "deleting"
+	SnapshotConsistencyGroupLifecycleStateFailedConst    = "failed"
+	SnapshotConsistencyGroupLifecycleStatePendingConst   = "pending"
+	SnapshotConsistencyGroupLifecycleStateStableConst    = "stable"
+	SnapshotConsistencyGroupLifecycleStateSuspendedConst = "suspended"
+	SnapshotConsistencyGroupLifecycleStateUpdatingConst  = "updating"
+	SnapshotConsistencyGroupLifecycleStateWaitingConst   = "waiting"
+)
+
+// Constants associated with the SnapshotConsistencyGroup.ResourceType property.
+// The resource type.
+const (
+	SnapshotConsistencyGroupResourceTypeSnapshotConsistencyGroupConst = "snapshot_consistency_group"
+)
+
+// UnmarshalSnapshotConsistencyGroup unmarshals an instance of SnapshotConsistencyGroup from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroup(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroup)
+	err = core.UnmarshalModel(m, "backup_policy_plan", &obj.BackupPolicyPlan, UnmarshalBackupPolicyPlanReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "delete_snapshots_on_delete", &obj.DeleteSnapshotsOnDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "service_tags", &obj.ServiceTags)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "snapshots", &obj.Snapshots, UnmarshalSnapshotConsistencyGroupSnapshotsItem)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupCollection : SnapshotConsistencyGroupCollection struct
+type SnapshotConsistencyGroupCollection struct {
+	// A link to the first page of resources.
+	First *SnapshotConsistencyGroupCollectionFirst `json:"first" validate:"required"`
+
+	// The maximum number of resources that can be returned by the request.
+	Limit *int64 `json:"limit" validate:"required"`
+
+	// A link to the next page of resources. This property is present for all pages
+	// except the last page.
+	Next *SnapshotConsistencyGroupCollectionNext `json:"next,omitempty"`
+
+	// Collection of snapshot consistency groups.
+	SnapshotConsistencyGroups []SnapshotConsistencyGroup `json:"snapshot_consistency_groups" validate:"required"`
+
+	// The total number of resources across all pages.
+	TotalCount *int64 `json:"total_count" validate:"required"`
+}
+
+// UnmarshalSnapshotConsistencyGroupCollection unmarshals an instance of SnapshotConsistencyGroupCollection from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupCollection(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupCollection)
+	err = core.UnmarshalModel(m, "first", &obj.First, UnmarshalSnapshotConsistencyGroupCollectionFirst)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "limit", &obj.Limit)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "next", &obj.Next, UnmarshalSnapshotConsistencyGroupCollectionNext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "snapshot_consistency_groups", &obj.SnapshotConsistencyGroups, UnmarshalSnapshotConsistencyGroup)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_count", &obj.TotalCount)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// Retrieve the value to be passed to a request to access the next page of results
+func (resp *SnapshotConsistencyGroupCollection) GetNextStart() (*string, error) {
+	if core.IsNil(resp.Next) {
+		return nil, nil
+	}
+	start, err := core.GetQueryParam(resp.Next.Href, "start")
+	if err != nil || start == nil {
+		return nil, err
+	}
+	return start, nil
+}
+
+// SnapshotConsistencyGroupCollectionFirst : A link to the first page of resources.
+type SnapshotConsistencyGroupCollectionFirst struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalSnapshotConsistencyGroupCollectionFirst unmarshals an instance of SnapshotConsistencyGroupCollectionFirst from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupCollectionFirst(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupCollectionFirst)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupCollectionNext : A link to the next page of resources. This property is present for all pages except the last page.
+type SnapshotConsistencyGroupCollectionNext struct {
+	// The URL for a page of resources.
+	Href *string `json:"href" validate:"required"`
+}
+
+// UnmarshalSnapshotConsistencyGroupCollectionNext unmarshals an instance of SnapshotConsistencyGroupCollectionNext from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupCollectionNext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupCollectionNext)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupPatch : SnapshotConsistencyGroupPatch struct
+type SnapshotConsistencyGroupPatch struct {
+	// Indicates whether deleting the snapshot consistency group will also delete the snapshots in the group.
+	DeleteSnapshotsOnDelete *bool `json:"delete_snapshots_on_delete,omitempty"`
+
+	// The name for this snapshot consistency group. The name must not be used by another snapshot consistency groups in
+	// the region.
+	Name *string `json:"name,omitempty"`
+}
+
+// UnmarshalSnapshotConsistencyGroupPatch unmarshals an instance of SnapshotConsistencyGroupPatch from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupPatch(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupPatch)
+	err = core.UnmarshalPrimitive(m, "delete_snapshots_on_delete", &obj.DeleteSnapshotsOnDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// AsPatch returns a generic map representation of the SnapshotConsistencyGroupPatch
+func (snapshotConsistencyGroupPatch *SnapshotConsistencyGroupPatch) AsPatch() (_patch map[string]interface{}, err error) {
+	var jsonData []byte
+	jsonData, err = json.Marshal(snapshotConsistencyGroupPatch)
+	if err == nil {
+		err = json.Unmarshal(jsonData, &_patch)
+	}
+	return
+}
+
+// SnapshotConsistencyGroupPrototype : SnapshotConsistencyGroupPrototype struct
+// Models which "extend" this model:
+// - SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots
+type SnapshotConsistencyGroupPrototype struct {
+	// Indicates whether deleting the snapshot consistency group will also delete the snapshots in the group.
+	DeleteSnapshotsOnDelete *bool `json:"delete_snapshots_on_delete,omitempty"`
+
+	// The name for this snapshot consistency group. The name must be unique across all snapshot consistency groups in the
+	// region.
+	//
+	// If unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The resource group to use. If unspecified, the account's [default resource
+	// group](https://cloud.ibm.com/apidocs/resource-manager#introduction) will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The data-consistent member snapshots to create.  All snapshots must specify a
+	// `source_volume` attached to the same virtual server instance.
+	Snapshots []SnapshotConsistencyGroupPrototypeSnapshotsItem `json:"snapshots,omitempty"`
+}
+
+func (*SnapshotConsistencyGroupPrototype) isaSnapshotConsistencyGroupPrototype() bool {
+	return true
+}
+
+type SnapshotConsistencyGroupPrototypeIntf interface {
+	isaSnapshotConsistencyGroupPrototype() bool
+}
+
+// UnmarshalSnapshotConsistencyGroupPrototype unmarshals an instance of SnapshotConsistencyGroupPrototype from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupPrototype)
+	err = core.UnmarshalPrimitive(m, "delete_snapshots_on_delete", &obj.DeleteSnapshotsOnDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "snapshots", &obj.Snapshots, UnmarshalSnapshotConsistencyGroupPrototypeSnapshotsItem)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem : SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem struct
+type SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem struct {
+	// The name for this snapshot. The name must not be used by another snapshot in the region. If unspecified, the name
+	// will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The volume to create this snapshot from.
+	SourceVolume VolumeIdentityIntf `json:"source_volume" validate:"required"`
+
+	// The [user tags](https://cloud.ibm.com/apidocs/tagging#types-of-tags) associated with this snapshot.
+	UserTags []string `json:"user_tags,omitempty"`
+}
+
+// NewSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem : Instantiate SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem (Generic Model Constructor)
+func (*VpcV1) NewSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem(sourceVolume VolumeIdentityIntf) (_model *SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem, err error) {
+	_model = &SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem{
+		SourceVolume: sourceVolume,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+// UnmarshalSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem unmarshals an instance of SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem)
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "source_volume", &obj.SourceVolume, UnmarshalVolumeIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_tags", &obj.UserTags)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupPrototypeSnapshotsItem : SnapshotConsistencyGroupPrototypeSnapshotsItem struct
+type SnapshotConsistencyGroupPrototypeSnapshotsItem struct {
+	// The name for this snapshot. The name must not be used by another snapshot in the region. If unspecified, the name
+	// will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The volume to create this snapshot from.
+	SourceVolume VolumeIdentityIntf `json:"source_volume" validate:"required"`
+
+	// The [user tags](https://cloud.ibm.com/apidocs/tagging#types-of-tags) associated with this snapshot.
+	UserTags []string `json:"user_tags,omitempty"`
+}
+
+// NewSnapshotConsistencyGroupPrototypeSnapshotsItem : Instantiate SnapshotConsistencyGroupPrototypeSnapshotsItem (Generic Model Constructor)
+func (*VpcV1) NewSnapshotConsistencyGroupPrototypeSnapshotsItem(sourceVolume VolumeIdentityIntf) (_model *SnapshotConsistencyGroupPrototypeSnapshotsItem, err error) {
+	_model = &SnapshotConsistencyGroupPrototypeSnapshotsItem{
+		SourceVolume: sourceVolume,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+// UnmarshalSnapshotConsistencyGroupPrototypeSnapshotsItem unmarshals an instance of SnapshotConsistencyGroupPrototypeSnapshotsItem from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupPrototypeSnapshotsItem(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupPrototypeSnapshotsItem)
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "source_volume", &obj.SourceVolume, UnmarshalVolumeIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_tags", &obj.UserTags)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupReference : SnapshotConsistencyGroupReference struct
+type SnapshotConsistencyGroupReference struct {
+	// The CRN of this snapshot consistency group.
+	CRN *string `json:"crn" validate:"required"`
+
+	// If present, this property indicates the referenced resource has been deleted, and provides
+	// some supplementary information.
+	Deleted *SnapshotConsistencyGroupReferenceDeleted `json:"deleted,omitempty"`
+
+	// The URL for this snapshot consistency group.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this snapshot consistency group.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this snapshot consistency group. The name is unique across all snapshot consistency groups in the
+	// region.
+	Name *string `json:"name" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+}
+
+// Constants associated with the SnapshotConsistencyGroupReference.ResourceType property.
+// The resource type.
+const (
+	SnapshotConsistencyGroupReferenceResourceTypeSnapshotConsistencyGroupConst = "snapshot_consistency_group"
+)
+
+// UnmarshalSnapshotConsistencyGroupReference unmarshals an instance of SnapshotConsistencyGroupReference from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupReference(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupReference)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalSnapshotConsistencyGroupReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupReferenceDeleted : If present, this property indicates the referenced resource has been deleted, and provides some supplementary
+// information.
+type SnapshotConsistencyGroupReferenceDeleted struct {
+	// Link to documentation about deleted resources.
+	MoreInfo *string `json:"more_info" validate:"required"`
+}
+
+// UnmarshalSnapshotConsistencyGroupReferenceDeleted unmarshals an instance of SnapshotConsistencyGroupReferenceDeleted from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupReferenceDeleted(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupReferenceDeleted)
+	err = core.UnmarshalPrimitive(m, "more_info", &obj.MoreInfo)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupSnapshotsItem : SnapshotConsistencyGroupSnapshotsItem struct
+type SnapshotConsistencyGroupSnapshotsItem struct {
+	// The CRN of this snapshot.
+	CRN *string `json:"crn" validate:"required"`
+
+	// If present, this property indicates the referenced resource has been deleted, and provides
+	// some supplementary information.
+	Deleted *SnapshotReferenceDeleted `json:"deleted,omitempty"`
+
+	// The URL for this snapshot.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this snapshot.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this snapshot. The name is unique across all snapshots in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// If present, this property indicates that the resource associated with this reference
+	// is remote and therefore may not be directly retrievable.
+	Remote *SnapshotRemote `json:"remote,omitempty"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+}
+
+// Constants associated with the SnapshotConsistencyGroupSnapshotsItem.ResourceType property.
+// The resource type.
+const (
+	SnapshotConsistencyGroupSnapshotsItemResourceTypeSnapshotConst = "snapshot"
+)
+
+// UnmarshalSnapshotConsistencyGroupSnapshotsItem unmarshals an instance of SnapshotConsistencyGroupSnapshotsItem from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupSnapshotsItem(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupSnapshotsItem)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalSnapshotReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "remote", &obj.Remote, UnmarshalSnapshotRemote)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
 	if err != nil {
 		return
 	}
@@ -67417,6 +73178,54 @@ func (options *UpdateBareMetalServerDiskOptions) SetHeaders(param map[string]str
 	return options
 }
 
+// UpdateBareMetalServerNetworkAttachmentOptions : The UpdateBareMetalServerNetworkAttachment options.
+type UpdateBareMetalServerNetworkAttachmentOptions struct {
+	// The bare metal server identifier.
+	BareMetalServerID *string `json:"bare_metal_server_id" validate:"required,ne="`
+
+	// The bare metal server network attachment identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// The bare metal server network attachment patch.
+	BareMetalServerNetworkAttachmentPatch map[string]interface{} `json:"BareMetalServerNetworkAttachment_patch" validate:"required"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewUpdateBareMetalServerNetworkAttachmentOptions : Instantiate UpdateBareMetalServerNetworkAttachmentOptions
+func (*VpcV1) NewUpdateBareMetalServerNetworkAttachmentOptions(bareMetalServerID string, id string, bareMetalServerNetworkAttachmentPatch map[string]interface{}) *UpdateBareMetalServerNetworkAttachmentOptions {
+	return &UpdateBareMetalServerNetworkAttachmentOptions{
+		BareMetalServerID:                     core.StringPtr(bareMetalServerID),
+		ID:                                    core.StringPtr(id),
+		BareMetalServerNetworkAttachmentPatch: bareMetalServerNetworkAttachmentPatch,
+	}
+}
+
+// SetBareMetalServerID : Allow user to set BareMetalServerID
+func (_options *UpdateBareMetalServerNetworkAttachmentOptions) SetBareMetalServerID(bareMetalServerID string) *UpdateBareMetalServerNetworkAttachmentOptions {
+	_options.BareMetalServerID = core.StringPtr(bareMetalServerID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *UpdateBareMetalServerNetworkAttachmentOptions) SetID(id string) *UpdateBareMetalServerNetworkAttachmentOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetBareMetalServerNetworkAttachmentPatch : Allow user to set BareMetalServerNetworkAttachmentPatch
+func (_options *UpdateBareMetalServerNetworkAttachmentOptions) SetBareMetalServerNetworkAttachmentPatch(bareMetalServerNetworkAttachmentPatch map[string]interface{}) *UpdateBareMetalServerNetworkAttachmentOptions {
+	_options.BareMetalServerNetworkAttachmentPatch = bareMetalServerNetworkAttachmentPatch
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *UpdateBareMetalServerNetworkAttachmentOptions) SetHeaders(param map[string]string) *UpdateBareMetalServerNetworkAttachmentOptions {
+	options.Headers = param
+	return options
+}
+
 // UpdateBareMetalServerNetworkInterfaceOptions : The UpdateBareMetalServerNetworkInterface options.
 type UpdateBareMetalServerNetworkInterfaceOptions struct {
 	// The bare metal server identifier.
@@ -68159,6 +73968,54 @@ func (_options *UpdateInstanceGroupOptions) SetInstanceGroupPatch(instanceGroupP
 
 // SetHeaders : Allow user to set Headers
 func (options *UpdateInstanceGroupOptions) SetHeaders(param map[string]string) *UpdateInstanceGroupOptions {
+	options.Headers = param
+	return options
+}
+
+// UpdateInstanceNetworkAttachmentOptions : The UpdateInstanceNetworkAttachment options.
+type UpdateInstanceNetworkAttachmentOptions struct {
+	// The virtual server instance identifier.
+	InstanceID *string `json:"instance_id" validate:"required,ne="`
+
+	// The instance network attachment identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// The instance network attachment patch.
+	InstanceNetworkAttachmentPatch map[string]interface{} `json:"InstanceNetworkAttachment_patch" validate:"required"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewUpdateInstanceNetworkAttachmentOptions : Instantiate UpdateInstanceNetworkAttachmentOptions
+func (*VpcV1) NewUpdateInstanceNetworkAttachmentOptions(instanceID string, id string, instanceNetworkAttachmentPatch map[string]interface{}) *UpdateInstanceNetworkAttachmentOptions {
+	return &UpdateInstanceNetworkAttachmentOptions{
+		InstanceID:                     core.StringPtr(instanceID),
+		ID:                             core.StringPtr(id),
+		InstanceNetworkAttachmentPatch: instanceNetworkAttachmentPatch,
+	}
+}
+
+// SetInstanceID : Allow user to set InstanceID
+func (_options *UpdateInstanceNetworkAttachmentOptions) SetInstanceID(instanceID string) *UpdateInstanceNetworkAttachmentOptions {
+	_options.InstanceID = core.StringPtr(instanceID)
+	return _options
+}
+
+// SetID : Allow user to set ID
+func (_options *UpdateInstanceNetworkAttachmentOptions) SetID(id string) *UpdateInstanceNetworkAttachmentOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetInstanceNetworkAttachmentPatch : Allow user to set InstanceNetworkAttachmentPatch
+func (_options *UpdateInstanceNetworkAttachmentOptions) SetInstanceNetworkAttachmentPatch(instanceNetworkAttachmentPatch map[string]interface{}) *UpdateInstanceNetworkAttachmentOptions {
+	_options.InstanceNetworkAttachmentPatch = instanceNetworkAttachmentPatch
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *UpdateInstanceNetworkAttachmentOptions) SetHeaders(param map[string]string) *UpdateInstanceNetworkAttachmentOptions {
 	options.Headers = param
 	return options
 }
@@ -69083,6 +74940,54 @@ func (options *UpdateShareOptions) SetHeaders(param map[string]string) *UpdateSh
 	return options
 }
 
+// UpdateSnapshotConsistencyGroupOptions : The UpdateSnapshotConsistencyGroup options.
+type UpdateSnapshotConsistencyGroupOptions struct {
+	// The snapshot consistency group identifier.
+	ID *string `json:"id" validate:"required,ne="`
+
+	// The snapshot consistency group patch.
+	SnapshotConsistencyGroupPatch map[string]interface{} `json:"SnapshotConsistencyGroup_patch" validate:"required"`
+
+	// If present, the request will fail if the specified ETag value does not match the resource's current ETag value.
+	// Required if the request body includes an array.
+	IfMatch *string `json:"If-Match,omitempty"`
+
+	// Allows users to set headers on API requests
+	Headers map[string]string
+}
+
+// NewUpdateSnapshotConsistencyGroupOptions : Instantiate UpdateSnapshotConsistencyGroupOptions
+func (*VpcV1) NewUpdateSnapshotConsistencyGroupOptions(id string, snapshotConsistencyGroupPatch map[string]interface{}) *UpdateSnapshotConsistencyGroupOptions {
+	return &UpdateSnapshotConsistencyGroupOptions{
+		ID:                            core.StringPtr(id),
+		SnapshotConsistencyGroupPatch: snapshotConsistencyGroupPatch,
+	}
+}
+
+// SetID : Allow user to set ID
+func (_options *UpdateSnapshotConsistencyGroupOptions) SetID(id string) *UpdateSnapshotConsistencyGroupOptions {
+	_options.ID = core.StringPtr(id)
+	return _options
+}
+
+// SetSnapshotConsistencyGroupPatch : Allow user to set SnapshotConsistencyGroupPatch
+func (_options *UpdateSnapshotConsistencyGroupOptions) SetSnapshotConsistencyGroupPatch(snapshotConsistencyGroupPatch map[string]interface{}) *UpdateSnapshotConsistencyGroupOptions {
+	_options.SnapshotConsistencyGroupPatch = snapshotConsistencyGroupPatch
+	return _options
+}
+
+// SetIfMatch : Allow user to set IfMatch
+func (_options *UpdateSnapshotConsistencyGroupOptions) SetIfMatch(ifMatch string) *UpdateSnapshotConsistencyGroupOptions {
+	_options.IfMatch = core.StringPtr(ifMatch)
+	return _options
+}
+
+// SetHeaders : Allow user to set Headers
+func (options *UpdateSnapshotConsistencyGroupOptions) SetHeaders(param map[string]string) *UpdateSnapshotConsistencyGroupOptions {
+	options.Headers = param
+	return options
+}
+
 // UpdateSnapshotOptions : The UpdateSnapshot options.
 type UpdateSnapshotOptions struct {
 	// The snapshot identifier.
@@ -69408,6 +75313,7 @@ type UpdateVPCOptions struct {
 	VPCPatch map[string]interface{} `json:"VPC_patch" validate:"required"`
 
 	// If present, the request will fail if the specified ETag value does not match the resource's current ETag value.
+	// Required if the request body includes an array.
 	IfMatch *string `json:"If-Match,omitempty"`
 
 	// Allows users to set headers on API requests
@@ -70392,6 +76298,14 @@ type VpcdnsResolver struct {
 	VPC *VPCReferenceDnsResolverContext `json:"vpc,omitempty"`
 
 	// The manually specified DNS servers for this VPC.
+	//
+	// If the DNS servers have `zone_affinity`, the DHCP [Domain Name Server
+	// Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for a zone will list the DNS server with the
+	// affinity for that zone first, followed by the unique DNS servers from other zones.
+	//
+	// If the DNS servers do not have `zone_affinity`, the DHCP [Domain Name Server
+	// Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for each zone will list all the manual DNS
+	// servers in the order specified.
 	ManualServers []DnsServer `json:"manual_servers,omitempty"`
 
 	// The configuration of the system DNS resolver for this VPC.
@@ -70494,6 +76408,14 @@ type VpcdnsResolverPatch struct {
 	// - have a unique `zone_affinity`, or
 	// - not have a `zone_affinity`.
 	//
+	// If `zone_affinity` is specified, exactly one DNS server must be specified for each zone in the region. The DHCP
+	// [Domain Name Server Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for a zone will list this DNS
+	// server first, followed by unique DNS servers from other zones if available.
+	//
+	// If `zone_affinity` is not specified, the DHCP [Domain Name Server
+	// Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for each zone will list all the manual DNS
+	// servers in the order specified.
+	//
 	// `dns.resolver.manual_servers` must be set if and only if `dns.resolver.type` is `manual`.
 	ManualServers []DnsServerPrototype `json:"manual_servers,omitempty"`
 
@@ -70581,6 +76503,14 @@ type VpcdnsResolverPrototype struct {
 	//
 	// - have a unique `zone_affinity`, or
 	// - not have a `zone_affinity`.
+	//
+	// If `zone_affinity` is specified, exactly one DNS server must be specified for each zone in the region. The DHCP
+	// [Domain Name Server Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for a zone will list this DNS
+	// server first, followed by unique DNS servers from other zones if available.
+	//
+	// If `zone_affinity` is not specified, the DHCP [Domain Name Server
+	// Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for each zone will list all the manual DNS
+	// servers in the order specified.
 	ManualServers []DnsServerPrototype `json:"manual_servers,omitempty"`
 }
 
@@ -70682,7 +76612,8 @@ type VPCHealthReason struct {
 // Constants associated with the VPCHealthReason.Code property.
 // A snake case string succinctly identifying the reason for this health state.
 const (
-	VPCHealthReasonCodeInternalErrorConst = "internal_error"
+	VPCHealthReasonCodeDnsResolutionBindingFailedConst = "dns_resolution_binding_failed"
+	VPCHealthReasonCodeInternalErrorConst              = "internal_error"
 )
 
 // UnmarshalVPCHealthReason unmarshals an instance of VPCHealthReason from the specified map of raw messages.
@@ -72647,11 +78578,11 @@ type VPNServer struct {
 
 	// The reasons for the current VPN server health_state (if any):
 	// - `cannot_access_client_certificate`: VPN server's client certificate is inaccessible
-	//   (verify certificate exists and that IAM policies grant `VPN server for VPC` access to
-	//   `Secrets Manager`)
+	//   (verify certificate exists and that IAM policies grant `VPN server for VPC` access
+	//   to `Secrets Manager`)
 	// - `cannot_access_server_certificate`: VPN server's server certificate is inaccessible
-	//   (verify certificate exists and that IAM policies grant `VPN server for VPC` access to
-	//   `Secrets Manager`)
+	//   (verify certificate exists and that IAM policies grant `VPN server for VPC` access
+	//   to `Secrets Manager`)
 	// - `cannot_create_vpc_route`: VPN cannot create route (check for conflict)
 	// - `cannot_reserve_ip_address`: IP address exhaustion (release addresses on the VPN's
 	//   subnet)
@@ -73889,6 +79820,10 @@ func (vpnServerRoutePatch *VPNServerRoutePatch) AsPatch() (_patch map[string]int
 
 // VirtualNetworkInterface : VirtualNetworkInterface struct
 type VirtualNetworkInterface struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing" validate:"required"`
+
 	// Indicates whether this virtual network interface will be automatically deleted when
 	// `target` is deleted.
 	AutoDelete *bool `json:"auto_delete" validate:"required"`
@@ -73899,14 +79834,34 @@ type VirtualNetworkInterface struct {
 	// The CRN for this virtual network interface.
 	CRN *string `json:"crn" validate:"required"`
 
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat" validate:"required"`
+
 	// The URL for this virtual network interface.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this virtual network interface.
 	ID *string `json:"id" validate:"required"`
 
+	// The reserved IPs bound to this virtual network interface.
+	//
+	// May be empty when `lifecycle_state` is `pending`.
+	Ips []ReservedIPReference `json:"ips" validate:"required"`
+
 	// The lifecycle state of the virtual network interface.
 	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The MAC address of the virtual network interface. May be absent if `lifecycle_state` is `pending`.
+	MacAddress *string `json:"mac_address,omitempty"`
 
 	// The name for this virtual network interface. The name is unique across all virtual network interfaces in the VPC.
 	Name *string `json:"name" validate:"required"`
@@ -73959,6 +79914,10 @@ const (
 // UnmarshalVirtualNetworkInterface unmarshals an instance of VirtualNetworkInterface from the specified map of raw messages.
 func UnmarshalVirtualNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(VirtualNetworkInterface)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
 	if err != nil {
 		return
@@ -73971,6 +79930,10 @@ func UnmarshalVirtualNetworkInterface(m map[string]json.RawMessage, result inter
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
 	if err != nil {
 		return
@@ -73979,7 +79942,15 @@ func UnmarshalVirtualNetworkInterface(m map[string]json.RawMessage, result inter
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "mac_address", &obj.MacAddress)
 	if err != nil {
 		return
 	}
@@ -74115,15 +80086,110 @@ func UnmarshalVirtualNetworkInterfaceCollectionNext(m map[string]json.RawMessage
 	return
 }
 
+// VirtualNetworkInterfaceIPPrototype : VirtualNetworkInterfaceIPPrototype struct
+// Models which "extend" this model:
+// - VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext
+// - VirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext
+type VirtualNetworkInterfaceIPPrototype struct {
+	// The unique identifier for this reserved IP.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this reserved IP.
+	Href *string `json:"href,omitempty"`
+
+	// The IP address to reserve, which must not already be reserved on the subnet.
+	//
+	// If unspecified, an available address on the subnet will automatically be selected.
+	Address *string `json:"address,omitempty"`
+
+	// Indicates whether this reserved IP member will be automatically deleted when either
+	// `target` is deleted, or the reserved IP is unbound.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// The name for this reserved IP. The name must not be used by another reserved IP in the subnet. Names starting with
+	// `ibm-` are reserved for provider-owned resources, and are not allowed. If unspecified, the name will be a hyphenated
+	// list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+}
+
+func (*VirtualNetworkInterfaceIPPrototype) isaVirtualNetworkInterfaceIPPrototype() bool {
+	return true
+}
+
+type VirtualNetworkInterfaceIPPrototypeIntf interface {
+	isaVirtualNetworkInterfaceIPPrototype() bool
+}
+
+// UnmarshalVirtualNetworkInterfaceIPPrototype unmarshals an instance of VirtualNetworkInterfaceIPPrototype from the specified map of raw messages.
+func UnmarshalVirtualNetworkInterfaceIPPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(VirtualNetworkInterfaceIPPrototype)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "address", &obj.Address)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // VirtualNetworkInterfacePatch : VirtualNetworkInterfacePatch struct
 type VirtualNetworkInterfacePatch struct {
-	// The name for this virtual network interface. The name is unique across all virtual network interfaces in the VPC.
+	// Indicates whether source IP spoofing is allowed on this interface.
+	//
+	// Must be `false` if `target` is a file share mount target.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted. Must be `false` if the virtual network interface is unbound.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
+	// region. Names beginning with `ibm-` are reserved for provider-owned resources, and are not allowed.
 	Name *string `json:"name,omitempty"`
 }
 
 // UnmarshalVirtualNetworkInterfacePatch unmarshals an instance of VirtualNetworkInterfacePatch from the specified map of raw messages.
 func UnmarshalVirtualNetworkInterfacePatch(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(VirtualNetworkInterfacePatch)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
 	if err != nil {
 		return
@@ -74279,6 +80345,8 @@ func UnmarshalVirtualNetworkInterfaceReferenceDeleted(m map[string]json.RawMessa
 // types. Optionally halt processing and surface an error, or bypass resources of unrecognized types.
 // Models which "extend" this model:
 // - VirtualNetworkInterfaceTargetShareMountTargetReference
+// - VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext
+// - VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext
 type VirtualNetworkInterfaceTarget struct {
 	// If present, this property indicates the referenced resource has been deleted, and provides
 	// some supplementary information.
@@ -76280,6 +82348,57 @@ func UnmarshalZoneReference(m map[string]json.RawMessage, result interface{}) (e
 	return
 }
 
+// BackupPolicyJobSourceInstanceReference : BackupPolicyJobSourceInstanceReference struct
+// This model "extends" BackupPolicyJobSource
+type BackupPolicyJobSourceInstanceReference struct {
+	// The CRN for this virtual server instance.
+	CRN *string `json:"crn" validate:"required"`
+
+	// If present, this property indicates the referenced resource has been deleted, and provides
+	// some supplementary information.
+	Deleted *InstanceReferenceDeleted `json:"deleted,omitempty"`
+
+	// The URL for this virtual server instance.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this virtual server instance.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this virtual server instance. The name is unique across all virtual server instances in the region.
+	Name *string `json:"name" validate:"required"`
+}
+
+func (*BackupPolicyJobSourceInstanceReference) isaBackupPolicyJobSource() bool {
+	return true
+}
+
+// UnmarshalBackupPolicyJobSourceInstanceReference unmarshals an instance of BackupPolicyJobSourceInstanceReference from the specified map of raw messages.
+func UnmarshalBackupPolicyJobSourceInstanceReference(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BackupPolicyJobSourceInstanceReference)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalInstanceReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // BackupPolicyJobSourceVolumeReference : BackupPolicyJobSourceVolumeReference struct
 // This model "extends" BackupPolicyJobSource
 type BackupPolicyJobSourceVolumeReference struct {
@@ -76345,6 +82464,554 @@ func UnmarshalBackupPolicyJobSourceVolumeReference(m map[string]json.RawMessage,
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BackupPolicyMatchResourceTypeInstance : BackupPolicyMatchResourceTypeInstance struct
+// This model "extends" BackupPolicy
+type BackupPolicyMatchResourceTypeInstance struct {
+	// The date and time that the backup policy was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this backup policy.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The reasons for the current `health_state` (if any).
+	//
+	// The enumerated reason code values for this property will expand in the future. When processing this property, check
+	// for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
+	// unexpected reason code was encountered.
+	HealthReasons []BackupPolicyHealthReason `json:"health_reasons" validate:"required"`
+
+	// The health of this resource.
+	// - `ok`: No abnormal behavior detected
+	// - `degraded`: Experiencing compromised performance, capacity, or connectivity
+	// - `faulted`: Completely unreachable, inoperative, or otherwise entirely incapacitated
+	// - `inapplicable`: The health state does not apply because of the current lifecycle state. A resource with a
+	// lifecycle state of `failed` or `deleting` will have a health state of `inapplicable`. A `pending` resource may also
+	// have this state.
+	HealthState *string `json:"health_state" validate:"required"`
+
+	// The URL for this backup policy.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this backup policy.
+	ID *string `json:"id" validate:"required"`
+
+	// The date and time that the most recent job for this backup policy completed.
+	//
+	// If absent, no job has yet completed for this backup policy.
+	LastJobCompletedAt *strfmt.DateTime `json:"last_job_completed_at,omitempty"`
+
+	// The lifecycle state of the backup policy.
+	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The user tags this backup policy applies to. Resources that have both a matching user tag and a matching type will
+	// be subject to the backup policy.
+	MatchUserTags []string `json:"match_user_tags" validate:"required"`
+
+	// The name for this backup policy. The name is unique across all backup policies in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The plans for the backup policy.
+	Plans []BackupPolicyPlanReference `json:"plans" validate:"required"`
+
+	// The resource group for this backup policy.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	Scope BackupPolicyScopeIntf `json:"scope" validate:"required"`
+
+	// The included content for backups created using this policy:
+	// - `boot_volume`: Include the instance's boot volume.
+	// - `data_volumes`: Include the instance's data volumes.
+	//
+	// The enumerated values for this property may expand in the future. When processing this property, check for and log
+	// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the
+	// unexpected property value was encountered.
+	IncludedContent []string `json:"included_content" validate:"required"`
+
+	// The resource type this backup policy applies to. Resources that have both a matching type and a matching user tag
+	// will be subject to the backup policy.
+	//
+	// The enumerated values for this property may expand in the future. When processing this property, check for and log
+	// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the
+	// unexpected property value was encountered.
+	MatchResourceType *string `json:"match_resource_type" validate:"required"`
+}
+
+// Constants associated with the BackupPolicyMatchResourceTypeInstance.HealthState property.
+// The health of this resource.
+// - `ok`: No abnormal behavior detected
+// - `degraded`: Experiencing compromised performance, capacity, or connectivity
+// - `faulted`: Completely unreachable, inoperative, or otherwise entirely incapacitated
+// - `inapplicable`: The health state does not apply because of the current lifecycle state. A resource with a lifecycle
+// state of `failed` or `deleting` will have a health state of `inapplicable`. A `pending` resource may also have this
+// state.
+const (
+	BackupPolicyMatchResourceTypeInstanceHealthStateDegradedConst     = "degraded"
+	BackupPolicyMatchResourceTypeInstanceHealthStateFaultedConst      = "faulted"
+	BackupPolicyMatchResourceTypeInstanceHealthStateInapplicableConst = "inapplicable"
+	BackupPolicyMatchResourceTypeInstanceHealthStateOkConst           = "ok"
+)
+
+// Constants associated with the BackupPolicyMatchResourceTypeInstance.LifecycleState property.
+// The lifecycle state of the backup policy.
+const (
+	BackupPolicyMatchResourceTypeInstanceLifecycleStateDeletingConst  = "deleting"
+	BackupPolicyMatchResourceTypeInstanceLifecycleStateFailedConst    = "failed"
+	BackupPolicyMatchResourceTypeInstanceLifecycleStatePendingConst   = "pending"
+	BackupPolicyMatchResourceTypeInstanceLifecycleStateStableConst    = "stable"
+	BackupPolicyMatchResourceTypeInstanceLifecycleStateSuspendedConst = "suspended"
+	BackupPolicyMatchResourceTypeInstanceLifecycleStateUpdatingConst  = "updating"
+	BackupPolicyMatchResourceTypeInstanceLifecycleStateWaitingConst   = "waiting"
+)
+
+// Constants associated with the BackupPolicyMatchResourceTypeInstance.ResourceType property.
+// The resource type.
+const (
+	BackupPolicyMatchResourceTypeInstanceResourceTypeBackupPolicyConst = "backup_policy"
+)
+
+// Constants associated with the BackupPolicyMatchResourceTypeInstance.IncludedContent property.
+// An item to include.
+const (
+	BackupPolicyMatchResourceTypeInstanceIncludedContentBootVolumeConst  = "boot_volume"
+	BackupPolicyMatchResourceTypeInstanceIncludedContentDataVolumesConst = "data_volumes"
+)
+
+// Constants associated with the BackupPolicyMatchResourceTypeInstance.MatchResourceType property.
+// The resource type this backup policy applies to. Resources that have both a matching type and a matching user tag
+// will be subject to the backup policy.
+//
+// The enumerated values for this property may expand in the future. When processing this property, check for and log
+// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the unexpected
+// property value was encountered.
+const (
+	BackupPolicyMatchResourceTypeInstanceMatchResourceTypeInstanceConst = "instance"
+)
+
+func (*BackupPolicyMatchResourceTypeInstance) isaBackupPolicy() bool {
+	return true
+}
+
+// UnmarshalBackupPolicyMatchResourceTypeInstance unmarshals an instance of BackupPolicyMatchResourceTypeInstance from the specified map of raw messages.
+func UnmarshalBackupPolicyMatchResourceTypeInstance(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BackupPolicyMatchResourceTypeInstance)
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "health_reasons", &obj.HealthReasons, UnmarshalBackupPolicyHealthReason)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "health_state", &obj.HealthState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "last_job_completed_at", &obj.LastJobCompletedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "match_user_tags", &obj.MatchUserTags)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "plans", &obj.Plans, UnmarshalBackupPolicyPlanReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "scope", &obj.Scope, UnmarshalBackupPolicyScope)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "included_content", &obj.IncludedContent)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "match_resource_type", &obj.MatchResourceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BackupPolicyMatchResourceTypeVolume : BackupPolicyMatchResourceTypeVolume struct
+// This model "extends" BackupPolicy
+type BackupPolicyMatchResourceTypeVolume struct {
+	// The date and time that the backup policy was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this backup policy.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The reasons for the current `health_state` (if any).
+	//
+	// The enumerated reason code values for this property will expand in the future. When processing this property, check
+	// for and log unknown values. Optionally halt processing and surface the error, or bypass the resource on which the
+	// unexpected reason code was encountered.
+	HealthReasons []BackupPolicyHealthReason `json:"health_reasons" validate:"required"`
+
+	// The health of this resource.
+	// - `ok`: No abnormal behavior detected
+	// - `degraded`: Experiencing compromised performance, capacity, or connectivity
+	// - `faulted`: Completely unreachable, inoperative, or otherwise entirely incapacitated
+	// - `inapplicable`: The health state does not apply because of the current lifecycle state. A resource with a
+	// lifecycle state of `failed` or `deleting` will have a health state of `inapplicable`. A `pending` resource may also
+	// have this state.
+	HealthState *string `json:"health_state" validate:"required"`
+
+	// The URL for this backup policy.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this backup policy.
+	ID *string `json:"id" validate:"required"`
+
+	// The date and time that the most recent job for this backup policy completed.
+	//
+	// If absent, no job has yet completed for this backup policy.
+	LastJobCompletedAt *strfmt.DateTime `json:"last_job_completed_at,omitempty"`
+
+	// The lifecycle state of the backup policy.
+	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The user tags this backup policy applies to. Resources that have both a matching user tag and a matching type will
+	// be subject to the backup policy.
+	MatchUserTags []string `json:"match_user_tags" validate:"required"`
+
+	// The name for this backup policy. The name is unique across all backup policies in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The plans for the backup policy.
+	Plans []BackupPolicyPlanReference `json:"plans" validate:"required"`
+
+	// The resource group for this backup policy.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	Scope BackupPolicyScopeIntf `json:"scope" validate:"required"`
+
+	// The resource type this backup policy applies to. Resources that have both a matching type and a matching user tag
+	// will be subject to the backup policy.
+	//
+	// The enumerated values for this property may expand in the future. When processing this property, check for and log
+	// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the
+	// unexpected property value was encountered.
+	MatchResourceType *string `json:"match_resource_type" validate:"required"`
+}
+
+// Constants associated with the BackupPolicyMatchResourceTypeVolume.HealthState property.
+// The health of this resource.
+// - `ok`: No abnormal behavior detected
+// - `degraded`: Experiencing compromised performance, capacity, or connectivity
+// - `faulted`: Completely unreachable, inoperative, or otherwise entirely incapacitated
+// - `inapplicable`: The health state does not apply because of the current lifecycle state. A resource with a lifecycle
+// state of `failed` or `deleting` will have a health state of `inapplicable`. A `pending` resource may also have this
+// state.
+const (
+	BackupPolicyMatchResourceTypeVolumeHealthStateDegradedConst     = "degraded"
+	BackupPolicyMatchResourceTypeVolumeHealthStateFaultedConst      = "faulted"
+	BackupPolicyMatchResourceTypeVolumeHealthStateInapplicableConst = "inapplicable"
+	BackupPolicyMatchResourceTypeVolumeHealthStateOkConst           = "ok"
+)
+
+// Constants associated with the BackupPolicyMatchResourceTypeVolume.LifecycleState property.
+// The lifecycle state of the backup policy.
+const (
+	BackupPolicyMatchResourceTypeVolumeLifecycleStateDeletingConst  = "deleting"
+	BackupPolicyMatchResourceTypeVolumeLifecycleStateFailedConst    = "failed"
+	BackupPolicyMatchResourceTypeVolumeLifecycleStatePendingConst   = "pending"
+	BackupPolicyMatchResourceTypeVolumeLifecycleStateStableConst    = "stable"
+	BackupPolicyMatchResourceTypeVolumeLifecycleStateSuspendedConst = "suspended"
+	BackupPolicyMatchResourceTypeVolumeLifecycleStateUpdatingConst  = "updating"
+	BackupPolicyMatchResourceTypeVolumeLifecycleStateWaitingConst   = "waiting"
+)
+
+// Constants associated with the BackupPolicyMatchResourceTypeVolume.ResourceType property.
+// The resource type.
+const (
+	BackupPolicyMatchResourceTypeVolumeResourceTypeBackupPolicyConst = "backup_policy"
+)
+
+// Constants associated with the BackupPolicyMatchResourceTypeVolume.MatchResourceType property.
+// The resource type this backup policy applies to. Resources that have both a matching type and a matching user tag
+// will be subject to the backup policy.
+//
+// The enumerated values for this property may expand in the future. When processing this property, check for and log
+// unknown values. Optionally halt processing and surface the error, or bypass the backup policy on which the unexpected
+// property value was encountered.
+const (
+	BackupPolicyMatchResourceTypeVolumeMatchResourceTypeVolumeConst = "volume"
+)
+
+func (*BackupPolicyMatchResourceTypeVolume) isaBackupPolicy() bool {
+	return true
+}
+
+// UnmarshalBackupPolicyMatchResourceTypeVolume unmarshals an instance of BackupPolicyMatchResourceTypeVolume from the specified map of raw messages.
+func UnmarshalBackupPolicyMatchResourceTypeVolume(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BackupPolicyMatchResourceTypeVolume)
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "health_reasons", &obj.HealthReasons, UnmarshalBackupPolicyHealthReason)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "health_state", &obj.HealthState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "last_job_completed_at", &obj.LastJobCompletedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "match_user_tags", &obj.MatchUserTags)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "plans", &obj.Plans, UnmarshalBackupPolicyPlanReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "scope", &obj.Scope, UnmarshalBackupPolicyScope)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "match_resource_type", &obj.MatchResourceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype : BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype struct
+// This model "extends" BackupPolicyPrototype
+type BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype struct {
+	// The user tags this backup policy will apply to. Resources that have both a matching user tag and a matching type
+	// will be subject to the backup policy.
+	MatchUserTags []string `json:"match_user_tags" validate:"required"`
+
+	// The name for this backup policy. The name must not be used by another backup policy in the region. If unspecified,
+	// the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The prototype objects for backup plans to be created for this backup policy.
+	Plans []BackupPolicyPlanPrototype `json:"plans,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	Scope BackupPolicyScopePrototypeIntf `json:"scope,omitempty"`
+
+	// The included content for backups created using this policy:
+	// - `boot_volume`: Include the instance's boot volume.
+	// - `data_volumes`: Include the instance's data volumes.
+	IncludedContent []string `json:"included_content,omitempty"`
+
+	// The resource type this backup policy will apply to. Resources that have both a matching type and a matching user tag
+	// will be subject to the backup policy.
+	MatchResourceType *string `json:"match_resource_type" validate:"required"`
+}
+
+// Constants associated with the BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype.IncludedContent property.
+// An item to include.
+const (
+	BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototypeIncludedContentBootVolumeConst  = "boot_volume"
+	BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototypeIncludedContentDataVolumesConst = "data_volumes"
+)
+
+// Constants associated with the BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype.MatchResourceType property.
+// The resource type this backup policy will apply to. Resources that have both a matching type and a matching user tag
+// will be subject to the backup policy.
+const (
+	BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototypeMatchResourceTypeInstanceConst = "instance"
+)
+
+// NewBackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype : Instantiate BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype (Generic Model Constructor)
+func (*VpcV1) NewBackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype(matchUserTags []string, matchResourceType string) (_model *BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype, err error) {
+	_model = &BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype{
+		MatchUserTags:     matchUserTags,
+		MatchResourceType: core.StringPtr(matchResourceType),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype) isaBackupPolicyPrototype() bool {
+	return true
+}
+
+// UnmarshalBackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype unmarshals an instance of BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype from the specified map of raw messages.
+func UnmarshalBackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BackupPolicyPrototypeBackupPolicyMatchResourceTypeInstancePrototype)
+	err = core.UnmarshalPrimitive(m, "match_user_tags", &obj.MatchUserTags)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "plans", &obj.Plans, UnmarshalBackupPolicyPlanPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "scope", &obj.Scope, UnmarshalBackupPolicyScopePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "included_content", &obj.IncludedContent)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "match_resource_type", &obj.MatchResourceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype : BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype struct
+// This model "extends" BackupPolicyPrototype
+type BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype struct {
+	// The user tags this backup policy will apply to. Resources that have both a matching user tag and a matching type
+	// will be subject to the backup policy.
+	MatchUserTags []string `json:"match_user_tags" validate:"required"`
+
+	// The name for this backup policy. The name must not be used by another backup policy in the region. If unspecified,
+	// the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The prototype objects for backup plans to be created for this backup policy.
+	Plans []BackupPolicyPlanPrototype `json:"plans,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	Scope BackupPolicyScopePrototypeIntf `json:"scope,omitempty"`
+
+	// The resource type this backup policy will apply to. Resources that have both a matching type and a matching user tag
+	// will be subject to the backup policy.
+	MatchResourceType *string `json:"match_resource_type" validate:"required"`
+}
+
+// Constants associated with the BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype.MatchResourceType property.
+// The resource type this backup policy will apply to. Resources that have both a matching type and a matching user tag
+// will be subject to the backup policy.
+const (
+	BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototypeMatchResourceTypeVolumeConst = "volume"
+)
+
+// NewBackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype : Instantiate BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype (Generic Model Constructor)
+func (*VpcV1) NewBackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype(matchUserTags []string, matchResourceType string) (_model *BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype, err error) {
+	_model = &BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype{
+		MatchUserTags:     matchUserTags,
+		MatchResourceType: core.StringPtr(matchResourceType),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype) isaBackupPolicyPrototype() bool {
+	return true
+}
+
+// UnmarshalBackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype unmarshals an instance of BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype from the specified map of raw messages.
+func UnmarshalBackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BackupPolicyPrototypeBackupPolicyMatchResourceTypeVolumePrototype)
+	err = core.UnmarshalPrimitive(m, "match_user_tags", &obj.MatchUserTags)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "plans", &obj.Plans, UnmarshalBackupPolicyPlanPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "scope", &obj.Scope, UnmarshalBackupPolicyScopePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "match_resource_type", &obj.MatchResourceType)
 	if err != nil {
 		return
 	}
@@ -76568,13 +83235,636 @@ func UnmarshalBareMetalServerInitializationUserAccountBareMetalServerInitializat
 	return
 }
 
+// BareMetalServerNetworkAttachmentByPci : BareMetalServerNetworkAttachmentByPci struct
+// This model "extends" BareMetalServerNetworkAttachment
+type BareMetalServerNetworkAttachmentByPci struct {
+	// The date and time that the bare metal server network attachment was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The URL for this bare metal server network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this bare metal server network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The lifecycle state of the bare metal server network attachment.
+	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The name for this bare metal server network attachment. The name is unique across all network attachments for the
+	// bare metal server.
+	Name *string `json:"name" validate:"required"`
+
+	// The port speed for this bare metal server network attachment in Mbps.
+	PortSpeed *int64 `json:"port_speed" validate:"required"`
+
+	// The primary IP address of the virtual network interface for the bare metal server network attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The subnet of the virtual network interface for the bare metal server network attachment.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+
+	// The bare metal server network attachment type.
+	Type *string `json:"type" validate:"required"`
+
+	// The virtual network interface for this bare metal server network attachment.
+	VirtualNetworkInterface *VirtualNetworkInterfaceReferenceAttachmentContext `json:"virtual_network_interface" validate:"required"`
+
+	// The VLAN IDs allowed for `vlan` attachments using this PCI attachment.
+	AllowedVlans []int64 `json:"allowed_vlans" validate:"required"`
+
+	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+	//   server is stopped
+	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+	//     to use the PCI attachment
+	//   - Cannot directly use an IEEE 802.1Q tag.
+	InterfaceType *string `json:"interface_type" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerNetworkAttachmentByPci.LifecycleState property.
+// The lifecycle state of the bare metal server network attachment.
+const (
+	BareMetalServerNetworkAttachmentByPciLifecycleStateDeletingConst  = "deleting"
+	BareMetalServerNetworkAttachmentByPciLifecycleStateFailedConst    = "failed"
+	BareMetalServerNetworkAttachmentByPciLifecycleStatePendingConst   = "pending"
+	BareMetalServerNetworkAttachmentByPciLifecycleStateStableConst    = "stable"
+	BareMetalServerNetworkAttachmentByPciLifecycleStateSuspendedConst = "suspended"
+	BareMetalServerNetworkAttachmentByPciLifecycleStateUpdatingConst  = "updating"
+	BareMetalServerNetworkAttachmentByPciLifecycleStateWaitingConst   = "waiting"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachmentByPci.ResourceType property.
+// The resource type.
+const (
+	BareMetalServerNetworkAttachmentByPciResourceTypeBareMetalServerNetworkAttachmentConst = "bare_metal_server_network_attachment"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachmentByPci.Type property.
+// The bare metal server network attachment type.
+const (
+	BareMetalServerNetworkAttachmentByPciTypePrimaryConst   = "primary"
+	BareMetalServerNetworkAttachmentByPciTypeSecondaryConst = "secondary"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachmentByPci.InterfaceType property.
+//   - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+//     server is stopped
+//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+//     to use the PCI attachment
+//   - Cannot directly use an IEEE 802.1Q tag.
+const (
+	BareMetalServerNetworkAttachmentByPciInterfaceTypePciConst = "pci"
+)
+
+func (*BareMetalServerNetworkAttachmentByPci) isaBareMetalServerNetworkAttachment() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentByPci unmarshals an instance of BareMetalServerNetworkAttachmentByPci from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentByPci(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentByPci)
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "port_speed", &obj.PortSpeed)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalVirtualNetworkInterfaceReferenceAttachmentContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allowed_vlans", &obj.AllowedVlans)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentByVlan : BareMetalServerNetworkAttachmentByVlan struct
+// This model "extends" BareMetalServerNetworkAttachment
+type BareMetalServerNetworkAttachmentByVlan struct {
+	// The date and time that the bare metal server network attachment was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The URL for this bare metal server network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this bare metal server network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The lifecycle state of the bare metal server network attachment.
+	LifecycleState *string `json:"lifecycle_state" validate:"required"`
+
+	// The name for this bare metal server network attachment. The name is unique across all network attachments for the
+	// bare metal server.
+	Name *string `json:"name" validate:"required"`
+
+	// The port speed for this bare metal server network attachment in Mbps.
+	PortSpeed *int64 `json:"port_speed" validate:"required"`
+
+	// The primary IP address of the virtual network interface for the bare metal server network attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The subnet of the virtual network interface for the bare metal server network attachment.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+
+	// The bare metal server network attachment type.
+	Type *string `json:"type" validate:"required"`
+
+	// The virtual network interface for this bare metal server network attachment.
+	VirtualNetworkInterface *VirtualNetworkInterfaceReferenceAttachmentContext `json:"virtual_network_interface" validate:"required"`
+
+	// Indicates if the data path for the network attachment can float to another bare metal server. Can only be `true` for
+	// network attachments with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network attachment will be automatically deleted from this bare metal server and a new network attachment with
+	// the same `id`, `name` and `vlan` will be created on the other bare metal server.  The virtual network interface for
+	// this network attachment will be automatically be attached to the new network attachment.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network attachment with `interface_type` of `pci` with `allowed_vlans` including
+	// this network attachment's `vlan`.
+	AllowToFloat *bool `json:"allow_to_float" validate:"required"`
+
+	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
+	//    of `allowed_vlans`.
+	//   - Must use an IEEE 802.1Q tag.
+	InterfaceType *string `json:"interface_type" validate:"required"`
+
+	// The IEEE 802.1Q VLAN ID that must be used for all traffic on this attachment.
+	Vlan *int64 `json:"vlan" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerNetworkAttachmentByVlan.LifecycleState property.
+// The lifecycle state of the bare metal server network attachment.
+const (
+	BareMetalServerNetworkAttachmentByVlanLifecycleStateDeletingConst  = "deleting"
+	BareMetalServerNetworkAttachmentByVlanLifecycleStateFailedConst    = "failed"
+	BareMetalServerNetworkAttachmentByVlanLifecycleStatePendingConst   = "pending"
+	BareMetalServerNetworkAttachmentByVlanLifecycleStateStableConst    = "stable"
+	BareMetalServerNetworkAttachmentByVlanLifecycleStateSuspendedConst = "suspended"
+	BareMetalServerNetworkAttachmentByVlanLifecycleStateUpdatingConst  = "updating"
+	BareMetalServerNetworkAttachmentByVlanLifecycleStateWaitingConst   = "waiting"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachmentByVlan.ResourceType property.
+// The resource type.
+const (
+	BareMetalServerNetworkAttachmentByVlanResourceTypeBareMetalServerNetworkAttachmentConst = "bare_metal_server_network_attachment"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachmentByVlan.Type property.
+// The bare metal server network attachment type.
+const (
+	BareMetalServerNetworkAttachmentByVlanTypePrimaryConst   = "primary"
+	BareMetalServerNetworkAttachmentByVlanTypeSecondaryConst = "secondary"
+)
+
+// Constants associated with the BareMetalServerNetworkAttachmentByVlan.InterfaceType property.
+//   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
+//     of `allowed_vlans`.
+//   - Must use an IEEE 802.1Q tag.
+const (
+	BareMetalServerNetworkAttachmentByVlanInterfaceTypeVlanConst = "vlan"
+)
+
+func (*BareMetalServerNetworkAttachmentByVlan) isaBareMetalServerNetworkAttachment() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentByVlan unmarshals an instance of BareMetalServerNetworkAttachmentByVlan from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentByVlan(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentByVlan)
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "lifecycle_state", &obj.LifecycleState)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "port_speed", &obj.PortSpeed)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalVirtualNetworkInterfaceReferenceAttachmentContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allow_to_float", &obj.AllowToFloat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "vlan", &obj.Vlan)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity : Identifies a virtual network interface by a unique property.
+// Models which "extend" this model:
+// - BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID
+// - BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref
+// - BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN
+// This model "extends" BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityIntf interface {
+	BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf
+	isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext : The virtual network interface for this target.
+// This model "extends" BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// Additional IP addresses to bind to the virtual network interface. Each item may be either a reserved IP identity, or
+	// a reserved IP prototype object which will be used to create a new reserved IP. All IP addresses must be in the
+	// primary IP's subnet.
+	//
+	// If reserved IP identities are provided, the specified reserved IPs must be unbound.
+	//
+	// If reserved IP prototype objects with addresses are provided, the addresses must be available on the virtual network
+	// interface's subnet. For any prototype objects that do not specify an address, an available address on the subnet
+	// will be automatically selected and reserved.
+	Ips []VirtualNetworkInterfaceIPPrototypeIntf `json:"ips,omitempty"`
+
+	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
+	// VPC. If unspecified, the name will be a hyphenated list of randomly-selected words. Names beginning with `ibm-` are
+	// reserved for provider-owned resources, and are not allowed.
+	Name *string `json:"name,omitempty"`
+
+	// The primary IP address to bind to the virtual network interface. May be either a
+	// reserved IP identity, or a reserved IP prototype object which will be used to create a
+	// new reserved IP.
+	//
+	// If a reserved IP identity is provided, the specified reserved IP must be unbound.
+	//
+	// If a reserved IP prototype object with an address is provided, the address must be
+	// available on the virtual network interface's subnet. If no address is specified,
+	// an available address on the subnet will be automatically selected and reserved.
+	PrimaryIP VirtualNetworkInterfacePrimaryIPPrototypeIntf `json:"primary_ip,omitempty"`
+
+	// The resource group to use for this virtual network interface. If unspecified, the
+	// bare metal server's resource group will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The security groups to use for this virtual network interface. If unspecified, the default security group of the VPC
+	// for the subnet is used.
+	SecurityGroups []SecurityGroupIdentityIntf `json:"security_groups,omitempty"`
+
+	// The associated subnet. Required if `primary_ip` does not specify a reserved IP
+	// identity.
+	Subnet SubnetIdentityIntf `json:"subnet,omitempty"`
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeBareMetalServerNetworkAttachmentContext)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalVirtualNetworkInterfaceIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalVirtualNetworkInterfacePrimaryIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "security_groups", &obj.SecurityGroups, UnmarshalSecurityGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetIdentity)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype : BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype struct
+// This model "extends" BareMetalServerNetworkAttachmentPrototype
+type BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype struct {
+	// The name for this bare metal server network attachment. Names must be unique within the bare metal server the
+	// network attachment resides in. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	VirtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf `json:"virtual_network_interface" validate:"required"`
+
+	// The VLAN IDs to allow for `vlan` attachments using this PCI attachment.
+	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
+
+	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+	//   server is stopped
+	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+	//     to use the PCI attachment
+	//   - Cannot directly use an IEEE 802.1Q tag.
+	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+	InterfaceType *string `json:"interface_type" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype.InterfaceType property.
+//   - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+//     server is stopped
+//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+//     to use the PCI attachment
+//   - Cannot directly use an IEEE 802.1Q tag.
+//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+const (
+	BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototypeInterfaceTypePciConst = "pci"
+)
+
+// NewBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype : Instantiate BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype(virtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf, interfaceType string) (_model *BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype, err error) {
+	_model = &BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype{
+		VirtualNetworkInterface: virtualNetworkInterface,
+		InterfaceType:           core.StringPtr(interfaceType),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype) isaBareMetalServerNetworkAttachmentPrototype() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByPciPrototype)
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allowed_vlans", &obj.AllowedVlans)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype : BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype struct
+// This model "extends" BareMetalServerNetworkAttachmentPrototype
+type BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype struct {
+	// The name for this bare metal server network attachment. Names must be unique within the bare metal server the
+	// network attachment resides in. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	VirtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf `json:"virtual_network_interface" validate:"required"`
+
+	// Indicates if the data path for the network attachment can float to another bare metal server. Can only be `true` for
+	// network attachments with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network attachment will be automatically deleted from this bare metal server and a new network attachment with
+	// the same `id`, `name` and `vlan` will be created on the other bare metal server.  The virtual network interface for
+	// this network attachment will be automatically be attached to the new network attachment.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network attachment with `interface_type` of `pci` with `allowed_vlans` including
+	// this network attachment's `vlan`.
+	AllowToFloat *bool `json:"allow_to_float,omitempty"`
+
+	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
+	//    of `allowed_vlans`.
+	//   - Must use an IEEE 802.1Q tag.
+	InterfaceType *string `json:"interface_type" validate:"required"`
+
+	// The IEEE 802.1Q VLAN ID that must be used for all traffic on this attachment.
+	Vlan *int64 `json:"vlan" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype.InterfaceType property.
+//   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
+//     of `allowed_vlans`.
+//   - Must use an IEEE 802.1Q tag.
+const (
+	BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototypeInterfaceTypeVlanConst = "vlan"
+)
+
+// NewBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype : Instantiate BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype(virtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf, interfaceType string, vlan int64) (_model *BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype, err error) {
+	_model = &BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype{
+		VirtualNetworkInterface: virtualNetworkInterface,
+		InterfaceType:           core.StringPtr(interfaceType),
+		Vlan:                    core.Int64Ptr(vlan),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype) isaBareMetalServerNetworkAttachmentPrototype() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeBareMetalServerNetworkAttachmentByVlanPrototype)
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allow_to_float", &obj.AllowToFloat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "vlan", &obj.Vlan)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // BareMetalServerNetworkInterfaceByHiperSocket : BareMetalServerNetworkInterfaceByHiperSocket struct
 // This model "extends" BareMetalServerNetworkInterface
 type BareMetalServerNetworkInterfaceByHiperSocket struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing" validate:"required"`
 
 	// The date and time that the bare metal server network interface was created.
+	//
+	// If this bare metal server has network attachments, this network interface was created as a [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) when its corresponding network attachment
+	// was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
 	// If `true`:
@@ -76586,25 +83876,58 @@ type BareMetalServerNetworkInterfaceByHiperSocket struct {
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat" validate:"required"`
 
 	// The floating IPs associated with this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the floating IPs are associated with the attached virtual
+	// network interface.
 	FloatingIps []FloatingIPReference `json:"floating_ips" validate:"required"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The MAC address of this bare metal server network interface. If the MAC address has not yet been selected, the value
 	// will be an empty string.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the MAC address is that of the attached virtual network
+	// interface.
 	MacAddress *string `json:"mac_address" validate:"required"`
 
 	// The name for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the name matches its corresponding network attachment.
 	Name *string `json:"name" validate:"required"`
 
 	// The bare metal server network interface port speed in Mbps.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the port speed is that of its corresponding network
+	// attachment.
 	PortSpeed *int64 `json:"port_speed" validate:"required"`
 
 	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
@@ -76613,15 +83936,28 @@ type BareMetalServerNetworkInterfaceByHiperSocket struct {
 	ResourceType *string `json:"resource_type" validate:"required"`
 
 	// The security groups targeting this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the security groups are associated with the attached
+	// virtual network interface.
 	SecurityGroups []SecurityGroupReference `json:"security_groups" validate:"required"`
 
 	// The status of the bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a read-only representation of its
+	// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+	// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 	Status *string `json:"status" validate:"required"`
 
 	// The associated subnet.
 	Subnet *SubnetReference `json:"subnet" validate:"required"`
 
 	// The bare metal server network interface type.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 	Type *string `json:"type" validate:"required"`
 
 	// - `hipersocket`: a virtual network device that provides high-speed TCP/IP connectivity
@@ -76637,6 +83973,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterfaceByHiperSocket.Status property.
 // The status of the bare metal server network interface.
+//
+// If this bare metal server has network attachments, this network interface is a read-only representation of its
+// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 const (
 	BareMetalServerNetworkInterfaceByHiperSocketStatusAvailableConst = "available"
 	BareMetalServerNetworkInterfaceByHiperSocketStatusDeletingConst  = "deleting"
@@ -76646,6 +83986,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterfaceByHiperSocket.Type property.
 // The bare metal server network interface type.
+//
+// If this bare metal server has network attachments, this network interface is a
+// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 const (
 	BareMetalServerNetworkInterfaceByHiperSocketTypePrimaryConst   = "primary"
 	BareMetalServerNetworkInterfaceByHiperSocketTypeSecondaryConst = "secondary"
@@ -76737,9 +84081,18 @@ func UnmarshalBareMetalServerNetworkInterfaceByHiperSocket(m map[string]json.Raw
 // This model "extends" BareMetalServerNetworkInterface
 type BareMetalServerNetworkInterfaceByPci struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing" validate:"required"`
 
 	// The date and time that the bare metal server network interface was created.
+	//
+	// If this bare metal server has network attachments, this network interface was created as a [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) when its corresponding network attachment
+	// was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
 	// If `true`:
@@ -76751,25 +84104,58 @@ type BareMetalServerNetworkInterfaceByPci struct {
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat" validate:"required"`
 
 	// The floating IPs associated with this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the floating IPs are associated with the attached virtual
+	// network interface.
 	FloatingIps []FloatingIPReference `json:"floating_ips" validate:"required"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The MAC address of this bare metal server network interface. If the MAC address has not yet been selected, the value
 	// will be an empty string.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the MAC address is that of the attached virtual network
+	// interface.
 	MacAddress *string `json:"mac_address" validate:"required"`
 
 	// The name for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the name matches its corresponding network attachment.
 	Name *string `json:"name" validate:"required"`
 
 	// The bare metal server network interface port speed in Mbps.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the port speed is that of its corresponding network
+	// attachment.
 	PortSpeed *int64 `json:"port_speed" validate:"required"`
 
 	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
@@ -76778,25 +84164,43 @@ type BareMetalServerNetworkInterfaceByPci struct {
 	ResourceType *string `json:"resource_type" validate:"required"`
 
 	// The security groups targeting this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the security groups are associated with the attached
+	// virtual network interface.
 	SecurityGroups []SecurityGroupReference `json:"security_groups" validate:"required"`
 
 	// The status of the bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a read-only representation of its
+	// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+	// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 	Status *string `json:"status" validate:"required"`
 
 	// The associated subnet.
 	Subnet *SubnetReference `json:"subnet" validate:"required"`
 
 	// The bare metal server network interface type.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 	Type *string `json:"type" validate:"required"`
 
-	// Indicates what VLAN IDs (for VLAN type only) can use this physical (PCI type) interface.
+	// The VLAN IDs allowed for `vlan` interfaces using this PCI interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the VLAN IDs match the `allow_vlans` of the corresponding
+	// network attachment.
 	AllowedVlans []int64 `json:"allowed_vlans" validate:"required"`
 
 	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
 	//   server is stopped
 	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 	//     to use the PCI interface
-	//   - Cannot directly use an IEEE 802.1q VLAN tag.
+	//   - Cannot directly use an IEEE 802.1Q tag.
 	InterfaceType *string `json:"interface_type" validate:"required"`
 }
 
@@ -76808,6 +84212,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterfaceByPci.Status property.
 // The status of the bare metal server network interface.
+//
+// If this bare metal server has network attachments, this network interface is a read-only representation of its
+// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 const (
 	BareMetalServerNetworkInterfaceByPciStatusAvailableConst = "available"
 	BareMetalServerNetworkInterfaceByPciStatusDeletingConst  = "deleting"
@@ -76817,6 +84225,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterfaceByPci.Type property.
 // The bare metal server network interface type.
+//
+// If this bare metal server has network attachments, this network interface is a
+// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 const (
 	BareMetalServerNetworkInterfaceByPciTypePrimaryConst   = "primary"
 	BareMetalServerNetworkInterfaceByPciTypeSecondaryConst = "secondary"
@@ -76827,7 +84239,7 @@ const (
 //     server is stopped
 //   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 //     to use the PCI interface
-//   - Cannot directly use an IEEE 802.1q VLAN tag.
+//   - Cannot directly use an IEEE 802.1Q tag.
 const (
 	BareMetalServerNetworkInterfaceByPciInterfaceTypePciConst = "pci"
 )
@@ -76915,9 +84327,18 @@ func UnmarshalBareMetalServerNetworkInterfaceByPci(m map[string]json.RawMessage,
 // This model "extends" BareMetalServerNetworkInterface
 type BareMetalServerNetworkInterfaceByVlan struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing" validate:"required"`
 
 	// The date and time that the bare metal server network interface was created.
+	//
+	// If this bare metal server has network attachments, this network interface was created as a [read-only
+	// representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) when its corresponding network attachment
+	// was created.
 	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
 
 	// If `true`:
@@ -76929,25 +84350,58 @@ type BareMetalServerNetworkInterfaceByVlan struct {
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat" validate:"required"`
 
 	// The floating IPs associated with this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the floating IPs are associated with the attached virtual
+	// network interface.
 	FloatingIps []FloatingIPReference `json:"floating_ips" validate:"required"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The MAC address of this bare metal server network interface. If the MAC address has not yet been selected, the value
 	// will be an empty string.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the MAC address is that of the attached virtual network
+	// interface.
 	MacAddress *string `json:"mac_address" validate:"required"`
 
 	// The name for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the name matches its corresponding network attachment.
 	Name *string `json:"name" validate:"required"`
 
 	// The bare metal server network interface port speed in Mbps.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the port speed is that of its corresponding network
+	// attachment.
 	PortSpeed *int64 `json:"port_speed" validate:"required"`
 
 	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
@@ -76956,30 +84410,60 @@ type BareMetalServerNetworkInterfaceByVlan struct {
 	ResourceType *string `json:"resource_type" validate:"required"`
 
 	// The security groups targeting this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the security groups are associated with the attached
+	// virtual network interface.
 	SecurityGroups []SecurityGroupReference `json:"security_groups" validate:"required"`
 
 	// The status of the bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a read-only representation of its
+	// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+	// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 	Status *string `json:"status" validate:"required"`
 
 	// The associated subnet.
 	Subnet *SubnetReference `json:"subnet" validate:"required"`
 
 	// The bare metal server network interface type.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 	Type *string `json:"type" validate:"required"`
 
-	// Indicates if the interface can float to any other server within the same
-	// `resource_group`. The interface will float automatically if the network detects a GARP or RARP on another bare metal
-	// server in the resource group.  Applies only to `vlan` type interfaces.
+	// Indicates if the data path for the network interface can float to another bare metal server. Can only be `true` for
+	// network interfaces with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network interface will be automatically deleted from this bare metal server and a new network interface with the
+	// same `id`, `name` and `vlan` will be created on the other bare metal server.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network interface with `interface_type` of `pci` with `allowed_vlans` including
+	// this network interface's `vlan`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the value of this property matches that of the
+	// `allow_to_float` property of the corresponding network attachment.
 	AllowInterfaceToFloat *bool `json:"allow_interface_to_float" validate:"required"`
 
 	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
 	//    of `allowed_vlans`.
-	//   - Must use an IEEE 802.1q tag.
+	//   - Must use an IEEE 802.1Q tag.
 	//   - Has its own security groups and does not inherit those of the PCI device through
 	//     which traffic flows.
 	InterfaceType *string `json:"interface_type" validate:"required"`
 
-	// Indicates the 802.1Q VLAN ID tag that must be used for all traffic on this interface.
+	// The VLAN ID used in the IEEE 802.1Q tag present in all traffic on this interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the VLAN ID matches the `vlan` of the corresponding
+	// network attachment.
 	Vlan *int64 `json:"vlan" validate:"required"`
 }
 
@@ -76991,6 +84475,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterfaceByVlan.Status property.
 // The status of the bare metal server network interface.
+//
+// If this bare metal server has network attachments, this network interface is a read-only representation of its
+// corresponding network attachment and its attached virtual network interface, and the status is [computed from
+// them](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients).
 const (
 	BareMetalServerNetworkInterfaceByVlanStatusAvailableConst = "available"
 	BareMetalServerNetworkInterfaceByVlanStatusDeletingConst  = "deleting"
@@ -77000,6 +84488,10 @@ const (
 
 // Constants associated with the BareMetalServerNetworkInterfaceByVlan.Type property.
 // The bare metal server network interface type.
+//
+// If this bare metal server has network attachments, this network interface is a
+// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+// attachment and its attached virtual network interface, and the type is that of its corresponding network attachment.
 const (
 	BareMetalServerNetworkInterfaceByVlanTypePrimaryConst   = "primary"
 	BareMetalServerNetworkInterfaceByVlanTypeSecondaryConst = "secondary"
@@ -77008,7 +84500,7 @@ const (
 // Constants associated with the BareMetalServerNetworkInterfaceByVlan.InterfaceType property.
 //   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
 //     of `allowed_vlans`.
-//   - Must use an IEEE 802.1q tag.
+//   - Must use an IEEE 802.1Q tag.
 //   - Has its own security groups and does not inherit those of the PCI device through
 //     which traffic flows.
 const (
@@ -77102,6 +84594,11 @@ func UnmarshalBareMetalServerNetworkInterfaceByVlan(m map[string]json.RawMessage
 // This model "extends" BareMetalServerNetworkInterfacePrototype
 type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByHiperSocketPrototype struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
 	// If `true`:
@@ -77113,6 +84610,11 @@ type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByHi
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
 
 	// The name for this bare metal server network interface. The name must not be used by another network interface on the
@@ -77201,6 +84703,11 @@ func UnmarshalBareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInte
 // This model "extends" BareMetalServerNetworkInterfacePrototype
 type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByPciPrototype struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
 	// If `true`:
@@ -77212,6 +84719,11 @@ type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByPc
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
 
 	// The name for this bare metal server network interface. The name must not be used by another network interface on the
@@ -77233,14 +84745,14 @@ type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByPc
 	// The associated subnet.
 	Subnet SubnetIdentityIntf `json:"subnet" validate:"required"`
 
-	// Indicates what VLAN IDs (for VLAN type only) can use this physical (PCI type) interface.
+	// The VLAN IDs to allow for `vlan` interfaces using this PCI interface.
 	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
 
 	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
 	//   server is stopped
 	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 	//     to use the PCI interface
-	//   - Cannot directly use an IEEE 802.1q VLAN tag.
+	//   - Cannot directly use an IEEE 802.1Q tag.
 	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
 	InterfaceType *string `json:"interface_type" validate:"required"`
 }
@@ -77250,7 +84762,7 @@ type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByPc
 //     server is stopped
 //   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
 //     to use the PCI interface
-//   - Cannot directly use an IEEE 802.1q VLAN tag.
+//   - Cannot directly use an IEEE 802.1Q tag.
 //   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
 const (
 	BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByPciPrototypeInterfaceTypePciConst = "pci"
@@ -77313,6 +84825,11 @@ func UnmarshalBareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInte
 // This model "extends" BareMetalServerNetworkInterfacePrototype
 type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByVlanPrototype struct {
 	// Indicates whether source IP spoofing is allowed on this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and source IP spoofing is managed on the attached virtual
+	// network interface.
 	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
 
 	// If `true`:
@@ -77324,6 +84841,11 @@ type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByVl
 	//   allowing the workload to perform any needed NAT operations.
 	// - `allow_ip_spoofing` must be `false`.
 	// - `interface_type` must not be `hipersocket`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and infrastructure NAT is managed on the attached virtual
+	// network interface.
 	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
 
 	// The name for this bare metal server network interface. The name must not be used by another network interface on the
@@ -77345,27 +84867,44 @@ type BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByVl
 	// The associated subnet.
 	Subnet SubnetIdentityIntf `json:"subnet" validate:"required"`
 
-	// Indicates if the interface can float to any other server within the same
-	// `resource_group`. The interface will float automatically if the network detects a GARP or RARP on another bare metal
-	// server in the resource group.  Applies only to `vlan` type interfaces.
+	// Indicates if the data path for the network interface can float to another bare metal server. Can only be `true` for
+	// network interfaces with an `interface_type` of `vlan`.
+	//
+	// If `true`, and the network detects traffic for this data path on another bare metal server in the resource group,
+	// the network interface will be automatically deleted from this bare metal server and a new network interface with the
+	// same `id`, `name` and `vlan` will be created on the other bare metal server.
+	//
+	// For the data path to float, the other bare metal server must be in the same
+	// `resource_group`, and must have a network interface with `interface_type` of `pci` with `allowed_vlans` including
+	// this network interface's `vlan`.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the value of this property matches that of the
+	// `allow_to_float` property of the corresponding network attachment.
 	AllowInterfaceToFloat *bool `json:"allow_interface_to_float,omitempty"`
 
 	// - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
 	//    of `allowed_vlans`.
-	//   - Must use an IEEE 802.1q tag.
+	//   - Must use an IEEE 802.1Q tag.
 	//   - Has its own security groups and does not inherit those of the PCI device through
 	//     which traffic flows.
 	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
 	InterfaceType *string `json:"interface_type" validate:"required"`
 
-	// Indicates the 802.1Q VLAN ID tag that must be used for all traffic on this interface.
+	// The VLAN ID used in the IEEE 802.1Q tag present in all traffic on this interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the VLAN ID matches the `vlan` of the corresponding
+	// network attachment.
 	Vlan *int64 `json:"vlan" validate:"required"`
 }
 
 // Constants associated with the BareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInterfaceByVlanPrototype.InterfaceType property.
 //   - `vlan`: a virtual device, used through a `pci` device that has the `vlan` in its array
 //     of `allowed_vlans`.
-//   - Must use an IEEE 802.1q tag.
+//   - Must use an IEEE 802.1Q tag.
 //   - Has its own security groups and does not inherit those of the PCI device through
 //     which traffic flows.
 //   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
@@ -77431,8 +84970,76 @@ func UnmarshalBareMetalServerNetworkInterfacePrototypeBareMetalServerNetworkInte
 	return
 }
 
-// BareMetalServerProfileBandwidthDependent : The total bandwidth shared across the bare metal server network interfaces of a bare metal server with this profile
-// depends on its configuration.
+// BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype : BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype struct
+// This model "extends" BareMetalServerPrimaryNetworkAttachmentPrototype
+type BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype struct {
+	// The name for this bare metal server network attachment. Names must be unique within the bare metal server the
+	// network attachment resides in. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	VirtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf `json:"virtual_network_interface" validate:"required"`
+
+	// The VLAN IDs to allow for `vlan` attachments using this PCI attachment.
+	AllowedVlans []int64 `json:"allowed_vlans,omitempty"`
+
+	// - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+	//   server is stopped
+	//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+	//     to use the PCI attachment
+	//   - Cannot directly use an IEEE 802.1Q tag.
+	//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+	InterfaceType *string `json:"interface_type,omitempty"`
+}
+
+// Constants associated with the BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype.InterfaceType property.
+//   - `pci`: a physical PCI device which can only be created or deleted when the bare metal
+//     server is stopped
+//   - Has an `allowed_vlans` property which controls the VLANs that will be permitted
+//     to use the PCI attachment
+//   - Cannot directly use an IEEE 802.1Q tag.
+//   - Not supported on bare metal servers with a `cpu.architecture` of `s390x`.
+const (
+	BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototypeInterfaceTypePciConst = "pci"
+)
+
+// NewBareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype : Instantiate BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype(virtualNetworkInterface BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf) (_model *BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype, err error) {
+	_model = &BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype{
+		VirtualNetworkInterface: virtualNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype) isaBareMetalServerPrimaryNetworkAttachmentPrototype() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype unmarshals an instance of BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype from the specified map of raw messages.
+func UnmarshalBareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerPrimaryNetworkAttachmentPrototypeBareMetalServerPrimaryNetworkAttachmentByPciPrototype)
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "virtual_network_interface", &obj.VirtualNetworkInterface, UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "allowed_vlans", &obj.AllowedVlans)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "interface_type", &obj.InterfaceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerProfileBandwidthDependent : The total bandwidth shared across the bare metal server network attachments or bare metal server network interfaces
+// of a bare metal server with this profile depends on its configuration.
 // This model "extends" BareMetalServerProfileBandwidth
 type BareMetalServerProfileBandwidthDependent struct {
 	// The type for this profile field.
@@ -77460,8 +85067,8 @@ func UnmarshalBareMetalServerProfileBandwidthDependent(m map[string]json.RawMess
 	return
 }
 
-// BareMetalServerProfileBandwidthEnum : The permitted total bandwidth values (in megabits per second) shared across the bare metal server network interfaces
-// of a bare metal server with this profile.
+// BareMetalServerProfileBandwidthEnum : The permitted total bandwidth values (in megabits per second) shared across the bare metal server network attachments
+// or bare metal server network interfaces of a bare metal server with this profile.
 // This model "extends" BareMetalServerProfileBandwidth
 type BareMetalServerProfileBandwidthEnum struct {
 	// The default value for this profile field.
@@ -77503,8 +85110,8 @@ func UnmarshalBareMetalServerProfileBandwidthEnum(m map[string]json.RawMessage, 
 	return
 }
 
-// BareMetalServerProfileBandwidthFixed : The total bandwidth (in megabits per second) shared across the bare metal server network interfaces of a bare metal
-// server with this profile.
+// BareMetalServerProfileBandwidthFixed : The total bandwidth (in megabits per second) shared across the bare metal server network attachments or bare metal
+// server network interfaces of a bare metal server with this profile.
 // This model "extends" BareMetalServerProfileBandwidth
 type BareMetalServerProfileBandwidthFixed struct {
 	// The type for this profile field.
@@ -77539,8 +85146,8 @@ func UnmarshalBareMetalServerProfileBandwidthFixed(m map[string]json.RawMessage,
 	return
 }
 
-// BareMetalServerProfileBandwidthRange : The permitted total bandwidth range (in megabits per second) shared across the bare metal server network interfaces
-// of a bare metal server with this profile.
+// BareMetalServerProfileBandwidthRange : The permitted total bandwidth range (in megabits per second) shared across the network attachments or network
+// interfaces of a bare metal server with this profile.
 // This model "extends" BareMetalServerProfileBandwidth
 type BareMetalServerProfileBandwidthRange struct {
 	// The default value for this profile field.
@@ -78466,6 +86073,77 @@ func UnmarshalBareMetalServerProfileMemoryRange(m map[string]json.RawMessage, re
 	return
 }
 
+// BareMetalServerProfileNetworkAttachmentCountDependent : The number of network attachments supported on a bare metal server with this profile is dependent on its
+// configuration.
+// This model "extends" BareMetalServerProfileNetworkAttachmentCount
+type BareMetalServerProfileNetworkAttachmentCountDependent struct {
+	// The type for this profile field.
+	Type *string `json:"type" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerProfileNetworkAttachmentCountDependent.Type property.
+// The type for this profile field.
+const (
+	BareMetalServerProfileNetworkAttachmentCountDependentTypeDependentConst = "dependent"
+)
+
+func (*BareMetalServerProfileNetworkAttachmentCountDependent) isaBareMetalServerProfileNetworkAttachmentCount() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerProfileNetworkAttachmentCountDependent unmarshals an instance of BareMetalServerProfileNetworkAttachmentCountDependent from the specified map of raw messages.
+func UnmarshalBareMetalServerProfileNetworkAttachmentCountDependent(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerProfileNetworkAttachmentCountDependent)
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerProfileNetworkAttachmentCountRange : The number of network attachments supported on a bare metal server with this profile.
+// This model "extends" BareMetalServerProfileNetworkAttachmentCount
+type BareMetalServerProfileNetworkAttachmentCountRange struct {
+	// The maximum value for this profile field.
+	Max *int64 `json:"max,omitempty"`
+
+	// The minimum value for this profile field.
+	Min *int64 `json:"min,omitempty"`
+
+	// The type for this profile field.
+	Type *string `json:"type" validate:"required"`
+}
+
+// Constants associated with the BareMetalServerProfileNetworkAttachmentCountRange.Type property.
+// The type for this profile field.
+const (
+	BareMetalServerProfileNetworkAttachmentCountRangeTypeRangeConst = "range"
+)
+
+func (*BareMetalServerProfileNetworkAttachmentCountRange) isaBareMetalServerProfileNetworkAttachmentCount() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerProfileNetworkAttachmentCountRange unmarshals an instance of BareMetalServerProfileNetworkAttachmentCountRange from the specified map of raw messages.
+func UnmarshalBareMetalServerProfileNetworkAttachmentCountRange(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerProfileNetworkAttachmentCountRange)
+	err = core.UnmarshalPrimitive(m, "max", &obj.Max)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "min", &obj.Min)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // BareMetalServerProfileNetworkInterfaceCountDependent : The number of bare metal server network interfaces supported on a bare metal server with this profile is dependent on
 // its configuration.
 // This model "extends" BareMetalServerProfileNetworkInterfaceCount
@@ -78530,6 +86208,210 @@ func UnmarshalBareMetalServerProfileNetworkInterfaceCountRange(m map[string]json
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerPrototypeBareMetalServerByNetworkAttachment : BareMetalServerPrototypeBareMetalServerByNetworkAttachment struct
+// This model "extends" BareMetalServerPrototype
+type BareMetalServerPrototypeBareMetalServerByNetworkAttachment struct {
+	// Indicates whether secure boot is enabled. If enabled, the image must support secure boot or the server will fail to
+	// boot.
+	EnableSecureBoot *bool `json:"enable_secure_boot,omitempty"`
+
+	Initialization *BareMetalServerInitializationPrototype `json:"initialization" validate:"required"`
+
+	// The name for this bare metal server. The name must not be used by another bare metal server in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-bare-metal-servers-profile) to use for this bare metal
+	// server.
+	Profile BareMetalServerProfileIdentityIntf `json:"profile" validate:"required"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	TrustedPlatformModule *BareMetalServerTrustedPlatformModulePrototype `json:"trusted_platform_module,omitempty"`
+
+	// The VPC this bare metal server will reside in.
+	//
+	// If specified, it must match the VPC for the subnets that the network attachments or network interfaces of the bare
+	// metal server are attached to.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The zone this bare metal server will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the bare metal server.
+	NetworkAttachments []BareMetalServerNetworkAttachmentPrototypeIntf `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the bare metal server.
+	PrimaryNetworkAttachment BareMetalServerPrimaryNetworkAttachmentPrototypeIntf `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewBareMetalServerPrototypeBareMetalServerByNetworkAttachment : Instantiate BareMetalServerPrototypeBareMetalServerByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerPrototypeBareMetalServerByNetworkAttachment(initialization *BareMetalServerInitializationPrototype, profile BareMetalServerProfileIdentityIntf, zone ZoneIdentityIntf, primaryNetworkAttachment BareMetalServerPrimaryNetworkAttachmentPrototypeIntf) (_model *BareMetalServerPrototypeBareMetalServerByNetworkAttachment, err error) {
+	_model = &BareMetalServerPrototypeBareMetalServerByNetworkAttachment{
+		Initialization:           initialization,
+		Profile:                  profile,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerPrototypeBareMetalServerByNetworkAttachment) isaBareMetalServerPrototype() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerPrototypeBareMetalServerByNetworkAttachment unmarshals an instance of BareMetalServerPrototypeBareMetalServerByNetworkAttachment from the specified map of raw messages.
+func UnmarshalBareMetalServerPrototypeBareMetalServerByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerPrototypeBareMetalServerByNetworkAttachment)
+	err = core.UnmarshalPrimitive(m, "enable_secure_boot", &obj.EnableSecureBoot)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "initialization", &obj.Initialization, UnmarshalBareMetalServerInitializationPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalBareMetalServerProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "trusted_platform_module", &obj.TrustedPlatformModule, UnmarshalBareMetalServerTrustedPlatformModulePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalBareMetalServerNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalBareMetalServerPrimaryNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerPrototypeBareMetalServerByNetworkInterface : BareMetalServerPrototypeBareMetalServerByNetworkInterface struct
+// This model "extends" BareMetalServerPrototype
+type BareMetalServerPrototypeBareMetalServerByNetworkInterface struct {
+	// Indicates whether secure boot is enabled. If enabled, the image must support secure boot or the server will fail to
+	// boot.
+	EnableSecureBoot *bool `json:"enable_secure_boot,omitempty"`
+
+	Initialization *BareMetalServerInitializationPrototype `json:"initialization" validate:"required"`
+
+	// The name for this bare metal server. The name must not be used by another bare metal server in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-bare-metal-servers-profile) to use for this bare metal
+	// server.
+	Profile BareMetalServerProfileIdentityIntf `json:"profile" validate:"required"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	TrustedPlatformModule *BareMetalServerTrustedPlatformModulePrototype `json:"trusted_platform_module,omitempty"`
+
+	// The VPC this bare metal server will reside in.
+	//
+	// If specified, it must match the VPC for the subnets that the network attachments or network interfaces of the bare
+	// metal server are attached to.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The zone this bare metal server will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional bare metal server network interfaces to create.
+	NetworkInterfaces []BareMetalServerNetworkInterfacePrototypeIntf `json:"network_interfaces,omitempty"`
+
+	// The primary bare metal server network interface to create.
+	PrimaryNetworkInterface *BareMetalServerPrimaryNetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewBareMetalServerPrototypeBareMetalServerByNetworkInterface : Instantiate BareMetalServerPrototypeBareMetalServerByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerPrototypeBareMetalServerByNetworkInterface(initialization *BareMetalServerInitializationPrototype, profile BareMetalServerProfileIdentityIntf, zone ZoneIdentityIntf, primaryNetworkInterface *BareMetalServerPrimaryNetworkInterfacePrototype) (_model *BareMetalServerPrototypeBareMetalServerByNetworkInterface, err error) {
+	_model = &BareMetalServerPrototypeBareMetalServerByNetworkInterface{
+		Initialization:          initialization,
+		Profile:                 profile,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerPrototypeBareMetalServerByNetworkInterface) isaBareMetalServerPrototype() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerPrototypeBareMetalServerByNetworkInterface unmarshals an instance of BareMetalServerPrototypeBareMetalServerByNetworkInterface from the specified map of raw messages.
+func UnmarshalBareMetalServerPrototypeBareMetalServerByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerPrototypeBareMetalServerByNetworkInterface)
+	err = core.UnmarshalPrimitive(m, "enable_secure_boot", &obj.EnableSecureBoot)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "initialization", &obj.Initialization, UnmarshalBareMetalServerInitializationPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalBareMetalServerProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "trusted_platform_module", &obj.TrustedPlatformModule, UnmarshalBareMetalServerTrustedPlatformModulePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalBareMetalServerNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalBareMetalServerPrimaryNetworkInterfacePrototype)
 	if err != nil {
 		return
 	}
@@ -79831,7 +87713,8 @@ type FloatingIPPrototypeFloatingIPByTarget struct {
 	// resource is:
 	//
 	// - an instance network interface
-	// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`.
+	// - a bare metal server network interface with `enable_infrastructure_nat` set to `true`
+	// - a virtual network interface with `enable_infrastructure_nat` set to `true`.
 	Target FloatingIPTargetPrototypeIntf `json:"target" validate:"required"`
 }
 
@@ -79919,9 +87802,18 @@ func UnmarshalFloatingIPPrototypeFloatingIPByZone(m map[string]json.RawMessage, 
 // This model "extends" FloatingIPTargetPatch
 type FloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentity struct {
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 }
 
@@ -79960,9 +87852,18 @@ func UnmarshalFloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentity(m map
 // This model "extends" FloatingIPTargetPatch
 type FloatingIPTargetPatchNetworkInterfaceIdentity struct {
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 }
 
@@ -79994,6 +87895,55 @@ func UnmarshalFloatingIPTargetPatchNetworkInterfaceIdentity(m map[string]json.Ra
 	return
 }
 
+// FloatingIPTargetPatchVirtualNetworkInterfaceIdentity : Identifies a virtual network interface by a unique property.
+// Models which "extend" this model:
+// - FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID
+// - FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref
+// - FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN
+// This model "extends" FloatingIPTargetPatch
+type FloatingIPTargetPatchVirtualNetworkInterfaceIdentity struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentity) isaFloatingIPTargetPatchVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+type FloatingIPTargetPatchVirtualNetworkInterfaceIdentityIntf interface {
+	FloatingIPTargetPatchIntf
+	isaFloatingIPTargetPatchVirtualNetworkInterfaceIdentity() bool
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentity) isaFloatingIPTargetPatch() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentity unmarshals an instance of FloatingIPTargetPatchVirtualNetworkInterfaceIdentity from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPatchVirtualNetworkInterfaceIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentity : Identifies a bare metal server network interface by a unique property.
 // Models which "extend" this model:
 // - FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentityBareMetalServerNetworkInterfaceIdentityByID
@@ -80001,9 +87951,18 @@ func UnmarshalFloatingIPTargetPatchNetworkInterfaceIdentity(m map[string]json.Ra
 // This model "extends" FloatingIPTargetPrototype
 type FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentity struct {
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 }
 
@@ -80042,9 +88001,18 @@ func UnmarshalFloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentity(m
 // This model "extends" FloatingIPTargetPrototype
 type FloatingIPTargetPrototypeNetworkInterfaceIdentity struct {
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 }
 
@@ -80076,6 +88044,55 @@ func UnmarshalFloatingIPTargetPrototypeNetworkInterfaceIdentity(m map[string]jso
 	return
 }
 
+// FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity : Identifies a virtual network interface by a unique property.
+// Models which "extend" this model:
+// - FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID
+// - FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref
+// - FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN
+// This model "extends" FloatingIPTargetPrototype
+type FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity) isaFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+type FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityIntf interface {
+	FloatingIPTargetPrototypeIntf
+	isaFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity) isaFloatingIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity unmarshals an instance of FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FloatingIPTargetBareMetalServerNetworkInterfaceReference : FloatingIPTargetBareMetalServerNetworkInterfaceReference struct
 // This model "extends" FloatingIPTarget
 type FloatingIPTargetBareMetalServerNetworkInterfaceReference struct {
@@ -80084,9 +88101,18 @@ type FloatingIPTargetBareMetalServerNetworkInterfaceReference struct {
 	Deleted *BareMetalServerNetworkInterfaceReferenceDeleted `json:"deleted,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this bare metal server network interface.
@@ -80147,9 +88173,18 @@ type FloatingIPTargetNetworkInterfaceReference struct {
 	Deleted *NetworkInterfaceReferenceDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this instance network interface.
@@ -80266,6 +88301,84 @@ func UnmarshalFloatingIPTargetPublicGatewayReference(m map[string]json.RawMessag
 	return
 }
 
+// FloatingIPTargetVirtualNetworkInterfaceReference : FloatingIPTargetVirtualNetworkInterfaceReference struct
+// This model "extends" FloatingIPTarget
+type FloatingIPTargetVirtualNetworkInterfaceReference struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+
+	// If present, this property indicates the referenced resource has been deleted, and provides
+	// some supplementary information.
+	Deleted *VirtualNetworkInterfaceReferenceDeleted `json:"deleted,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this virtual network interface. The name is unique across all virtual network interfaces in the VPC.
+	Name *string `json:"name" validate:"required"`
+
+	// The primary IP for this virtual network interface.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The associated subnet.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+}
+
+// Constants associated with the FloatingIPTargetVirtualNetworkInterfaceReference.ResourceType property.
+// The resource type.
+const (
+	FloatingIPTargetVirtualNetworkInterfaceReferenceResourceTypeVirtualNetworkInterfaceConst = "virtual_network_interface"
+)
+
+func (*FloatingIPTargetVirtualNetworkInterfaceReference) isaFloatingIPTarget() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetVirtualNetworkInterfaceReference unmarshals an instance of FloatingIPTargetVirtualNetworkInterfaceReference from the specified map of raw messages.
+func UnmarshalFloatingIPTargetVirtualNetworkInterfaceReference(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetVirtualNetworkInterfaceReference)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalVirtualNetworkInterfaceReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FlowLogCollectorTargetPrototypeInstanceIdentity : Identifies a virtual server instance by a unique property.
 // Models which "extend" this model:
 // - FlowLogCollectorTargetPrototypeInstanceIdentityInstanceIdentityByID
@@ -80315,6 +88428,47 @@ func UnmarshalFlowLogCollectorTargetPrototypeInstanceIdentity(m map[string]json.
 	return
 }
 
+// FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity : Identifies an instance network attachment by a unique property.
+// Models which "extend" this model:
+// - FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID
+// - FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref
+// This model "extends" FlowLogCollectorTargetPrototype
+type FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity struct {
+	// The unique identifier for this instance network attachment.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this instance network attachment.
+	Href *string `json:"href,omitempty"`
+}
+
+func (*FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity) isaFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity() bool {
+	return true
+}
+
+type FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityIntf interface {
+	FlowLogCollectorTargetPrototypeIntf
+	isaFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity() bool
+}
+
+func (*FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity) isaFlowLogCollectorTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity unmarshals an instance of FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FlowLogCollectorTargetPrototypeNetworkInterfaceIdentity : Identifies an instance network interface by a unique property.
 // Models which "extend" this model:
 // - FlowLogCollectorTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByID
@@ -80322,9 +88476,18 @@ func UnmarshalFlowLogCollectorTargetPrototypeInstanceIdentity(m map[string]json.
 // This model "extends" FlowLogCollectorTargetPrototype
 type FlowLogCollectorTargetPrototypeNetworkInterfaceIdentity struct {
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href,omitempty"`
 }
 
@@ -80454,6 +88617,127 @@ func UnmarshalFlowLogCollectorTargetPrototypeVPCIdentity(m map[string]json.RawMe
 	return
 }
 
+// FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity : Identifies a virtual network interface by a unique property.
+// Models which "extend" this model:
+// - FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID
+// - FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref
+// - FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN
+// This model "extends" FlowLogCollectorTargetPrototype
+type FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity) isaFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+type FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityIntf interface {
+	FlowLogCollectorTargetPrototypeIntf
+	isaFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity() bool
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity) isaFlowLogCollectorTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity unmarshals an instance of FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FlowLogCollectorTargetInstanceNetworkAttachmentReference : FlowLogCollectorTargetInstanceNetworkAttachmentReference struct
+// This model "extends" FlowLogCollectorTarget
+type FlowLogCollectorTargetInstanceNetworkAttachmentReference struct {
+	// If present, this property indicates the referenced resource has been deleted, and provides
+	// some supplementary information.
+	Deleted *InstanceNetworkAttachmentReferenceDeleted `json:"deleted,omitempty"`
+
+	// The URL for this instance network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this instance network attachment. The name is unique across all network attachments for the instance.
+	Name *string `json:"name" validate:"required"`
+
+	// The primary IP address of the virtual network interface for the instance network
+	// attachment.
+	PrimaryIP *ReservedIPReference `json:"primary_ip" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+
+	// The subnet of the virtual network interface for the instance network attachment.
+	Subnet *SubnetReference `json:"subnet" validate:"required"`
+}
+
+// Constants associated with the FlowLogCollectorTargetInstanceNetworkAttachmentReference.ResourceType property.
+// The resource type.
+const (
+	FlowLogCollectorTargetInstanceNetworkAttachmentReferenceResourceTypeInstanceNetworkAttachmentConst = "instance_network_attachment"
+)
+
+func (*FlowLogCollectorTargetInstanceNetworkAttachmentReference) isaFlowLogCollectorTarget() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetInstanceNetworkAttachmentReference unmarshals an instance of FlowLogCollectorTargetInstanceNetworkAttachmentReference from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetInstanceNetworkAttachmentReference(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetInstanceNetworkAttachmentReference)
+	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalInstanceNetworkAttachmentReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalReservedIPReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetReference)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FlowLogCollectorTargetInstanceReference : FlowLogCollectorTargetInstanceReference struct
 // This model "extends" FlowLogCollectorTarget
 type FlowLogCollectorTargetInstanceReference struct {
@@ -80513,9 +88797,18 @@ type FlowLogCollectorTargetNetworkInterfaceReferenceTargetContext struct {
 	Deleted *NetworkInterfaceReferenceTargetContextDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this instance network interface.
@@ -80667,6 +88960,62 @@ func UnmarshalFlowLogCollectorTargetVPCReference(m map[string]json.RawMessage, r
 		return
 	}
 	err = core.UnmarshalModel(m, "deleted", &obj.Deleted, UnmarshalVPCReferenceDeleted)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext : FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext struct
+// This model "extends" FlowLogCollectorTarget
+type FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this virtual network interface. The name is unique across all virtual network interfaces in the VPC.
+	Name *string `json:"name" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+}
+
+// Constants associated with the FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext.ResourceType property.
+// The resource type.
+const (
+	FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContextResourceTypeVirtualNetworkInterfaceConst = "virtual_network_interface"
+)
+
+func (*FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext) isaFlowLogCollectorTarget() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext unmarshals an instance of FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetVirtualNetworkInterfaceReferenceAttachmentContext)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
 	if err != nil {
 		return
 	}
@@ -81869,6 +90218,165 @@ func UnmarshalInstanceGroupManagerScheduledActionManagerPrototypeAutoScaleProtot
 	return
 }
 
+// InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity : Identifies a virtual network interface by a unique property.
+// Models which "extend" this model:
+// - InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID
+// - InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref
+// - InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN
+// This model "extends" InstanceNetworkAttachmentPrototypeVirtualNetworkInterface
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityIntf interface {
+	InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceIntf
+	isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity unmarshals an instance of InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext : The virtual network interface for this target.
+// This model "extends" InstanceNetworkAttachmentPrototypeVirtualNetworkInterface
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// Additional IP addresses to bind to the virtual network interface. Each item may be either a reserved IP identity, or
+	// a reserved IP prototype object which will be used to create a new reserved IP. All IP addresses must be in the
+	// primary IP's subnet.
+	//
+	// If reserved IP identities are provided, the specified reserved IPs must be unbound.
+	//
+	// If reserved IP prototype objects with addresses are provided, the addresses must be available on the virtual network
+	// interface's subnet. For any prototype objects that do not specify an address, an available address on the subnet
+	// will be automatically selected and reserved.
+	Ips []VirtualNetworkInterfaceIPPrototypeIntf `json:"ips,omitempty"`
+
+	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
+	// VPC. If unspecified, the name will be a hyphenated list of randomly-selected words. Names beginning with `ibm-` are
+	// reserved for provider-owned resources, and are not allowed.
+	Name *string `json:"name,omitempty"`
+
+	// The primary IP address to bind to the virtual network interface. May be either a
+	// reserved IP identity, or a reserved IP prototype object which will be used to create a
+	// new reserved IP.
+	//
+	// If a reserved IP identity is provided, the specified reserved IP must be unbound.
+	//
+	// If a reserved IP prototype object with an address is provided, the address must be
+	// available on the virtual network interface's subnet. If no address is specified,
+	// an available address on the subnet will be automatically selected and reserved.
+	PrimaryIP VirtualNetworkInterfacePrimaryIPPrototypeIntf `json:"primary_ip,omitempty"`
+
+	// The resource group to use for this virtual network interface. If unspecified, the
+	// virtual server instance's resource group will be used.
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The security groups to use for this virtual network interface. If unspecified, the default security group of the VPC
+	// for the subnet is used.
+	SecurityGroups []SecurityGroupIdentityIntf `json:"security_groups,omitempty"`
+
+	// The associated subnet. Required if `primary_ip` does not specify a reserved IP
+	// identity.
+	Subnet SubnetIdentityIntf `json:"subnet,omitempty"`
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext unmarshals an instance of InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfacePrototypeInstanceNetworkAttachmentContext)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalVirtualNetworkInterfaceIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_ip", &obj.PrimaryIP, UnmarshalVirtualNetworkInterfacePrimaryIPPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "security_groups", &obj.SecurityGroups, UnmarshalSecurityGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "subnet", &obj.Subnet, UnmarshalSubnetIdentity)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // InstancePatchProfileInstanceProfileIdentityByHref : InstancePatchProfileInstanceProfileIdentityByHref struct
 // This model "extends" InstancePatchProfile
 type InstancePatchProfileInstanceProfileIdentityByHref struct {
@@ -82368,8 +90876,8 @@ func UnmarshalInstancePlacementTargetPlacementGroupReference(m map[string]json.R
 	return
 }
 
-// InstanceProfileBandwidthDependent : The total bandwidth shared across the network interfaces and storage volumes of an instance with this profile depends
-// on its configuration.
+// InstanceProfileBandwidthDependent : The total bandwidth shared across the network attachments or network interfaces and storage volumes of an instance
+// with this profile depends on its configuration.
 // This model "extends" InstanceProfileBandwidth
 type InstanceProfileBandwidthDependent struct {
 	// The type for this profile field.
@@ -82397,8 +90905,8 @@ func UnmarshalInstanceProfileBandwidthDependent(m map[string]json.RawMessage, re
 	return
 }
 
-// InstanceProfileBandwidthEnum : The permitted total bandwidth values (in megabits per second) shared across the network interfaces and storage
-// volumes of an instance with this profile.
+// InstanceProfileBandwidthEnum : The permitted total bandwidth values (in megabits per second) shared across the network attachments or network
+// interfaces and storage volumes of an instance with this profile.
 // This model "extends" InstanceProfileBandwidth
 type InstanceProfileBandwidthEnum struct {
 	// The default value for this profile field.
@@ -82440,8 +90948,8 @@ func UnmarshalInstanceProfileBandwidthEnum(m map[string]json.RawMessage, result 
 	return
 }
 
-// InstanceProfileBandwidthFixed : The total bandwidth (in megabits per second) shared across the network interfaces and storage volumes of an instance
-// with this profile.
+// InstanceProfileBandwidthFixed : The total bandwidth (in megabits per second) shared across the network attachments or network interfaces and storage
+// volumes of an instance with this profile.
 // This model "extends" InstanceProfileBandwidth
 type InstanceProfileBandwidthFixed struct {
 	// The type for this profile field.
@@ -82476,8 +90984,8 @@ func UnmarshalInstanceProfileBandwidthFixed(m map[string]json.RawMessage, result
 	return
 }
 
-// InstanceProfileBandwidthRange : The permitted total bandwidth range (in megabits per second) shared across the network interfaces and storage volumes
-// of an instance with this profile.
+// InstanceProfileBandwidthRange : The permitted total bandwidth range (in megabits per second) shared across the network attachments or network
+// interfaces and storage volumes of an instance with this profile.
 // This model "extends" InstanceProfileBandwidth
 type InstanceProfileBandwidthRange struct {
 	// The default value for this profile field.
@@ -83465,6 +91973,76 @@ func UnmarshalInstanceProfileNumaCountFixed(m map[string]json.RawMessage, result
 	return
 }
 
+// InstanceProfileNetworkAttachmentCountDependent : The number of network attachments supported on an instance with this profile is dependent on its configuration.
+// This model "extends" InstanceProfileNetworkAttachmentCount
+type InstanceProfileNetworkAttachmentCountDependent struct {
+	// The type for this profile field.
+	Type *string `json:"type" validate:"required"`
+}
+
+// Constants associated with the InstanceProfileNetworkAttachmentCountDependent.Type property.
+// The type for this profile field.
+const (
+	InstanceProfileNetworkAttachmentCountDependentTypeDependentConst = "dependent"
+)
+
+func (*InstanceProfileNetworkAttachmentCountDependent) isaInstanceProfileNetworkAttachmentCount() bool {
+	return true
+}
+
+// UnmarshalInstanceProfileNetworkAttachmentCountDependent unmarshals an instance of InstanceProfileNetworkAttachmentCountDependent from the specified map of raw messages.
+func UnmarshalInstanceProfileNetworkAttachmentCountDependent(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceProfileNetworkAttachmentCountDependent)
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceProfileNetworkAttachmentCountRange : The number of network attachments supported on an instance with this profile.
+// This model "extends" InstanceProfileNetworkAttachmentCount
+type InstanceProfileNetworkAttachmentCountRange struct {
+	// The maximum value for this profile field.
+	Max *int64 `json:"max,omitempty"`
+
+	// The minimum value for this profile field.
+	Min *int64 `json:"min,omitempty"`
+
+	// The type for this profile field.
+	Type *string `json:"type" validate:"required"`
+}
+
+// Constants associated with the InstanceProfileNetworkAttachmentCountRange.Type property.
+// The type for this profile field.
+const (
+	InstanceProfileNetworkAttachmentCountRangeTypeRangeConst = "range"
+)
+
+func (*InstanceProfileNetworkAttachmentCountRange) isaInstanceProfileNetworkAttachmentCount() bool {
+	return true
+}
+
+// UnmarshalInstanceProfileNetworkAttachmentCountRange unmarshals an instance of InstanceProfileNetworkAttachmentCountRange from the specified map of raw messages.
+func UnmarshalInstanceProfileNetworkAttachmentCountRange(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceProfileNetworkAttachmentCountRange)
+	err = core.UnmarshalPrimitive(m, "max", &obj.Max)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "min", &obj.Min)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "type", &obj.Type)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // InstanceProfileNetworkInterfaceCountDependent : The number of network interfaces supported on an instance with this profile is dependent on its configuration.
 // This model "extends" InstanceProfileNetworkInterfaceCount
 type InstanceProfileNetworkInterfaceCountDependent struct {
@@ -83924,6 +92502,9 @@ func UnmarshalInstanceProfileVolumeBandwidthRange(m map[string]json.RawMessage, 
 }
 
 // InstancePrototypeInstanceByCatalogOffering : Create an instance by using a catalog offering.
+// Models which "extend" this model:
+// - InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment
+// - InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface
 // This model "extends" InstancePrototype
 type InstancePrototypeInstanceByCatalogOffering struct {
 	// The availability policy to use for this virtual server instance.
@@ -83982,7 +92563,8 @@ type InstancePrototypeInstanceByCatalogOffering struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -84006,17 +92588,21 @@ type InstancePrototypeInstanceByCatalogOffering struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 }
 
-// NewInstancePrototypeInstanceByCatalogOffering : Instantiate InstancePrototypeInstanceByCatalogOffering (Generic Model Constructor)
-func (*VpcV1) NewInstancePrototypeInstanceByCatalogOffering(catalogOffering InstanceCatalogOfferingPrototypeIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf) (_model *InstancePrototypeInstanceByCatalogOffering, err error) {
-	_model = &InstancePrototypeInstanceByCatalogOffering{
-		CatalogOffering:         catalogOffering,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Zone:                    zone,
-	}
-	err = core.ValidateStruct(_model, "required parameters")
-	return
+func (*InstancePrototypeInstanceByCatalogOffering) isaInstancePrototypeInstanceByCatalogOffering() bool {
+	return true
+}
+
+type InstancePrototypeInstanceByCatalogOfferingIntf interface {
+	InstancePrototypeIntf
+	isaInstancePrototypeInstanceByCatalogOffering() bool
 }
 
 func (*InstancePrototypeInstanceByCatalogOffering) isaInstancePrototype() bool {
@@ -84094,11 +92680,22 @@ func UnmarshalInstancePrototypeInstanceByCatalogOffering(m map[string]json.RawMe
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
 // InstancePrototypeInstanceByImage : Create an instance by using an image.
+// Models which "extend" this model:
+// - InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment
+// - InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface
 // This model "extends" InstancePrototype
 type InstancePrototypeInstanceByImage struct {
 	// The availability policy to use for this virtual server instance.
@@ -84157,7 +92754,8 @@ type InstancePrototypeInstanceByImage struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -84174,17 +92772,21 @@ type InstancePrototypeInstanceByImage struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 }
 
-// NewInstancePrototypeInstanceByImage : Instantiate InstancePrototypeInstanceByImage (Generic Model Constructor)
-func (*VpcV1) NewInstancePrototypeInstanceByImage(image ImageIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf) (_model *InstancePrototypeInstanceByImage, err error) {
-	_model = &InstancePrototypeInstanceByImage{
-		Image:                   image,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Zone:                    zone,
-	}
-	err = core.ValidateStruct(_model, "required parameters")
-	return
+func (*InstancePrototypeInstanceByImage) isaInstancePrototypeInstanceByImage() bool {
+	return true
+}
+
+type InstancePrototypeInstanceByImageIntf interface {
+	InstancePrototypeIntf
+	isaInstancePrototypeInstanceByImage() bool
 }
 
 func (*InstancePrototypeInstanceByImage) isaInstancePrototype() bool {
@@ -84262,11 +92864,22 @@ func UnmarshalInstancePrototypeInstanceByImage(m map[string]json.RawMessage, res
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
 // InstancePrototypeInstanceBySourceSnapshot : Create an instance by using a snapshot.
+// Models which "extend" this model:
+// - InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment
+// - InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface
 // This model "extends" InstancePrototype
 type InstancePrototypeInstanceBySourceSnapshot struct {
 	// The availability policy to use for this virtual server instance.
@@ -84325,7 +92938,8 @@ type InstancePrototypeInstanceBySourceSnapshot struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -84339,17 +92953,21 @@ type InstancePrototypeInstanceBySourceSnapshot struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 }
 
-// NewInstancePrototypeInstanceBySourceSnapshot : Instantiate InstancePrototypeInstanceBySourceSnapshot (Generic Model Constructor)
-func (*VpcV1) NewInstancePrototypeInstanceBySourceSnapshot(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf) (_model *InstancePrototypeInstanceBySourceSnapshot, err error) {
-	_model = &InstancePrototypeInstanceBySourceSnapshot{
-		BootVolumeAttachment:    bootVolumeAttachment,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Zone:                    zone,
-	}
-	err = core.ValidateStruct(_model, "required parameters")
-	return
+func (*InstancePrototypeInstanceBySourceSnapshot) isaInstancePrototypeInstanceBySourceSnapshot() bool {
+	return true
+}
+
+type InstancePrototypeInstanceBySourceSnapshotIntf interface {
+	InstancePrototypeIntf
+	isaInstancePrototypeInstanceBySourceSnapshot() bool
 }
 
 func (*InstancePrototypeInstanceBySourceSnapshot) isaInstancePrototype() bool {
@@ -84423,11 +93041,22 @@ func UnmarshalInstancePrototypeInstanceBySourceSnapshot(m map[string]json.RawMes
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
 // InstancePrototypeInstanceBySourceTemplate : Create an instance by using an instance template.
+//
+// The `primary_network_attachment` and `network_attachments` properties may only be specified if
+// `primary_network_attachment` is specified in the source template.
 //
 // The `primary_network_interface` and `network_interfaces` properties may only be specified if
 // `primary_network_interface` is specified in the source template.
@@ -84489,7 +93118,8 @@ type InstancePrototypeInstanceBySourceTemplate struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -84509,8 +93139,14 @@ type InstancePrototypeInstanceBySourceTemplate struct {
 	// The image to use when provisioning the virtual server instance.
 	Image ImageIdentityIntf `json:"image,omitempty"`
 
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
 	// The additional instance network interfaces to create.
 	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 
 	// The primary instance network interface to create.
 	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface,omitempty"`
@@ -84598,7 +93234,15 @@ func UnmarshalInstancePrototypeInstanceBySourceTemplate(m map[string]json.RawMes
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
 	if err != nil {
 		return
 	}
@@ -84619,6 +93263,9 @@ func UnmarshalInstancePrototypeInstanceBySourceTemplate(m map[string]json.RawMes
 }
 
 // InstancePrototypeInstanceByVolume : Create an instance by using a boot volume.
+// Models which "extend" this model:
+// - InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment
+// - InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface
 // This model "extends" InstancePrototype
 type InstancePrototypeInstanceByVolume struct {
 	// The availability policy to use for this virtual server instance.
@@ -84677,7 +93324,8 @@ type InstancePrototypeInstanceByVolume struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment for the virtual server instance.
@@ -84691,17 +93339,21 @@ type InstancePrototypeInstanceByVolume struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 }
 
-// NewInstancePrototypeInstanceByVolume : Instantiate InstancePrototypeInstanceByVolume (Generic Model Constructor)
-func (*VpcV1) NewInstancePrototypeInstanceByVolume(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceByVolumeContext, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf) (_model *InstancePrototypeInstanceByVolume, err error) {
-	_model = &InstancePrototypeInstanceByVolume{
-		BootVolumeAttachment:    bootVolumeAttachment,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Zone:                    zone,
-	}
-	err = core.ValidateStruct(_model, "required parameters")
-	return
+func (*InstancePrototypeInstanceByVolume) isaInstancePrototypeInstanceByVolume() bool {
+	return true
+}
+
+type InstancePrototypeInstanceByVolumeIntf interface {
+	InstancePrototypeIntf
+	isaInstancePrototypeInstanceByVolume() bool
 }
 
 func (*InstancePrototypeInstanceByVolume) isaInstancePrototype() bool {
@@ -84772,6 +93424,14 @@ func UnmarshalInstancePrototypeInstanceByVolume(m map[string]json.RawMessage, re
 		return
 	}
 	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
 	if err != nil {
 		return
 	}
@@ -84873,6 +93533,9 @@ func UnmarshalInstanceTemplateIdentityByID(m map[string]json.RawMessage, result 
 }
 
 // InstanceTemplatePrototypeInstanceTemplateByCatalogOffering : Create an instance template that creates instances by using a catalog offering.
+// Models which "extend" this model:
+// - InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment
+// - InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface
 // This model "extends" InstanceTemplatePrototype
 type InstanceTemplatePrototypeInstanceTemplateByCatalogOffering struct {
 	// The availability policy to use for this virtual server instance.
@@ -84929,7 +93592,8 @@ type InstanceTemplatePrototypeInstanceTemplateByCatalogOffering struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -84953,17 +93617,21 @@ type InstanceTemplatePrototypeInstanceTemplateByCatalogOffering struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 }
 
-// NewInstanceTemplatePrototypeInstanceTemplateByCatalogOffering : Instantiate InstanceTemplatePrototypeInstanceTemplateByCatalogOffering (Generic Model Constructor)
-func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateByCatalogOffering(catalogOffering InstanceCatalogOfferingPrototypeIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf) (_model *InstanceTemplatePrototypeInstanceTemplateByCatalogOffering, err error) {
-	_model = &InstanceTemplatePrototypeInstanceTemplateByCatalogOffering{
-		CatalogOffering:         catalogOffering,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Zone:                    zone,
-	}
-	err = core.ValidateStruct(_model, "required parameters")
-	return
+func (*InstanceTemplatePrototypeInstanceTemplateByCatalogOffering) isaInstanceTemplatePrototypeInstanceTemplateByCatalogOffering() bool {
+	return true
+}
+
+type InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingIntf interface {
+	InstanceTemplatePrototypeIntf
+	isaInstanceTemplatePrototypeInstanceTemplateByCatalogOffering() bool
 }
 
 func (*InstanceTemplatePrototypeInstanceTemplateByCatalogOffering) isaInstanceTemplatePrototype() bool {
@@ -85041,11 +93709,22 @@ func UnmarshalInstanceTemplatePrototypeInstanceTemplateByCatalogOffering(m map[s
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
 // InstanceTemplatePrototypeInstanceTemplateByImage : Create an instance template that creates instances by using an image.
+// Models which "extend" this model:
+// - InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment
+// - InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface
 // This model "extends" InstanceTemplatePrototype
 type InstanceTemplatePrototypeInstanceTemplateByImage struct {
 	// The availability policy to use for this virtual server instance.
@@ -85102,7 +93781,8 @@ type InstanceTemplatePrototypeInstanceTemplateByImage struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -85119,17 +93799,21 @@ type InstanceTemplatePrototypeInstanceTemplateByImage struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 }
 
-// NewInstanceTemplatePrototypeInstanceTemplateByImage : Instantiate InstanceTemplatePrototypeInstanceTemplateByImage (Generic Model Constructor)
-func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateByImage(image ImageIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf) (_model *InstanceTemplatePrototypeInstanceTemplateByImage, err error) {
-	_model = &InstanceTemplatePrototypeInstanceTemplateByImage{
-		Image:                   image,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Zone:                    zone,
-	}
-	err = core.ValidateStruct(_model, "required parameters")
-	return
+func (*InstanceTemplatePrototypeInstanceTemplateByImage) isaInstanceTemplatePrototypeInstanceTemplateByImage() bool {
+	return true
+}
+
+type InstanceTemplatePrototypeInstanceTemplateByImageIntf interface {
+	InstanceTemplatePrototypeIntf
+	isaInstanceTemplatePrototypeInstanceTemplateByImage() bool
 }
 
 func (*InstanceTemplatePrototypeInstanceTemplateByImage) isaInstanceTemplatePrototype() bool {
@@ -85207,11 +93891,22 @@ func UnmarshalInstanceTemplatePrototypeInstanceTemplateByImage(m map[string]json
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
 // InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot : Create an instance template that creates instances by using a snapshot.
+// Models which "extend" this model:
+// - InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment
+// - InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface
 // This model "extends" InstanceTemplatePrototype
 type InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot struct {
 	// The availability policy to use for this virtual server instance.
@@ -85268,7 +93963,8 @@ type InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -85282,17 +93978,21 @@ type InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot struct {
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 }
 
-// NewInstanceTemplatePrototypeInstanceTemplateBySourceSnapshot : Instantiate InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot (Generic Model Constructor)
-func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateBySourceSnapshot(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf) (_model *InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot, err error) {
-	_model = &InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot{
-		BootVolumeAttachment:    bootVolumeAttachment,
-		PrimaryNetworkInterface: primaryNetworkInterface,
-		Zone:                    zone,
-	}
-	err = core.ValidateStruct(_model, "required parameters")
-	return
+func (*InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot) isaInstanceTemplatePrototypeInstanceTemplateBySourceSnapshot() bool {
+	return true
+}
+
+type InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotIntf interface {
+	InstanceTemplatePrototypeIntf
+	isaInstanceTemplatePrototypeInstanceTemplateBySourceSnapshot() bool
 }
 
 func (*InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot) isaInstanceTemplatePrototype() bool {
@@ -85366,6 +94066,14 @@ func UnmarshalInstanceTemplatePrototypeInstanceTemplateBySourceSnapshot(m map[st
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
@@ -85427,7 +94135,8 @@ type InstanceTemplatePrototypeInstanceTemplateBySourceTemplate struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -85447,8 +94156,14 @@ type InstanceTemplatePrototypeInstanceTemplateBySourceTemplate struct {
 	// The image to use when provisioning the virtual server instance.
 	Image ImageIdentityIntf `json:"image,omitempty"`
 
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
 	// The additional instance network interfaces to create.
 	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
 
 	// The primary instance network interface to create.
 	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface,omitempty"`
@@ -85536,7 +94251,15 @@ func UnmarshalInstanceTemplatePrototypeInstanceTemplateBySourceTemplate(m map[st
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
 	if err != nil {
 		return
 	}
@@ -85557,6 +94280,9 @@ func UnmarshalInstanceTemplatePrototypeInstanceTemplateBySourceTemplate(m map[st
 }
 
 // InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext : Create an instance by using a catalog offering.
+// Models which "extend" this model:
+// - InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment
+// - InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface
 // This model "extends" InstanceTemplate
 type InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext struct {
 	// The availability policy to use for this virtual server instance.
@@ -85625,7 +94351,8 @@ type InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -85645,10 +94372,25 @@ type InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext struct {
 	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
 
 	// The primary instance network interface to create.
-	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface,omitempty"`
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
+}
+
+func (*InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext) isaInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext() bool {
+	return true
+}
+
+type InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextIntf interface {
+	InstanceTemplateIntf
+	isaInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext() bool
 }
 
 func (*InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext) isaInstanceTemplate() bool {
@@ -85742,11 +94484,22 @@ func UnmarshalInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext(m
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
 // InstanceTemplateInstanceByImageInstanceTemplateContext : Create an instance by using an image.
+// Models which "extend" this model:
+// - InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment
+// - InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface
 // This model "extends" InstanceTemplate
 type InstanceTemplateInstanceByImageInstanceTemplateContext struct {
 	// The availability policy to use for this virtual server instance.
@@ -85815,7 +94568,8 @@ type InstanceTemplateInstanceByImageInstanceTemplateContext struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
@@ -85828,10 +94582,25 @@ type InstanceTemplateInstanceByImageInstanceTemplateContext struct {
 	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
 
 	// The primary instance network interface to create.
-	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface,omitempty"`
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
+}
+
+func (*InstanceTemplateInstanceByImageInstanceTemplateContext) isaInstanceTemplateInstanceByImageInstanceTemplateContext() bool {
+	return true
+}
+
+type InstanceTemplateInstanceByImageInstanceTemplateContextIntf interface {
+	InstanceTemplateIntf
+	isaInstanceTemplateInstanceByImageInstanceTemplateContext() bool
 }
 
 func (*InstanceTemplateInstanceByImageInstanceTemplateContext) isaInstanceTemplate() bool {
@@ -85925,11 +94694,22 @@ func UnmarshalInstanceTemplateInstanceByImageInstanceTemplateContext(m map[strin
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
 	return
 }
 
 // InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext : Create an instance by using a snapshot.
+// Models which "extend" this model:
+// - InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment
+// - InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface
 // This model "extends" InstanceTemplate
 type InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext struct {
 	// The availability policy to use for this virtual server instance.
@@ -85998,20 +94778,36 @@ type InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext struct {
 
 	// The VPC this virtual server instance will reside in.
 	//
-	// If specified, it must match the VPC for the subnets of the instance network interfaces.
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
 	VPC VPCIdentityIntf `json:"vpc,omitempty"`
 
 	// The boot volume attachment to create for the virtual server instance.
 	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext `json:"boot_volume_attachment" validate:"required"`
 
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
 	// The additional instance network interfaces to create.
 	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
 
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
+
 	// The primary instance network interface to create.
-	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface,omitempty"`
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
 
 	// The zone this virtual server instance will reside in.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+}
+
+func (*InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext) isaInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext() bool {
+	return true
+}
+
+type InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextIntf interface {
+	InstanceTemplateIntf
+	isaInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext() bool
 }
 
 func (*InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext) isaInstanceTemplate() bool {
@@ -86089,7 +94885,15 @@ func UnmarshalInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext(m 
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
 	if err != nil {
 		return
 	}
@@ -89593,6 +98397,55 @@ func UnmarshalReservedIPTargetPrototypeEndpointGatewayIdentity(m map[string]json
 	return
 }
 
+// ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity : Identifies a virtual network interface by a unique property.
+// Models which "extend" this model:
+// - ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID
+// - ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref
+// - ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN
+// This model "extends" ReservedIPTargetPrototype
+type ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity) isaReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+type ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityIntf interface {
+	ReservedIPTargetPrototypeIntf
+	isaReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity) isaReservedIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity unmarshals an instance of ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity from the specified map of raw messages.
+func UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // ReservedIPTargetBareMetalServerNetworkInterfaceReferenceTargetContext : ReservedIPTargetBareMetalServerNetworkInterfaceReferenceTargetContext struct
 // This model "extends" ReservedIPTarget
 type ReservedIPTargetBareMetalServerNetworkInterfaceReferenceTargetContext struct {
@@ -89601,9 +98454,18 @@ type ReservedIPTargetBareMetalServerNetworkInterfaceReferenceTargetContext struc
 	Deleted *BareMetalServerNetworkInterfaceReferenceTargetContextDeleted `json:"deleted,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this bare metal server network interface.
@@ -89829,9 +98691,18 @@ type ReservedIPTargetNetworkInterfaceReferenceTargetContext struct {
 	Deleted *NetworkInterfaceReferenceTargetContextDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this instance network interface.
@@ -91514,9 +100385,18 @@ type SecurityGroupTargetReferenceBareMetalServerNetworkInterfaceReferenceTargetC
 	Deleted *BareMetalServerNetworkInterfaceReferenceTargetContextDeleted `json:"deleted,omitempty"`
 
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this bare metal server network interface.
@@ -91699,9 +100579,18 @@ type SecurityGroupTargetReferenceNetworkInterfaceReferenceTargetContext struct {
 	Deleted *NetworkInterfaceReferenceTargetContextDeleted `json:"deleted,omitempty"`
 
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 
 	// The name for this instance network interface.
@@ -91983,8 +100872,15 @@ func UnmarshalShareIdentityByID(m map[string]json.RawMessage, result interface{}
 	return
 }
 
-// ShareMountTargetPrototypeShareMountTargetByAccessControlModeSecurityGroup : The virtual network interface for this share mount target. The virtual network interface's VPC must not be used by a
-// virtual network interface for another mount target for this share.
+// ShareMountTargetPrototypeShareMountTargetByAccessControlModeSecurityGroup : The virtual network interface for this share mount target. The virtual network interface must:
+//
+// - have `allow_ip_spoofing` set to `false`
+// - have `enable_infrastructure_nat` set to `true`
+// - not be in the same VPC as an existing mount target for this share
+// - not have `ips` other than the `primary_ip` address
+//
+// If an existing virtual network interface is specified, it must not have a floating IP bound to it, and it must not be
+// the target of a flow log collector.
 //
 // Required if the share's `access_control_mode` is `security_group`.
 // This model "extends" ShareMountTargetPrototype
@@ -92104,9 +101000,89 @@ func UnmarshalShareMountTargetPrototypeShareMountTargetByAccessControlModeVPC(m 
 	return
 }
 
+// ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity : Identifies a virtual network interface by a unique property.
+// Models which "extend" this model:
+// - ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID
+// - ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref
+// - ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN
+// This model "extends" ShareMountTargetVirtualNetworkInterfacePrototype
+type ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this virtual network interface.
+	Href *string `json:"href,omitempty"`
+
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn,omitempty"`
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity) isaShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+type ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityIntf interface {
+	ShareMountTargetVirtualNetworkInterfacePrototypeIntf
+	isaShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity() bool
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity) isaShareMountTargetVirtualNetworkInterfacePrototype() bool {
+	return true
+}
+
+// UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity unmarshals an instance of ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity from the specified map of raw messages.
+func UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePrototypeShareMountTargetContext : The virtual network interface for this target.
 // This model "extends" ShareMountTargetVirtualNetworkInterfacePrototype
 type ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePrototypeShareMountTargetContext struct {
+	// Indicates whether source IP spoofing is allowed on this interface. If `false`, source IP spoofing is prevented on
+	// this interface. If `true`, source IP spoofing is allowed on this interface.
+	AllowIPSpoofing *bool `json:"allow_ip_spoofing,omitempty"`
+
+	// Indicates whether this virtual network interface will be automatically deleted when
+	// `target` is deleted.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// If `true`:
+	// - The VPC infrastructure performs any needed NAT operations.
+	// - `floating_ips` must not have more than one floating IP.
+	//
+	// If `false`:
+	// - Packets are passed unchanged to/from the virtual network interface,
+	//   allowing the workload to perform any needed NAT operations.
+	// - `allow_ip_spoofing` must be `false`.
+	// - Can only be attached to a `target` with a `resource_type` of
+	//   `bare_metal_server_network_attachment`.
+	EnableInfrastructureNat *bool `json:"enable_infrastructure_nat,omitempty"`
+
+	// Additional IP addresses to bind to the virtual network interface. Each item may be either a reserved IP identity, or
+	// a reserved IP prototype object which will be used to create a new reserved IP. All IP addresses must be in the
+	// primary IP's subnet.
+	//
+	// If reserved IP identities are provided, the specified reserved IPs must be unbound.
+	//
+	// If reserved IP prototype objects with addresses are provided, the addresses must be available on the virtual network
+	// interface's subnet. For any prototype objects that do not specify an address, an available address on the subnet
+	// will be automatically selected and reserved.
+	Ips []VirtualNetworkInterfaceIPPrototypeIntf `json:"ips,omitempty"`
+
 	// The name for this virtual network interface. The name must not be used by another virtual network interface in the
 	// VPC. If unspecified, the name will be a hyphenated list of randomly-selected words. Names beginning with `ibm-` are
 	// reserved for provider-owned resources, and are not allowed.
@@ -92131,7 +101107,8 @@ type ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceProt
 	// for the subnet is used.
 	SecurityGroups []SecurityGroupIdentityIntf `json:"security_groups,omitempty"`
 
-	// The associated subnet. Required if `primary_ip` does not specify a reserved IP.
+	// The associated subnet. Required if `primary_ip` does not specify a reserved IP
+	// identity.
 	Subnet SubnetIdentityIntf `json:"subnet,omitempty"`
 }
 
@@ -92142,6 +101119,22 @@ func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePr
 // UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePrototypeShareMountTargetContext unmarshals an instance of ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePrototypeShareMountTargetContext from the specified map of raw messages.
 func UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePrototypeShareMountTargetContext(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfacePrototypeShareMountTargetContext)
+	err = core.UnmarshalPrimitive(m, "allow_ip_spoofing", &obj.AllowIPSpoofing)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "enable_infrastructure_nat", &obj.EnableInfrastructureNat)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "ips", &obj.Ips, UnmarshalVirtualNetworkInterfaceIPPrototype)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
 	if err != nil {
 		return
@@ -92619,8 +101612,9 @@ type SharePrototypeShareBySize struct {
 	// Tags for this resource.
 	UserTags []string `json:"user_tags,omitempty"`
 
-	// The zone this file share will reside in. For a replica share, this must be a different zone in the same region as
-	// the source share.
+	// The zone this file share will reside in.
+	//
+	// For a replica share, this must be a different zone in the same region as the source share.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
 
 	// The access control mode for the share:
@@ -92736,8 +101730,8 @@ func UnmarshalSharePrototypeShareBySize(m map[string]json.RawMessage, result int
 	return
 }
 
-// SharePrototypeShareBySourceShare : Create a replica file share for an existing file share. The values for `access_control_mode`,
-// `encryption_key`, `initial_owner`, and `size` will be inherited from `source_share`.
+// SharePrototypeShareBySourceShare : Create a replica file share for an existing file share. The values for `initial_owner`,
+// `access_control_mode`, `encryption_key` and `size` will be inherited from `source_share`.
 // This model "extends" SharePrototype
 type SharePrototypeShareBySourceShare struct {
 	// The maximum input/output operations per second (IOPS) for the file share. The share must be in the
@@ -92762,9 +101756,17 @@ type SharePrototypeShareBySourceShare struct {
 	// Tags for this resource.
 	UserTags []string `json:"user_tags,omitempty"`
 
-	// The zone this file share will reside in. For a replica share, this must be a different zone in the same region as
-	// the source share.
+	// The zone this file share will reside in.
+	//
+	// For a replica share, this must be a different zone in the same region as the source share.
 	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The root key to use to wrap the data encryption key for the share.
+	//
+	// This property must be specified if the `source_share` is in a different region and has
+	// an `encryption` type of `user_managed`, and must not be specified otherwise (its value
+	// will be inherited from `source_share`).
+	EncryptionKey EncryptionKeyIdentityIntf `json:"encryption_key,omitempty"`
 
 	// The cron specification for the file share replication schedule.
 	//
@@ -92776,7 +101778,9 @@ type SharePrototypeShareBySourceShare struct {
 	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
 
 	// The source file share for this replica file share. The specified file share must not
-	// already have a replica, and must not be a replica.
+	// already have a replica, and must not be a replica. If source file share is specified
+	// by CRN, it may be in an [associated partner
+	// region](https://cloud.ibm.com/docs/vpc?topic=vpc-file-storage-replication).
 	SourceShare ShareIdentityIntf `json:"source_share" validate:"required"`
 }
 
@@ -92827,6 +101831,10 @@ func UnmarshalSharePrototypeShareBySourceShare(m map[string]json.RawMessage, res
 	if err != nil {
 		return
 	}
+	err = core.UnmarshalModel(m, "encryption_key", &obj.EncryptionKey, UnmarshalEncryptionKeyIdentity)
+	if err != nil {
+		return
+	}
 	err = core.UnmarshalPrimitive(m, "replication_cron_spec", &obj.ReplicationCronSpec)
 	if err != nil {
 		return
@@ -92836,6 +101844,61 @@ func UnmarshalSharePrototypeShareBySourceShare(m map[string]json.RawMessage, res
 		return
 	}
 	err = core.UnmarshalModel(m, "source_share", &obj.SourceShare, UnmarshalShareIdentity)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots : SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots struct
+// This model "extends" SnapshotConsistencyGroupPrototype
+type SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots struct {
+	// Indicates whether deleting the snapshot consistency group will also delete the snapshots in the group.
+	DeleteSnapshotsOnDelete *bool `json:"delete_snapshots_on_delete,omitempty"`
+
+	// The name for this snapshot consistency group. The name must be unique across all snapshot consistency groups in the
+	// region.
+	//
+	// If unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The data-consistent member snapshots to create.  All snapshots must specify a
+	// `source_volume` attached to the same virtual server instance.
+	Snapshots []SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem `json:"snapshots" validate:"required"`
+}
+
+// NewSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots : Instantiate SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots (Generic Model Constructor)
+func (*VpcV1) NewSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots(snapshots []SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem) (_model *SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots, err error) {
+	_model = &SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots{
+		Snapshots: snapshots,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots) isaSnapshotConsistencyGroupPrototype() bool {
+	return true
+}
+
+// UnmarshalSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots unmarshals an instance of SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots from the specified map of raw messages.
+func UnmarshalSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(SnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshots)
+	err = core.UnmarshalPrimitive(m, "delete_snapshots_on_delete", &obj.DeleteSnapshotsOnDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "snapshots", &obj.Snapshots, UnmarshalSnapshotConsistencyGroupPrototypeSnapshotConsistencyGroupBySnapshotsSnapshotsItem)
 	if err != nil {
 		return
 	}
@@ -93527,6 +102590,14 @@ type VpcdnsResolverPrototypeVpcdnsResolverTypeManualPrototype struct {
 	//
 	// - have a unique `zone_affinity`, or
 	// - not have a `zone_affinity`.
+	//
+	// If `zone_affinity` is specified, exactly one DNS server must be specified for each zone in the region. The DHCP
+	// [Domain Name Server Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for a zone will list this DNS
+	// server first, followed by unique DNS servers from other zones if available.
+	//
+	// If `zone_affinity` is not specified, the DHCP [Domain Name Server
+	// Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for each zone will list all the manual DNS
+	// servers in the order specified.
 	ManualServers []DnsServerPrototype `json:"manual_servers" validate:"required"`
 
 	// The type of the DNS resolver to use.
@@ -93657,6 +102728,14 @@ type VpcdnsResolverTypeManual struct {
 	Servers []DnsServer `json:"servers" validate:"required"`
 
 	// The manually specified DNS servers for this VPC.
+	//
+	// If the DNS servers have `zone_affinity`, the DHCP [Domain Name Server
+	// Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for a zone will list the DNS server with the
+	// affinity for that zone first, followed by the unique DNS servers from other zones.
+	//
+	// If the DNS servers do not have `zone_affinity`, the DHCP [Domain Name Server
+	// Option](https://datatracker.ietf.org/doc/html/rfc2132#section-3.8) for each zone will list all the manual DNS
+	// servers in the order specified.
 	ManualServers []DnsServer `json:"manual_servers" validate:"required"`
 
 	// The type of the DNS resolver used for the VPC.
@@ -95543,6 +104622,89 @@ func UnmarshalVPNServerAuthenticationPrototypeVPNServerAuthenticationByUsernameP
 	return
 }
 
+// VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext : Identifies a reserved IP by a unique property. The reserved IP must be currently unbound and in the primary IP's
+// subnet.
+// Models which "extend" this model:
+// - VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID
+// - VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref
+// This model "extends" VirtualNetworkInterfaceIPPrototype
+type VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext struct {
+	// The unique identifier for this reserved IP.
+	ID *string `json:"id,omitempty"`
+
+	// The URL for this reserved IP.
+	Href *string `json:"href,omitempty"`
+}
+
+func (*VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext) isaVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext() bool {
+	return true
+}
+
+type VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextIntf interface {
+	VirtualNetworkInterfaceIPPrototypeIntf
+	isaVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext() bool
+}
+
+func (*VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext) isaVirtualNetworkInterfaceIPPrototype() bool {
+	return true
+}
+
+// UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext unmarshals an instance of VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext from the specified map of raw messages.
+func UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// VirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext : The prototype for a new reserved IP. Must be in the primary IP's subnet.
+// This model "extends" VirtualNetworkInterfaceIPPrototype
+type VirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext struct {
+	// The IP address to reserve, which must not already be reserved on the subnet.
+	//
+	// If unspecified, an available address on the subnet will automatically be selected.
+	Address *string `json:"address,omitempty"`
+
+	// Indicates whether this reserved IP member will be automatically deleted when either
+	// `target` is deleted, or the reserved IP is unbound.
+	AutoDelete *bool `json:"auto_delete,omitempty"`
+
+	// The name for this reserved IP. The name must not be used by another reserved IP in the subnet. Names starting with
+	// `ibm-` are reserved for provider-owned resources, and are not allowed. If unspecified, the name will be a hyphenated
+	// list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+}
+
+func (*VirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext) isaVirtualNetworkInterfaceIPPrototype() bool {
+	return true
+}
+
+// UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext unmarshals an instance of VirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext from the specified map of raw messages.
+func UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(VirtualNetworkInterfaceIPPrototypeReservedIPPrototypeVirtualNetworkInterfaceIPsContext)
+	err = core.UnmarshalPrimitive(m, "address", &obj.Address)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "auto_delete", &obj.AutoDelete)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // VirtualNetworkInterfacePrimaryIPPrototypeReservedIPIdentityVirtualNetworkInterfacePrimaryIPContext : Identifies a reserved IP by a unique property. Required if `subnet` is not specified. The reserved IP must be
 // currently unbound.
 // Models which "extend" this model:
@@ -95619,6 +104781,105 @@ func UnmarshalVirtualNetworkInterfacePrimaryIPPrototypeReservedIPPrototypeVirtua
 		return
 	}
 	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext : VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext struct
+// This model "extends" VirtualNetworkInterfaceTarget
+type VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext struct {
+	// The URL for this bare metal server network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this bare metal server network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this bare metal server network attachment. The name is unique across all network attachments for the
+	// bare metal server.
+	Name *string `json:"name" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+}
+
+// Constants associated with the VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext.ResourceType property.
+// The resource type.
+const (
+	VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContextResourceTypeBareMetalServerNetworkAttachmentConst = "bare_metal_server_network_attachment"
+)
+
+func (*VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext) isaVirtualNetworkInterfaceTarget() bool {
+	return true
+}
+
+// UnmarshalVirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext unmarshals an instance of VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext from the specified map of raw messages.
+func UnmarshalVirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(VirtualNetworkInterfaceTargetBareMetalServerNetworkAttachmentReferenceVirtualNetworkInterfaceContext)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext : VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext struct
+// This model "extends" VirtualNetworkInterfaceTarget
+type VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext struct {
+	// The URL for this instance network attachment.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance network attachment.
+	ID *string `json:"id" validate:"required"`
+
+	// The name for this instance network attachment. The name is unique across all network attachments for the instance.
+	Name *string `json:"name" validate:"required"`
+
+	// The resource type.
+	ResourceType *string `json:"resource_type" validate:"required"`
+}
+
+// Constants associated with the VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext.ResourceType property.
+// The resource type.
+const (
+	VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContextResourceTypeInstanceNetworkAttachmentConst = "instance_network_attachment"
+)
+
+func (*VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext) isaVirtualNetworkInterfaceTarget() bool {
+	return true
+}
+
+// UnmarshalVirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext unmarshals an instance of VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext from the specified map of raw messages.
+func UnmarshalVirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(VirtualNetworkInterfaceTargetInstanceNetworkAttachmentReferenceVirtualNetworkInterfaceContext)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "resource_type", &obj.ResourceType)
 	if err != nil {
 		return
 	}
@@ -96255,6 +105516,111 @@ func UnmarshalBackupPolicyScopePrototypeEnterpriseIdentityEnterpriseIdentityByCR
 	return
 }
 
+// BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct
+// This model "extends" BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+}
+
+// NewBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : Instantiate BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(crn string) (_model *BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN, err error) {
+	_model = &BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN{
+		CRN: core.StringPtr(crn),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct
+// This model "extends" BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct {
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : Instantiate BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(href string) (_model *BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref, err error) {
+	_model = &BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct
+// This model "extends" BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : Instantiate BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(id string) (_model *BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID, err error) {
+	_model = &BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID unmarshals an instance of BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID from the specified map of raw messages.
+func UnmarshalBareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(BareMetalServerNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // EndpointGatewayReservedIPReservedIPIdentityByHref : EndpointGatewayReservedIPReservedIPIdentityByHref struct
 // This model "extends" EndpointGatewayReservedIPReservedIPIdentity
 type EndpointGatewayReservedIPReservedIPIdentityByHref struct {
@@ -96430,6 +105796,10 @@ func UnmarshalEndpointGatewayTargetPrototypeProviderInfrastructureServiceIdentit
 // This model "extends" FloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentity
 type FloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentityBareMetalServerNetworkInterfaceIdentityByHref struct {
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 }
 
@@ -96465,6 +105835,11 @@ func UnmarshalFloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentityBareMe
 // This model "extends" FloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentity
 type FloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentityBareMetalServerNetworkInterfaceIdentityByID struct {
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 }
 
@@ -96500,6 +105875,10 @@ func UnmarshalFloatingIPTargetPatchBareMetalServerNetworkInterfaceIdentityBareMe
 // This model "extends" FloatingIPTargetPatchNetworkInterfaceIdentity
 type FloatingIPTargetPatchNetworkInterfaceIdentityNetworkInterfaceIdentityByHref struct {
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 }
 
@@ -96535,6 +105914,11 @@ func UnmarshalFloatingIPTargetPatchNetworkInterfaceIdentityNetworkInterfaceIdent
 // This model "extends" FloatingIPTargetPatchNetworkInterfaceIdentity
 type FloatingIPTargetPatchNetworkInterfaceIdentityNetworkInterfaceIdentityByID struct {
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 }
 
@@ -96566,10 +105950,119 @@ func UnmarshalFloatingIPTargetPatchNetworkInterfaceIdentityNetworkInterfaceIdent
 	return
 }
 
+// FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct
+// This model "extends" FloatingIPTargetPatchVirtualNetworkInterfaceIdentity
+type FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+}
+
+// NewFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : Instantiate FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN (Generic Model Constructor)
+func (*VpcV1) NewFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(crn string) (_model *FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN, err error) {
+	_model = &FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN{
+		CRN: core.StringPtr(crn),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaFloatingIPTargetPatchVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaFloatingIPTargetPatch() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN unmarshals an instance of FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct
+// This model "extends" FloatingIPTargetPatchVirtualNetworkInterfaceIdentity
+type FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct {
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : Instantiate FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(href string) (_model *FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref, err error) {
+	_model = &FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaFloatingIPTargetPatchVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaFloatingIPTargetPatch() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref unmarshals an instance of FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct
+// This model "extends" FloatingIPTargetPatchVirtualNetworkInterfaceIdentity
+type FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : Instantiate FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(id string) (_model *FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID, err error) {
+	_model = &FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaFloatingIPTargetPatchVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaFloatingIPTargetPatch() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID unmarshals an instance of FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPatchVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentityBareMetalServerNetworkInterfaceIdentityByHref : FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentityBareMetalServerNetworkInterfaceIdentityByHref struct
 // This model "extends" FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentity
 type FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentityBareMetalServerNetworkInterfaceIdentityByHref struct {
 	// The URL for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 }
 
@@ -96605,6 +106098,11 @@ func UnmarshalFloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentityBa
 // This model "extends" FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentity
 type FloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentityBareMetalServerNetworkInterfaceIdentityByID struct {
 	// The unique identifier for this bare metal server network interface.
+	//
+	// If this bare metal server has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 }
 
@@ -96640,6 +106138,10 @@ func UnmarshalFloatingIPTargetPrototypeBareMetalServerNetworkInterfaceIdentityBa
 // This model "extends" FloatingIPTargetPrototypeNetworkInterfaceIdentity
 type FloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByHref struct {
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 }
 
@@ -96675,6 +106177,11 @@ func UnmarshalFloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceI
 // This model "extends" FloatingIPTargetPrototypeNetworkInterfaceIdentity
 type FloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByID struct {
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 }
 
@@ -96698,6 +106205,111 @@ func (*FloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentity
 // UnmarshalFloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByID unmarshals an instance of FloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByID from the specified map of raw messages.
 func UnmarshalFloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(FloatingIPTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct
+// This model "extends" FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity
+type FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+}
+
+// NewFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : Instantiate FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN (Generic Model Constructor)
+func (*VpcV1) NewFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(crn string) (_model *FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN, err error) {
+	_model = &FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN{
+		CRN: core.StringPtr(crn),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaFloatingIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN unmarshals an instance of FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct
+// This model "extends" FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity
+type FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct {
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : Instantiate FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(href string) (_model *FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref, err error) {
+	_model = &FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaFloatingIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref unmarshals an instance of FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct
+// This model "extends" FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity
+type FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : Instantiate FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(id string) (_model *FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID, err error) {
+	_model = &FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaFloatingIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID unmarshals an instance of FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID from the specified map of raw messages.
+func UnmarshalFloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FloatingIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID)
 	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
 	if err != nil {
 		return
@@ -96811,10 +106423,84 @@ func UnmarshalFlowLogCollectorTargetPrototypeInstanceIdentityInstanceIdentityByI
 	return
 }
 
+// FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref : FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref struct
+// This model "extends" FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity
+type FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref struct {
+	// The URL for this instance network attachment.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref : Instantiate FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref(href string) (_model *FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref, err error) {
+	_model = &FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref) isaFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity() bool {
+	return true
+}
+
+func (*FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref) isaFlowLogCollectorTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref unmarshals an instance of FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID : FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID struct
+// This model "extends" FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity
+type FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID struct {
+	// The unique identifier for this instance network attachment.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID : Instantiate FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID(id string) (_model *FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID, err error) {
+	_model = &FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID) isaFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentity() bool {
+	return true
+}
+
+func (*FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID) isaFlowLogCollectorTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID unmarshals an instance of FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetPrototypeInstanceNetworkAttachmentIdentityInstanceNetworkAttachmentIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // FlowLogCollectorTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByHref : FlowLogCollectorTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByHref struct
 // This model "extends" FlowLogCollectorTargetPrototypeNetworkInterfaceIdentity
 type FlowLogCollectorTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByHref struct {
 	// The URL for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment.
 	Href *string `json:"href" validate:"required"`
 }
 
@@ -96850,6 +106536,11 @@ func UnmarshalFlowLogCollectorTargetPrototypeNetworkInterfaceIdentityNetworkInte
 // This model "extends" FlowLogCollectorTargetPrototypeNetworkInterfaceIdentity
 type FlowLogCollectorTargetPrototypeNetworkInterfaceIdentityNetworkInterfaceIdentityByID struct {
 	// The unique identifier for this instance network interface.
+	//
+	// If this instance has network attachments, this network interface is a
+	// [read-only representation](https://cloud.ibm.com/docs/vpc?topic=vni-old-api-clients) of its corresponding network
+	// attachment and its attached virtual network interface, and the identifier is that of the corresponding network
+	// attachment.
 	ID *string `json:"id" validate:"required"`
 }
 
@@ -97083,6 +106774,111 @@ func (*FlowLogCollectorTargetPrototypeVPCIdentityVPCIdentityByID) isaFlowLogColl
 // UnmarshalFlowLogCollectorTargetPrototypeVPCIdentityVPCIdentityByID unmarshals an instance of FlowLogCollectorTargetPrototypeVPCIdentityVPCIdentityByID from the specified map of raw messages.
 func UnmarshalFlowLogCollectorTargetPrototypeVPCIdentityVPCIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(FlowLogCollectorTargetPrototypeVPCIdentityVPCIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct
+// This model "extends" FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity
+type FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+}
+
+// NewFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : Instantiate FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN (Generic Model Constructor)
+func (*VpcV1) NewFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(crn string) (_model *FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN, err error) {
+	_model = &FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN{
+		CRN: core.StringPtr(crn),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaFlowLogCollectorTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN unmarshals an instance of FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct
+// This model "extends" FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity
+type FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct {
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : Instantiate FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(href string) (_model *FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref, err error) {
+	_model = &FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaFlowLogCollectorTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref unmarshals an instance of FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct
+// This model "extends" FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity
+type FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : Instantiate FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(id string) (_model *FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID, err error) {
+	_model = &FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaFlowLogCollectorTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID unmarshals an instance of FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID from the specified map of raw messages.
+func UnmarshalFlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(FlowLogCollectorTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID)
 	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
 	if err != nil {
 		return
@@ -97616,6 +107412,111 @@ func UnmarshalInstanceGroupManagerScheduledActionManagerPrototypeAutoScaleProtot
 	return
 }
 
+// InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct
+// This model "extends" InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+}
+
+// NewInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : Instantiate InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN (Generic Model Constructor)
+func (*VpcV1) NewInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(crn string) (_model *InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN, err error) {
+	_model = &InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN{
+		CRN: core.StringPtr(crn),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN unmarshals an instance of InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct
+// This model "extends" InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct {
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : Instantiate InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(href string) (_model *InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref, err error) {
+	_model = &InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref unmarshals an instance of InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct
+// This model "extends" InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity
+type InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : Instantiate InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(id string) (_model *InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID, err error) {
+	_model = &InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaInstanceNetworkAttachmentPrototypeVirtualNetworkInterface() bool {
+	return true
+}
+
+// UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID unmarshals an instance of InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID from the specified map of raw messages.
+func UnmarshalInstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceNetworkAttachmentPrototypeVirtualNetworkInterfaceVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // InstancePlacementTargetPatchDedicatedHostGroupIdentityDedicatedHostGroupIdentityByCRN : InstancePlacementTargetPatchDedicatedHostGroupIdentityDedicatedHostGroupIdentityByCRN struct
 // This model "extends" InstancePlacementTargetPatchDedicatedHostGroupIdentity
 type InstancePlacementTargetPatchDedicatedHostGroupIdentityDedicatedHostGroupIdentityByCRN struct {
@@ -98134,6 +108035,3643 @@ func (*InstancePlacementTargetPrototypePlacementGroupIdentityPlacementGroupIdent
 func UnmarshalInstancePlacementTargetPrototypePlacementGroupIdentityPlacementGroupIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(InstancePlacementTargetPrototypePlacementGroupIdentityPlacementGroupIdentityByID)
 	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment : InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment struct
+// This model "extends" InstancePrototypeInstanceByCatalogOffering
+type InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	CatalogOffering InstanceCatalogOfferingPrototypeIntf `json:"catalog_offering" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment : Instantiate InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment(catalogOffering InstanceCatalogOfferingPrototypeIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf, primaryNetworkAttachment *InstanceNetworkAttachmentPrototype) (_model *InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment, err error) {
+	_model = &InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment{
+		CatalogOffering:          catalogOffering,
+		PrimaryNetworkInterface:  primaryNetworkInterface,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment) isaInstancePrototypeInstanceByCatalogOffering() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment unmarshals an instance of InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "catalog_offering", &obj.CatalogOffering, UnmarshalInstanceCatalogOfferingPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface : InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface struct
+// This model "extends" InstancePrototypeInstanceByCatalogOffering
+type InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	CatalogOffering InstanceCatalogOfferingPrototypeIntf `json:"catalog_offering" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface : Instantiate InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface(catalogOffering InstanceCatalogOfferingPrototypeIntf, zone ZoneIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype) (_model *InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface, err error) {
+	_model = &InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface{
+		CatalogOffering:         catalogOffering,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface) isaInstancePrototypeInstanceByCatalogOffering() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface unmarshals an instance of InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceByCatalogOfferingInstanceByCatalogOfferingInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "catalog_offering", &obj.CatalogOffering, UnmarshalInstanceCatalogOfferingPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment : InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment struct
+// This model "extends" InstancePrototypeInstanceByImage
+type InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	// The image to use when provisioning the virtual server instance.
+	Image ImageIdentityIntf `json:"image" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment : Instantiate InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment(image ImageIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf, primaryNetworkAttachment *InstanceNetworkAttachmentPrototype) (_model *InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment, err error) {
+	_model = &InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment{
+		Image:                    image,
+		PrimaryNetworkInterface:  primaryNetworkInterface,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment) isaInstancePrototypeInstanceByImage() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment unmarshals an instance of InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "image", &obj.Image, UnmarshalImageIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface : InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface struct
+// This model "extends" InstancePrototypeInstanceByImage
+type InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	// The image to use when provisioning the virtual server instance.
+	Image ImageIdentityIntf `json:"image" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface : Instantiate InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface(image ImageIdentityIntf, zone ZoneIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype) (_model *InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface, err error) {
+	_model = &InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface{
+		Image:                   image,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface) isaInstancePrototypeInstanceByImage() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface unmarshals an instance of InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceByImageInstanceByImageInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "image", &obj.Image, UnmarshalImageIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment : InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment struct
+// This model "extends" InstancePrototypeInstanceBySourceSnapshot
+type InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment : Instantiate InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf, primaryNetworkAttachment *InstanceNetworkAttachmentPrototype) (_model *InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment, err error) {
+	_model = &InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment{
+		BootVolumeAttachment:     bootVolumeAttachment,
+		PrimaryNetworkInterface:  primaryNetworkInterface,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment) isaInstancePrototypeInstanceBySourceSnapshot() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment unmarshals an instance of InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceBySourceSnapshotContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface : InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface struct
+// This model "extends" InstancePrototypeInstanceBySourceSnapshot
+type InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface : Instantiate InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext, zone ZoneIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype) (_model *InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface, err error) {
+	_model = &InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface{
+		BootVolumeAttachment:    bootVolumeAttachment,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface) isaInstancePrototypeInstanceBySourceSnapshot() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface unmarshals an instance of InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceBySourceSnapshotInstanceBySourceSnapshotInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceBySourceSnapshotContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment : InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment struct
+// This model "extends" InstancePrototypeInstanceByVolume
+type InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByVolumeContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment : Instantiate InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceByVolumeContext, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf, primaryNetworkAttachment *InstanceNetworkAttachmentPrototype) (_model *InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment, err error) {
+	_model = &InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment{
+		BootVolumeAttachment:     bootVolumeAttachment,
+		PrimaryNetworkInterface:  primaryNetworkInterface,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment) isaInstancePrototypeInstanceByVolume() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment unmarshals an instance of InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByVolumeContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface : InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface struct
+// This model "extends" InstancePrototypeInstanceByVolume
+type InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this virtual server instance. The name must not be used by another virtual server instance in the
+	// region. If unspecified, the name will be a hyphenated list of randomly-selected words.
+	//
+	// The system hostname will be based on this name.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByVolumeContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface : Instantiate InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceByVolumeContext, zone ZoneIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype) (_model *InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface, err error) {
+	_model = &InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface{
+		BootVolumeAttachment:    bootVolumeAttachment,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface) isaInstancePrototypeInstanceByVolume() bool {
+	return true
+}
+
+func (*InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface) isaInstancePrototype() bool {
+	return true
+}
+
+// UnmarshalInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface unmarshals an instance of InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstancePrototypeInstanceByVolumeInstanceByVolumeInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByVolumeContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment : InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment struct
+// This model "extends" InstanceTemplatePrototypeInstanceTemplateByCatalogOffering
+type InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name must not be used by another instance template in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	CatalogOffering InstanceCatalogOfferingPrototypeIntf `json:"catalog_offering" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment : Instantiate InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment(catalogOffering InstanceCatalogOfferingPrototypeIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf, primaryNetworkAttachment *InstanceNetworkAttachmentPrototype) (_model *InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment, err error) {
+	_model = &InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment{
+		CatalogOffering:          catalogOffering,
+		PrimaryNetworkInterface:  primaryNetworkInterface,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment) isaInstanceTemplatePrototypeInstanceTemplateByCatalogOffering() bool {
+	return true
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment) isaInstanceTemplatePrototype() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment unmarshals an instance of InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "catalog_offering", &obj.CatalogOffering, UnmarshalInstanceCatalogOfferingPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface : InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface struct
+// This model "extends" InstanceTemplatePrototypeInstanceTemplateByCatalogOffering
+type InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name must not be used by another instance template in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	CatalogOffering InstanceCatalogOfferingPrototypeIntf `json:"catalog_offering" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface : Instantiate InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface(catalogOffering InstanceCatalogOfferingPrototypeIntf, zone ZoneIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype) (_model *InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface, err error) {
+	_model = &InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface{
+		CatalogOffering:         catalogOffering,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface) isaInstanceTemplatePrototypeInstanceTemplateByCatalogOffering() bool {
+	return true
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface) isaInstanceTemplatePrototype() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface unmarshals an instance of InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplatePrototypeInstanceTemplateByCatalogOfferingInstanceTemplateByCatalogOfferingInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "catalog_offering", &obj.CatalogOffering, UnmarshalInstanceCatalogOfferingPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment : InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment struct
+// This model "extends" InstanceTemplatePrototypeInstanceTemplateByImage
+type InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name must not be used by another instance template in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	// The image to use when provisioning the virtual server instance.
+	Image ImageIdentityIntf `json:"image" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment : Instantiate InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment(image ImageIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf, primaryNetworkAttachment *InstanceNetworkAttachmentPrototype) (_model *InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment, err error) {
+	_model = &InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment{
+		Image:                    image,
+		PrimaryNetworkInterface:  primaryNetworkInterface,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment) isaInstanceTemplatePrototypeInstanceTemplateByImage() bool {
+	return true
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment) isaInstanceTemplatePrototype() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment unmarshals an instance of InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "image", &obj.Image, UnmarshalImageIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface : InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface struct
+// This model "extends" InstanceTemplatePrototypeInstanceTemplateByImage
+type InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name must not be used by another instance template in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	// The image to use when provisioning the virtual server instance.
+	Image ImageIdentityIntf `json:"image" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface : Instantiate InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface(image ImageIdentityIntf, zone ZoneIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype) (_model *InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface, err error) {
+	_model = &InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface{
+		Image:                   image,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface) isaInstanceTemplatePrototypeInstanceTemplateByImage() bool {
+	return true
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface) isaInstanceTemplatePrototype() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface unmarshals an instance of InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplatePrototypeInstanceTemplateByImageInstanceTemplateByImageInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "image", &obj.Image, UnmarshalImageIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment : InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment struct
+// This model "extends" InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot
+type InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name must not be used by another instance template in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+// NewInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment : Instantiate InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment (Generic Model Constructor)
+func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext, primaryNetworkInterface *NetworkInterfacePrototype, zone ZoneIdentityIntf, primaryNetworkAttachment *InstanceNetworkAttachmentPrototype) (_model *InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment, err error) {
+	_model = &InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment{
+		BootVolumeAttachment:     bootVolumeAttachment,
+		PrimaryNetworkInterface:  primaryNetworkInterface,
+		Zone:                     zone,
+		PrimaryNetworkAttachment: primaryNetworkAttachment,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment) isaInstanceTemplatePrototypeInstanceTemplateBySourceSnapshot() bool {
+	return true
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment) isaInstanceTemplatePrototype() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment unmarshals an instance of InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceBySourceSnapshotContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface : InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface struct
+// This model "extends" InstanceTemplatePrototypeInstanceTemplateBySourceSnapshot
+type InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name must not be used by another instance template in the region. If
+	// unspecified, the name will be a hyphenated list of randomly-selected words.
+	Name *string `json:"name,omitempty"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	ResourceGroup ResourceGroupIdentityIntf `json:"resource_group,omitempty"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+// NewInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface : Instantiate InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface (Generic Model Constructor)
+func (*VpcV1) NewInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface(bootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext, zone ZoneIdentityIntf, primaryNetworkInterface *NetworkInterfacePrototype) (_model *InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface, err error) {
+	_model = &InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface{
+		BootVolumeAttachment:    bootVolumeAttachment,
+		Zone:                    zone,
+		PrimaryNetworkInterface: primaryNetworkInterface,
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface) isaInstanceTemplatePrototypeInstanceTemplateBySourceSnapshot() bool {
+	return true
+}
+
+func (*InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface) isaInstanceTemplatePrototype() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface unmarshals an instance of InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplatePrototypeInstanceTemplateBySourceSnapshotInstanceTemplateBySourceSnapshotInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceBySourceSnapshotContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment : InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment struct
+// This model "extends" InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext
+type InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The date and time that the instance template was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this instance template.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The URL for this instance template.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance template.
+	ID *string `json:"id" validate:"required"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name is unique across all instance templates in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	// The resource group for this instance template.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	CatalogOffering InstanceCatalogOfferingPrototypeIntf `json:"catalog_offering" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+func (*InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment) isaInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext() bool {
+	return true
+}
+
+func (*InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment) isaInstanceTemplate() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment unmarshals an instance of InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "catalog_offering", &obj.CatalogOffering, UnmarshalInstanceCatalogOfferingPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface : InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface struct
+// This model "extends" InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext
+type InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The date and time that the instance template was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this instance template.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The URL for this instance template.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance template.
+	ID *string `json:"id" validate:"required"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name is unique across all instance templates in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	// The resource group for this instance template.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	CatalogOffering InstanceCatalogOfferingPrototypeIntf `json:"catalog_offering" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+func (*InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface) isaInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContext() bool {
+	return true
+}
+
+func (*InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface) isaInstanceTemplate() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface unmarshals an instance of InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplateInstanceByCatalogOfferingInstanceTemplateContextInstanceByCatalogOfferingInstanceTemplateContextInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "catalog_offering", &obj.CatalogOffering, UnmarshalInstanceCatalogOfferingPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment : InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment struct
+// This model "extends" InstanceTemplateInstanceByImageInstanceTemplateContext
+type InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The date and time that the instance template was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this instance template.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The URL for this instance template.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance template.
+	ID *string `json:"id" validate:"required"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name is unique across all instance templates in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	// The resource group for this instance template.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	// The image to use when provisioning the virtual server instance.
+	Image ImageIdentityIntf `json:"image" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+func (*InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment) isaInstanceTemplateInstanceByImageInstanceTemplateContext() bool {
+	return true
+}
+
+func (*InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment) isaInstanceTemplate() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment unmarshals an instance of InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "image", &obj.Image, UnmarshalImageIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface : InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface struct
+// This model "extends" InstanceTemplateInstanceByImageInstanceTemplateContext
+type InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The date and time that the instance template was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this instance template.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The URL for this instance template.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance template.
+	ID *string `json:"id" validate:"required"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name is unique across all instance templates in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	// The resource group for this instance template.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceByImageContext `json:"boot_volume_attachment,omitempty"`
+
+	// The image to use when provisioning the virtual server instance.
+	Image ImageIdentityIntf `json:"image" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+func (*InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface) isaInstanceTemplateInstanceByImageInstanceTemplateContext() bool {
+	return true
+}
+
+func (*InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface) isaInstanceTemplate() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface unmarshals an instance of InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplateInstanceByImageInstanceTemplateContextInstanceByImageInstanceTemplateContextInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceByImageContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "image", &obj.Image, UnmarshalImageIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment : InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment struct
+// This model "extends" InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext
+type InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The date and time that the instance template was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this instance template.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The URL for this instance template.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance template.
+	ID *string `json:"id" validate:"required"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name is unique across all instance templates in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	// The resource group for this instance template.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment" validate:"required"`
+}
+
+func (*InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment) isaInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext() bool {
+	return true
+}
+
+func (*InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment) isaInstanceTemplate() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment unmarshals an instance of InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment from the specified map of raw messages.
+func UnmarshalInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkAttachment)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceBySourceSnapshotContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface : InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface struct
+// This model "extends" InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext
+type InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface struct {
+	// The availability policy to use for this virtual server instance.
+	AvailabilityPolicy *InstanceAvailabilityPolicyPrototype `json:"availability_policy,omitempty"`
+
+	// The date and time that the instance template was created.
+	CreatedAt *strfmt.DateTime `json:"created_at" validate:"required"`
+
+	// The CRN for this instance template.
+	CRN *string `json:"crn" validate:"required"`
+
+	// The default trusted profile configuration to use for this virtual server instance
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	DefaultTrustedProfile *InstanceDefaultTrustedProfilePrototype `json:"default_trusted_profile,omitempty"`
+
+	// The URL for this instance template.
+	Href *string `json:"href" validate:"required"`
+
+	// The unique identifier for this instance template.
+	ID *string `json:"id" validate:"required"`
+
+	// The public SSH keys for the administrative user of the virtual server instance. Keys will be made available to the
+	// virtual server instance as cloud-init vendor data. For cloud-init enabled images, these keys will also be added as
+	// SSH authorized keys for the administrative user.
+	//
+	// For Windows images, the keys of type `rsa` must be specified, and one will be selected to encrypt [the administrator
+	// password](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization). Keys are optional for other images, but if
+	// no keys are specified, the instance will be inaccessible unless the specified image provides another means of
+	// access.
+	//
+	// This property's value is used when provisioning the virtual server instance, but not subsequently managed.
+	// Accordingly, it is reflected as an [instance
+	// initialization](https://cloud.ibm.com/apidocs/vpc#get-instance-initialization) property.
+	Keys []KeyIdentityIntf `json:"keys,omitempty"`
+
+	MetadataService *InstanceMetadataServicePrototype `json:"metadata_service,omitempty"`
+
+	// The name for this instance template. The name is unique across all instance templates in the region.
+	Name *string `json:"name" validate:"required"`
+
+	// The placement restrictions to use for the virtual server instance.
+	PlacementTarget InstancePlacementTargetPrototypeIntf `json:"placement_target,omitempty"`
+
+	// The [profile](https://cloud.ibm.com/docs/vpc?topic=vpc-profiles) to use for this virtual server instance.
+	//
+	// If unspecified, `bx2-2x8` will be used, but this default value is expected to change in the future.
+	Profile InstanceProfileIdentityIntf `json:"profile,omitempty"`
+
+	// The resource group for this instance template.
+	ResourceGroup *ResourceGroupReference `json:"resource_group" validate:"required"`
+
+	// The amount of bandwidth (in megabits per second) allocated exclusively to instance storage volumes. An increase in
+	// this value will result in a corresponding decrease to
+	// `total_network_bandwidth`.
+	TotalVolumeBandwidth *int64 `json:"total_volume_bandwidth,omitempty"`
+
+	// [User data](https://cloud.ibm.com/docs/vpc?topic=vpc-user-data) to make available when setting up the virtual server
+	// instance.
+	UserData *string `json:"user_data,omitempty"`
+
+	// The additional volume attachments to create for the virtual server instance.
+	VolumeAttachments []VolumeAttachmentPrototype `json:"volume_attachments,omitempty"`
+
+	// The VPC this virtual server instance will reside in.
+	//
+	// If specified, it must match the VPC for the subnets of the instance network attachments or instance network
+	// interfaces.
+	VPC VPCIdentityIntf `json:"vpc,omitempty"`
+
+	// The boot volume attachment to create for the virtual server instance.
+	BootVolumeAttachment *VolumeAttachmentPrototypeInstanceBySourceSnapshotContext `json:"boot_volume_attachment" validate:"required"`
+
+	// The additional network attachments to create for the virtual server instance.
+	NetworkAttachments []InstanceNetworkAttachmentPrototype `json:"network_attachments,omitempty"`
+
+	// The primary network attachment to create for the virtual server instance.
+	PrimaryNetworkAttachment *InstanceNetworkAttachmentPrototype `json:"primary_network_attachment,omitempty"`
+
+	// The zone this virtual server instance will reside in.
+	Zone ZoneIdentityIntf `json:"zone" validate:"required"`
+
+	// The additional instance network interfaces to create.
+	NetworkInterfaces []NetworkInterfacePrototype `json:"network_interfaces,omitempty"`
+
+	// The primary instance network interface to create.
+	PrimaryNetworkInterface *NetworkInterfacePrototype `json:"primary_network_interface" validate:"required"`
+}
+
+func (*InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface) isaInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContext() bool {
+	return true
+}
+
+func (*InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface) isaInstanceTemplate() bool {
+	return true
+}
+
+// UnmarshalInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface unmarshals an instance of InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface from the specified map of raw messages.
+func UnmarshalInstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(InstanceTemplateInstanceBySourceSnapshotInstanceTemplateContextInstanceBySourceSnapshotInstanceTemplateContextInstanceByNetworkInterface)
+	err = core.UnmarshalModel(m, "availability_policy", &obj.AvailabilityPolicy, UnmarshalInstanceAvailabilityPolicyPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "created_at", &obj.CreatedAt)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "default_trusted_profile", &obj.DefaultTrustedProfile, UnmarshalInstanceDefaultTrustedProfilePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "keys", &obj.Keys, UnmarshalKeyIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "metadata_service", &obj.MetadataService, UnmarshalInstanceMetadataServicePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "name", &obj.Name)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "placement_target", &obj.PlacementTarget, UnmarshalInstancePlacementTargetPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "profile", &obj.Profile, UnmarshalInstanceProfileIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "resource_group", &obj.ResourceGroup, UnmarshalResourceGroupReference)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "total_volume_bandwidth", &obj.TotalVolumeBandwidth)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalPrimitive(m, "user_data", &obj.UserData)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "volume_attachments", &obj.VolumeAttachments, UnmarshalVolumeAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "vpc", &obj.VPC, UnmarshalVPCIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "boot_volume_attachment", &obj.BootVolumeAttachment, UnmarshalVolumeAttachmentPrototypeInstanceBySourceSnapshotContext)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_attachments", &obj.NetworkAttachments, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_attachment", &obj.PrimaryNetworkAttachment, UnmarshalInstanceNetworkAttachmentPrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "zone", &obj.Zone, UnmarshalZoneIdentity)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "network_interfaces", &obj.NetworkInterfaces, UnmarshalNetworkInterfacePrototype)
+	if err != nil {
+		return
+	}
+	err = core.UnmarshalModel(m, "primary_network_interface", &obj.PrimaryNetworkInterface, UnmarshalNetworkInterfacePrototype)
 	if err != nil {
 		return
 	}
@@ -98701,6 +112239,111 @@ func UnmarshalReservedIPTargetPrototypeEndpointGatewayIdentityEndpointGatewayIde
 	return
 }
 
+// ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct
+// This model "extends" ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity
+type ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+}
+
+// NewReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : Instantiate ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN (Generic Model Constructor)
+func (*VpcV1) NewReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(crn string) (_model *ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN, err error) {
+	_model = &ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN{
+		CRN: core.StringPtr(crn),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaReservedIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN unmarshals an instance of ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN from the specified map of raw messages.
+func UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct
+// This model "extends" ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity
+type ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct {
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : Instantiate ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(href string) (_model *ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref, err error) {
+	_model = &ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaReservedIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref unmarshals an instance of ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref from the specified map of raw messages.
+func UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct
+// This model "extends" ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity
+type ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : Instantiate ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(id string) (_model *ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID, err error) {
+	_model = &ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaReservedIPTargetPrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaReservedIPTargetPrototype() bool {
+	return true
+}
+
+// UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID unmarshals an instance of ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID from the specified map of raw messages.
+func UnmarshalReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ReservedIPTargetPrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
 // RouteNextHopPatchRouteNextHopIPRouteNextHopIPSentinelIP : RouteNextHopPatchRouteNextHopIPRouteNextHopIPSentinelIP struct
 // This model "extends" RouteNextHopPatchRouteNextHopIP
 type RouteNextHopPatchRouteNextHopIPRouteNextHopIPSentinelIP struct {
@@ -99207,6 +112850,181 @@ func (*SecurityGroupRuleRemotePrototypeSecurityGroupIdentitySecurityGroupIdentit
 // UnmarshalSecurityGroupRuleRemotePrototypeSecurityGroupIdentitySecurityGroupIdentityByID unmarshals an instance of SecurityGroupRuleRemotePrototypeSecurityGroupIdentitySecurityGroupIdentityByID from the specified map of raw messages.
 func UnmarshalSecurityGroupRuleRemotePrototypeSecurityGroupIdentitySecurityGroupIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
 	obj := new(SecurityGroupRuleRemotePrototypeSecurityGroupIdentitySecurityGroupIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct
+// This model "extends" ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity
+type ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN struct {
+	// The CRN for this virtual network interface.
+	CRN *string `json:"crn" validate:"required"`
+}
+
+// NewShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN : Instantiate ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN (Generic Model Constructor)
+func (*VpcV1) NewShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(crn string) (_model *ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN, err error) {
+	_model = &ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN{
+		CRN: core.StringPtr(crn),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN) isaShareMountTargetVirtualNetworkInterfacePrototype() bool {
+	return true
+}
+
+// UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN unmarshals an instance of ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN from the specified map of raw messages.
+func UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByCRN)
+	err = core.UnmarshalPrimitive(m, "crn", &obj.CRN)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct
+// This model "extends" ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity
+type ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref struct {
+	// The URL for this virtual network interface.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref : Instantiate ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref (Generic Model Constructor)
+func (*VpcV1) NewShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(href string) (_model *ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref, err error) {
+	_model = &ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref) isaShareMountTargetVirtualNetworkInterfacePrototype() bool {
+	return true
+}
+
+// UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref unmarshals an instance of ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref from the specified map of raw messages.
+func UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct
+// This model "extends" ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity
+type ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID struct {
+	// The unique identifier for this virtual network interface.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID : Instantiate ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID (Generic Model Constructor)
+func (*VpcV1) NewShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(id string) (_model *ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID, err error) {
+	_model = &ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentity() bool {
+	return true
+}
+
+func (*ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID) isaShareMountTargetVirtualNetworkInterfacePrototype() bool {
+	return true
+}
+
+// UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID unmarshals an instance of ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID from the specified map of raw messages.
+func UnmarshalShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(ShareMountTargetVirtualNetworkInterfacePrototypeVirtualNetworkInterfaceIdentityVirtualNetworkInterfaceIdentityByID)
+	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref : VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref struct
+// This model "extends" VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext
+type VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref struct {
+	// The URL for this reserved IP.
+	Href *string `json:"href" validate:"required"`
+}
+
+// NewVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref : Instantiate VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref (Generic Model Constructor)
+func (*VpcV1) NewVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref(href string) (_model *VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref, err error) {
+	_model = &VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref{
+		Href: core.StringPtr(href),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref) isaVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext() bool {
+	return true
+}
+
+func (*VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref) isaVirtualNetworkInterfaceIPPrototype() bool {
+	return true
+}
+
+// UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref unmarshals an instance of VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref from the specified map of raw messages.
+func UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByHref)
+	err = core.UnmarshalPrimitive(m, "href", &obj.Href)
+	if err != nil {
+		return
+	}
+	reflect.ValueOf(result).Elem().Set(reflect.ValueOf(obj))
+	return
+}
+
+// VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID : VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID struct
+// This model "extends" VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext
+type VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID struct {
+	// The unique identifier for this reserved IP.
+	ID *string `json:"id" validate:"required"`
+}
+
+// NewVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID : Instantiate VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID (Generic Model Constructor)
+func (*VpcV1) NewVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID(id string) (_model *VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID, err error) {
+	_model = &VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID{
+		ID: core.StringPtr(id),
+	}
+	err = core.ValidateStruct(_model, "required parameters")
+	return
+}
+
+func (*VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID) isaVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContext() bool {
+	return true
+}
+
+func (*VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID) isaVirtualNetworkInterfaceIPPrototype() bool {
+	return true
+}
+
+// UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID unmarshals an instance of VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID from the specified map of raw messages.
+func UnmarshalVirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID(m map[string]json.RawMessage, result interface{}) (err error) {
+	obj := new(VirtualNetworkInterfaceIPPrototypeReservedIPIdentityVirtualNetworkInterfaceIPsContextByID)
 	err = core.UnmarshalPrimitive(m, "id", &obj.ID)
 	if err != nil {
 		return
@@ -101596,7 +115414,7 @@ func (pager *BackupPoliciesPager) HasNext() bool {
 }
 
 // GetNextWithContext returns the next page of results using the specified Context.
-func (pager *BackupPoliciesPager) GetNextWithContext(ctx context.Context) (page []BackupPolicy, err error) {
+func (pager *BackupPoliciesPager) GetNextWithContext(ctx context.Context) (page []BackupPolicyIntf, err error) {
 	if !pager.HasNext() {
 		return nil, fmt.Errorf("no more results available")
 	}
@@ -101627,9 +115445,9 @@ func (pager *BackupPoliciesPager) GetNextWithContext(ctx context.Context) (page 
 
 // GetAllWithContext returns all results by invoking GetNextWithContext() repeatedly
 // until all pages of results have been retrieved.
-func (pager *BackupPoliciesPager) GetAllWithContext(ctx context.Context) (allItems []BackupPolicy, err error) {
+func (pager *BackupPoliciesPager) GetAllWithContext(ctx context.Context) (allItems []BackupPolicyIntf, err error) {
 	for pager.HasNext() {
-		var nextPage []BackupPolicy
+		var nextPage []BackupPolicyIntf
 		nextPage, err = pager.GetNextWithContext(ctx)
 		if err != nil {
 			return
@@ -101640,12 +115458,12 @@ func (pager *BackupPoliciesPager) GetAllWithContext(ctx context.Context) (allIte
 }
 
 // GetNext invokes GetNextWithContext() using context.Background() as the Context parameter.
-func (pager *BackupPoliciesPager) GetNext() (page []BackupPolicy, err error) {
+func (pager *BackupPoliciesPager) GetNext() (page []BackupPolicyIntf, err error) {
 	return pager.GetNextWithContext(context.Background())
 }
 
 // GetAll invokes GetAllWithContext() using context.Background() as the Context parameter.
-func (pager *BackupPoliciesPager) GetAll() (allItems []BackupPolicy, err error) {
+func (pager *BackupPoliciesPager) GetAll() (allItems []BackupPolicyIntf, err error) {
 	return pager.GetAllWithContext(context.Background())
 }
 
@@ -101989,6 +115807,91 @@ func (pager *BareMetalServersPager) GetAll() (allItems []BareMetalServer, err er
 	return pager.GetAllWithContext(context.Background())
 }
 
+// BareMetalServerNetworkAttachmentsPager can be used to simplify the use of the "ListBareMetalServerNetworkAttachments" method.
+type BareMetalServerNetworkAttachmentsPager struct {
+	hasNext     bool
+	options     *ListBareMetalServerNetworkAttachmentsOptions
+	client      *VpcV1
+	pageContext struct {
+		next *string
+	}
+}
+
+// NewBareMetalServerNetworkAttachmentsPager returns a new BareMetalServerNetworkAttachmentsPager instance.
+func (vpc *VpcV1) NewBareMetalServerNetworkAttachmentsPager(options *ListBareMetalServerNetworkAttachmentsOptions) (pager *BareMetalServerNetworkAttachmentsPager, err error) {
+	if options.Start != nil && *options.Start != "" {
+		err = fmt.Errorf("the 'options.Start' field should not be set")
+		return
+	}
+
+	var optionsCopy ListBareMetalServerNetworkAttachmentsOptions = *options
+	pager = &BareMetalServerNetworkAttachmentsPager{
+		hasNext: true,
+		options: &optionsCopy,
+		client:  vpc,
+	}
+	return
+}
+
+// HasNext returns true if there are potentially more results to be retrieved.
+func (pager *BareMetalServerNetworkAttachmentsPager) HasNext() bool {
+	return pager.hasNext
+}
+
+// GetNextWithContext returns the next page of results using the specified Context.
+func (pager *BareMetalServerNetworkAttachmentsPager) GetNextWithContext(ctx context.Context) (page []BareMetalServerNetworkAttachmentIntf, err error) {
+	if !pager.HasNext() {
+		return nil, fmt.Errorf("no more results available")
+	}
+
+	pager.options.Start = pager.pageContext.next
+
+	result, _, err := pager.client.ListBareMetalServerNetworkAttachmentsWithContext(ctx, pager.options)
+	if err != nil {
+		return
+	}
+
+	var next *string
+	if result.Next != nil {
+		var start *string
+		start, err = core.GetQueryParam(result.Next.Href, "start")
+		if err != nil {
+			err = fmt.Errorf("error retrieving 'start' query parameter from URL '%s': %s", *result.Next.Href, err.Error())
+			return
+		}
+		next = start
+	}
+	pager.pageContext.next = next
+	pager.hasNext = (pager.pageContext.next != nil)
+	page = result.NetworkAttachments
+
+	return
+}
+
+// GetAllWithContext returns all results by invoking GetNextWithContext() repeatedly
+// until all pages of results have been retrieved.
+func (pager *BareMetalServerNetworkAttachmentsPager) GetAllWithContext(ctx context.Context) (allItems []BareMetalServerNetworkAttachmentIntf, err error) {
+	for pager.HasNext() {
+		var nextPage []BareMetalServerNetworkAttachmentIntf
+		nextPage, err = pager.GetNextWithContext(ctx)
+		if err != nil {
+			return
+		}
+		allItems = append(allItems, nextPage...)
+	}
+	return
+}
+
+// GetNext invokes GetNextWithContext() using context.Background() as the Context parameter.
+func (pager *BareMetalServerNetworkAttachmentsPager) GetNext() (page []BareMetalServerNetworkAttachmentIntf, err error) {
+	return pager.GetNextWithContext(context.Background())
+}
+
+// GetAll invokes GetAllWithContext() using context.Background() as the Context parameter.
+func (pager *BareMetalServerNetworkAttachmentsPager) GetAll() (allItems []BareMetalServerNetworkAttachmentIntf, err error) {
+	return pager.GetAllWithContext(context.Background())
+}
+
 // BareMetalServerNetworkInterfacesPager can be used to simplify the use of the "ListBareMetalServerNetworkInterfaces" method.
 type BareMetalServerNetworkInterfacesPager struct {
 	hasNext     bool
@@ -102241,6 +116144,91 @@ func (pager *VolumesPager) GetNext() (page []Volume, err error) {
 
 // GetAll invokes GetAllWithContext() using context.Background() as the Context parameter.
 func (pager *VolumesPager) GetAll() (allItems []Volume, err error) {
+	return pager.GetAllWithContext(context.Background())
+}
+
+// SnapshotConsistencyGroupsPager can be used to simplify the use of the "ListSnapshotConsistencyGroups" method.
+type SnapshotConsistencyGroupsPager struct {
+	hasNext     bool
+	options     *ListSnapshotConsistencyGroupsOptions
+	client      *VpcV1
+	pageContext struct {
+		next *string
+	}
+}
+
+// NewSnapshotConsistencyGroupsPager returns a new SnapshotConsistencyGroupsPager instance.
+func (vpc *VpcV1) NewSnapshotConsistencyGroupsPager(options *ListSnapshotConsistencyGroupsOptions) (pager *SnapshotConsistencyGroupsPager, err error) {
+	if options.Start != nil && *options.Start != "" {
+		err = fmt.Errorf("the 'options.Start' field should not be set")
+		return
+	}
+
+	var optionsCopy ListSnapshotConsistencyGroupsOptions = *options
+	pager = &SnapshotConsistencyGroupsPager{
+		hasNext: true,
+		options: &optionsCopy,
+		client:  vpc,
+	}
+	return
+}
+
+// HasNext returns true if there are potentially more results to be retrieved.
+func (pager *SnapshotConsistencyGroupsPager) HasNext() bool {
+	return pager.hasNext
+}
+
+// GetNextWithContext returns the next page of results using the specified Context.
+func (pager *SnapshotConsistencyGroupsPager) GetNextWithContext(ctx context.Context) (page []SnapshotConsistencyGroup, err error) {
+	if !pager.HasNext() {
+		return nil, fmt.Errorf("no more results available")
+	}
+
+	pager.options.Start = pager.pageContext.next
+
+	result, _, err := pager.client.ListSnapshotConsistencyGroupsWithContext(ctx, pager.options)
+	if err != nil {
+		return
+	}
+
+	var next *string
+	if result.Next != nil {
+		var start *string
+		start, err = core.GetQueryParam(result.Next.Href, "start")
+		if err != nil {
+			err = fmt.Errorf("error retrieving 'start' query parameter from URL '%s': %s", *result.Next.Href, err.Error())
+			return
+		}
+		next = start
+	}
+	pager.pageContext.next = next
+	pager.hasNext = (pager.pageContext.next != nil)
+	page = result.SnapshotConsistencyGroups
+
+	return
+}
+
+// GetAllWithContext returns all results by invoking GetNextWithContext() repeatedly
+// until all pages of results have been retrieved.
+func (pager *SnapshotConsistencyGroupsPager) GetAllWithContext(ctx context.Context) (allItems []SnapshotConsistencyGroup, err error) {
+	for pager.HasNext() {
+		var nextPage []SnapshotConsistencyGroup
+		nextPage, err = pager.GetNextWithContext(ctx)
+		if err != nil {
+			return
+		}
+		allItems = append(allItems, nextPage...)
+	}
+	return
+}
+
+// GetNext invokes GetNextWithContext() using context.Background() as the Context parameter.
+func (pager *SnapshotConsistencyGroupsPager) GetNext() (page []SnapshotConsistencyGroup, err error) {
+	return pager.GetNextWithContext(context.Background())
+}
+
+// GetAll invokes GetAllWithContext() using context.Background() as the Context parameter.
+func (pager *SnapshotConsistencyGroupsPager) GetAll() (allItems []SnapshotConsistencyGroup, err error) {
 	return pager.GetAllWithContext(context.Background())
 }
 
@@ -102666,6 +116654,176 @@ func (pager *VirtualNetworkInterfacesPager) GetNext() (page []VirtualNetworkInte
 
 // GetAll invokes GetAllWithContext() using context.Background() as the Context parameter.
 func (pager *VirtualNetworkInterfacesPager) GetAll() (allItems []VirtualNetworkInterface, err error) {
+	return pager.GetAllWithContext(context.Background())
+}
+
+// NetworkInterfaceFloatingIpsPager can be used to simplify the use of the "ListNetworkInterfaceFloatingIps" method.
+type NetworkInterfaceFloatingIpsPager struct {
+	hasNext     bool
+	options     *ListNetworkInterfaceFloatingIpsOptions
+	client      *VpcV1
+	pageContext struct {
+		next *string
+	}
+}
+
+// NewNetworkInterfaceFloatingIpsPager returns a new NetworkInterfaceFloatingIpsPager instance.
+func (vpc *VpcV1) NewNetworkInterfaceFloatingIpsPager(options *ListNetworkInterfaceFloatingIpsOptions) (pager *NetworkInterfaceFloatingIpsPager, err error) {
+	if options.Start != nil && *options.Start != "" {
+		err = fmt.Errorf("the 'options.Start' field should not be set")
+		return
+	}
+
+	var optionsCopy ListNetworkInterfaceFloatingIpsOptions = *options
+	pager = &NetworkInterfaceFloatingIpsPager{
+		hasNext: true,
+		options: &optionsCopy,
+		client:  vpc,
+	}
+	return
+}
+
+// HasNext returns true if there are potentially more results to be retrieved.
+func (pager *NetworkInterfaceFloatingIpsPager) HasNext() bool {
+	return pager.hasNext
+}
+
+// GetNextWithContext returns the next page of results using the specified Context.
+func (pager *NetworkInterfaceFloatingIpsPager) GetNextWithContext(ctx context.Context) (page []FloatingIPReference, err error) {
+	if !pager.HasNext() {
+		return nil, fmt.Errorf("no more results available")
+	}
+
+	pager.options.Start = pager.pageContext.next
+
+	result, _, err := pager.client.ListNetworkInterfaceFloatingIpsWithContext(ctx, pager.options)
+	if err != nil {
+		return
+	}
+
+	var next *string
+	if result.Next != nil {
+		var start *string
+		start, err = core.GetQueryParam(result.Next.Href, "start")
+		if err != nil {
+			err = fmt.Errorf("error retrieving 'start' query parameter from URL '%s': %s", *result.Next.Href, err.Error())
+			return
+		}
+		next = start
+	}
+	pager.pageContext.next = next
+	pager.hasNext = (pager.pageContext.next != nil)
+	page = result.FloatingIps
+
+	return
+}
+
+// GetAllWithContext returns all results by invoking GetNextWithContext() repeatedly
+// until all pages of results have been retrieved.
+func (pager *NetworkInterfaceFloatingIpsPager) GetAllWithContext(ctx context.Context) (allItems []FloatingIPReference, err error) {
+	for pager.HasNext() {
+		var nextPage []FloatingIPReference
+		nextPage, err = pager.GetNextWithContext(ctx)
+		if err != nil {
+			return
+		}
+		allItems = append(allItems, nextPage...)
+	}
+	return
+}
+
+// GetNext invokes GetNextWithContext() using context.Background() as the Context parameter.
+func (pager *NetworkInterfaceFloatingIpsPager) GetNext() (page []FloatingIPReference, err error) {
+	return pager.GetNextWithContext(context.Background())
+}
+
+// GetAll invokes GetAllWithContext() using context.Background() as the Context parameter.
+func (pager *NetworkInterfaceFloatingIpsPager) GetAll() (allItems []FloatingIPReference, err error) {
+	return pager.GetAllWithContext(context.Background())
+}
+
+// VirtualNetworkInterfaceIpsPager can be used to simplify the use of the "ListVirtualNetworkInterfaceIps" method.
+type VirtualNetworkInterfaceIpsPager struct {
+	hasNext     bool
+	options     *ListVirtualNetworkInterfaceIpsOptions
+	client      *VpcV1
+	pageContext struct {
+		next *string
+	}
+}
+
+// NewVirtualNetworkInterfaceIpsPager returns a new VirtualNetworkInterfaceIpsPager instance.
+func (vpc *VpcV1) NewVirtualNetworkInterfaceIpsPager(options *ListVirtualNetworkInterfaceIpsOptions) (pager *VirtualNetworkInterfaceIpsPager, err error) {
+	if options.Start != nil && *options.Start != "" {
+		err = fmt.Errorf("the 'options.Start' field should not be set")
+		return
+	}
+
+	var optionsCopy ListVirtualNetworkInterfaceIpsOptions = *options
+	pager = &VirtualNetworkInterfaceIpsPager{
+		hasNext: true,
+		options: &optionsCopy,
+		client:  vpc,
+	}
+	return
+}
+
+// HasNext returns true if there are potentially more results to be retrieved.
+func (pager *VirtualNetworkInterfaceIpsPager) HasNext() bool {
+	return pager.hasNext
+}
+
+// GetNextWithContext returns the next page of results using the specified Context.
+func (pager *VirtualNetworkInterfaceIpsPager) GetNextWithContext(ctx context.Context) (page []ReservedIPReference, err error) {
+	if !pager.HasNext() {
+		return nil, fmt.Errorf("no more results available")
+	}
+
+	pager.options.Start = pager.pageContext.next
+
+	result, _, err := pager.client.ListVirtualNetworkInterfaceIpsWithContext(ctx, pager.options)
+	if err != nil {
+		return
+	}
+
+	var next *string
+	if result.Next != nil {
+		var start *string
+		start, err = core.GetQueryParam(result.Next.Href, "start")
+		if err != nil {
+			err = fmt.Errorf("error retrieving 'start' query parameter from URL '%s': %s", *result.Next.Href, err.Error())
+			return
+		}
+		next = start
+	}
+	pager.pageContext.next = next
+	pager.hasNext = (pager.pageContext.next != nil)
+	page = result.Ips
+
+	return
+}
+
+// GetAllWithContext returns all results by invoking GetNextWithContext() repeatedly
+// until all pages of results have been retrieved.
+func (pager *VirtualNetworkInterfaceIpsPager) GetAllWithContext(ctx context.Context) (allItems []ReservedIPReference, err error) {
+	for pager.HasNext() {
+		var nextPage []ReservedIPReference
+		nextPage, err = pager.GetNextWithContext(ctx)
+		if err != nil {
+			return
+		}
+		allItems = append(allItems, nextPage...)
+	}
+	return
+}
+
+// GetNext invokes GetNextWithContext() using context.Background() as the Context parameter.
+func (pager *VirtualNetworkInterfaceIpsPager) GetNext() (page []ReservedIPReference, err error) {
+	return pager.GetNextWithContext(context.Background())
+}
+
+// GetAll invokes GetAllWithContext() using context.Background() as the Context parameter.
+func (pager *VirtualNetworkInterfaceIpsPager) GetAll() (allItems []ReservedIPReference, err error) {
 	return pager.GetAllWithContext(context.Background())
 }
 

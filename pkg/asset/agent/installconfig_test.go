@@ -54,7 +54,7 @@ networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  networkType: OpenShiftSDN
+  networkType: OVNKubernetes
   machineNetwork:
   - cidr: 192.168.122.0/23
   serviceNetwork:
@@ -270,32 +270,28 @@ pullSecret: "{\"auths\":{\"example.com\":{\"auth\":\"authorization value\"}}}"
 			expectedError: "invalid install-config configuration: Compute.Replicas: Required value: Total number of Compute.Replicas must be 0 when ControlPlane.Replicas is 1 for platform none or external. Found 3",
 		},
 		{
-			name: "invalid networkType for SNO cluster",
+			name: "incorrect compute.replicas set",
 			data: `
 apiVersion: v1
 metadata:
   name: test-cluster
 baseDomain: test-domain
 networking:
-  networkType: OpenShiftSDN
-compute:
-  - architecture: amd64
-    hyperthreading: Enabled
-    name: worker
-    platform: {}
-    replicas: 0
+  networkType: OVNKubernetes
 controlPlane:
   architecture: amd64
   hyperthreading: Enabled
   name: master
   platform: {}
-  replicas: 1
+  replicas: 2
 platform:
-  none : {}
+  external:
+    platformName: oci
+    cloudControllerManager: External
 pullSecret: "{\"auths\":{\"example.com\":{\"auth\":\"authorization value\"}}}"
 `,
 			expectedFound: false,
-			expectedError: "invalid install-config configuration: Networking.NetworkType: Invalid value: \"OpenShiftSDN\": Only OVNKubernetes network type is allowed for Single Node OpenShift (SNO) cluster",
+			expectedError: "invalid install-config configuration: ControlPlane.Replicas: Invalid value: 2: ControlPlane.Replicas can only be set to 3 or 1. Found 2",
 		},
 		{
 			name: "invalid platform for SNO cluster",
@@ -305,7 +301,7 @@ metadata:
   name: test-cluster
 baseDomain: test-domain
 networking:
-  networkType: OpenShiftSDN
+  networkType: OVNKubernetes
 compute:
   - architecture: amd64
     hyperthreading: Enabled
@@ -637,7 +633,7 @@ networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  networkType: OpenShiftSDN
+  networkType: OVNKubernetes
   machineNetwork:
   - cidr: 192.168.122.0/23
   serviceNetwork:
@@ -700,7 +696,7 @@ pullSecret: "{\"auths\":{\"example.com\":{\"auth\":\"authorization value\"}}}"
 					MachineNetwork: []types.MachineNetworkEntry{
 						{CIDR: *ipnet.MustParseCIDR("192.168.122.0/23")},
 					},
-					NetworkType:    "OpenShiftSDN",
+					NetworkType:    "OVNKubernetes",
 					ServiceNetwork: []ipnet.IPNet{*ipnet.MustParseCIDR("172.30.0.0/16")},
 					ClusterNetwork: []types.ClusterNetworkEntry{
 						{
@@ -798,7 +794,7 @@ networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  networkType: OpenShiftSDN
+  networkType: OVNKubernetes
   machineNetwork:
   - cidr: 192.168.122.0/23
   serviceNetwork: 
@@ -843,7 +839,7 @@ pullSecret: "{\"auths\":{\"example.com\":{\"auth\":\"authorization value\"}}}"
 					MachineNetwork: []types.MachineNetworkEntry{
 						{CIDR: *ipnet.MustParseCIDR("192.168.122.0/23")},
 					},
-					NetworkType:    "OpenShiftSDN",
+					NetworkType:    "OVNKubernetes",
 					ServiceNetwork: []ipnet.IPNet{*ipnet.MustParseCIDR("172.30.0.0/16")},
 					ClusterNetwork: []types.ClusterNetworkEntry{
 						{
@@ -895,7 +891,7 @@ pullSecret: "{\"auths\":{\"example.com\":{\"auth\":\"authorization value\"}}}"
 								ComputeCluster: "/testDataCenter/host/testCluster",
 								Networks:       []string{""},
 								Datastore:      "/testDataCenter/datastore/testDefaultDataStore",
-								ResourcePool:   "/testDataCenter/host/testCluster//Resources",
+								ResourcePool:   "/testDataCenter/host/testCluster/Resources",
 								Folder:         "/testDataCenter/vm/testFolder",
 							},
 						}},
@@ -916,7 +912,7 @@ networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  networkType: OpenShiftSDN
+  networkType: OVNKubernetes
   machineNetwork:
   - cidr: 192.168.122.0/23
   serviceNetwork:
@@ -952,7 +948,7 @@ networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
     hostPrefix: 23
-  networkType: OpenShiftSDN
+  networkType: OVNKubernetes
   machineNetwork:
   - cidr: 192.168.122.0/23
   serviceNetwork:

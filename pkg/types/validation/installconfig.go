@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	dockerref "github.com/containers/image/docker/reference"
+	dockerref "github.com/containers/image/v5/docker/reference"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
@@ -53,7 +53,7 @@ import (
 )
 
 // list of known plugins that require hostPrefix to be set
-var pluginsUsingHostPrefix = sets.NewString(string(operv1.NetworkTypeOpenShiftSDN), string(operv1.NetworkTypeOVNKubernetes))
+var pluginsUsingHostPrefix = sets.NewString(string(operv1.NetworkTypeOVNKubernetes))
 
 // ValidateInstallConfig checks that the specified install config is valid.
 //
@@ -142,7 +142,7 @@ func ValidateInstallConfig(c *types.InstallConfig, usingAgentMethod bool) field.
 		allErrs = append(allErrs, field.Invalid(field.NewPath("imageContentSources"), c.Publish, "cannot set imageContentSources and imageDigestSources at the same time"))
 	}
 	if len(c.DeprecatedImageContentSources) != 0 {
-		logrus.Warningln("imageContentSources is deprecated, please use ImageDigestSource")
+		logrus.Warningln("imageContentSources is deprecated, please use ImageDigestSources")
 	}
 	allErrs = append(allErrs, validateCloudCredentialsMode(c.CredentialsMode, field.NewPath("credentialsMode"), c.Platform)...)
 	if c.Capabilities != nil {
@@ -190,6 +190,13 @@ func ValidateInstallConfig(c *types.InstallConfig, usingAgentMethod bool) field.
 	}
 
 	if c.Capabilities != nil {
+		capSet := c.Capabilities.BaselineCapabilitySet
+		if capSet == "" {
+			capSet = configv1.ClusterVersionCapabilitySetCurrent
+		}
+		enabledCaps := sets.New[configv1.ClusterVersionCapability](configv1.ClusterVersionCapabilitySets[capSet]...)
+		enabledCaps.Insert(c.Capabilities.AdditionalEnabledCapabilities...)
+
 		if c.Capabilities.BaselineCapabilitySet == configv1.ClusterVersionCapabilitySetNone {
 			enabledCaps := sets.New[configv1.ClusterVersionCapability](c.Capabilities.AdditionalEnabledCapabilities...)
 			if enabledCaps.Has(configv1.ClusterVersionCapabilityBaremetal) && !enabledCaps.Has(configv1.ClusterVersionCapabilityMachineAPI) {
@@ -199,6 +206,14 @@ func ValidateInstallConfig(c *types.InstallConfig, usingAgentMethod bool) field.
 			if enabledCaps.Has(configv1.ClusterVersionCapabilityMarketplace) && !enabledCaps.Has(configv1.ClusterVersionCapabilityOperatorLifecycleManager) {
 				allErrs = append(allErrs, field.Invalid(field.NewPath("additionalEnabledCapabilities"), c.Capabilities.AdditionalEnabledCapabilities,
 					"the marketplace capability requires the OperatorLifecycleManager capability"))
+			}
+		}
+
+		if !enabledCaps.Has(configv1.ClusterVersionCapabilityCloudCredential) {
+			// check if platform is cloud
+			if c.None == nil && c.BareMetal == nil {
+				allErrs = append(allErrs, field.Invalid(field.NewPath("capabilities"), c.Capabilities,
+					"disabling CloudCredential capability available only for baremetal platforms"))
 			}
 		}
 	}
@@ -282,10 +297,6 @@ func validateNetworkingIPVersion(n *types.Networking, p *types.Platform) field.E
 
 	switch {
 	case hasIPv4 && hasIPv6:
-		if n.NetworkType == string(operv1.NetworkTypeOpenShiftSDN) {
-			allErrs = append(allErrs, field.Invalid(field.NewPath("networking", "networkType"), n.NetworkType, "dual-stack IPv4/IPv6 is not supported for this networking plugin"))
-		}
-
 		if len(n.ServiceNetwork) != 2 {
 			allErrs = append(allErrs, field.Invalid(field.NewPath("networking", "serviceNetwork"), strings.Join(ipnetworksToStrings(n.ServiceNetwork), ", "), "when installing dual-stack IPv4/IPv6 you must provide two service networks, one for each IP address type"))
 		}
@@ -327,10 +338,6 @@ func validateNetworkingIPVersion(n *types.Networking, p *types.Platform) field.E
 		}
 
 	case hasIPv6:
-		if n.NetworkType == string(operv1.NetworkTypeOpenShiftSDN) {
-			allErrs = append(allErrs, field.Invalid(field.NewPath("networking", "networkType"), n.NetworkType, "IPv6 is not supported for this networking plugin"))
-		}
-
 		switch {
 		case p.BareMetal != nil:
 		case p.VSphere != nil:
@@ -369,8 +376,8 @@ func validateNetworking(n *types.Networking, singleNodeOpenShift bool, fldPath *
 		allErrs = append(allErrs, field.Invalid(fldPath.Child("networkType"), n.NetworkType, "networkType Kuryr is not supported on OpenShift later than 4.14"))
 	}
 
-	if singleNodeOpenShift && n.NetworkType == string(operv1.NetworkTypeOpenShiftSDN) {
-		allErrs = append(allErrs, field.Invalid(fldPath.Child("networkType"), n.NetworkType, "networkType OpenShiftSDN is currently not supported on Single Node OpenShift"))
+	if n.NetworkType == string(operv1.NetworkTypeOpenShiftSDN) {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("networkType"), n.NetworkType, "networkType OpenShiftSDN is not supported, please use OVNKubernetes"))
 	}
 
 	if len(n.MachineNetwork) > 0 {
@@ -772,10 +779,6 @@ func validateAPIAndIngressVIPs(vips vips, fieldNames vipFields, vipIsRequired, r
 					allErrs = append(allErrs, field.Invalid(fldPath.Child(fieldNames.APIVIPs), vip, err.Error()))
 				}
 			}
-
-			if utilsnet.IsIPv6String(vip) && n.NetworkType == string(operv1.NetworkTypeOpenShiftSDN) {
-				allErrs = append(allErrs, field.Invalid(fldPath.Child(fieldNames.APIVIPs), vip, "IPv6 is not supported on OpenShiftSDN"))
-			}
 		}
 
 		if len(vips.Ingress) == 0 {
@@ -818,10 +821,6 @@ func validateAPIAndIngressVIPs(vips vips, fieldNames vipFields, vipIsRequired, r
 				if err := ValidateIPinMachineCIDR(vip, n); reqVIPinMachineCIDR && err != nil {
 					allErrs = append(allErrs, field.Invalid(fldPath.Child(fieldNames.IngressVIPs), vip, err.Error()))
 				}
-			}
-
-			if utilsnet.IsIPv6String(vip) && n.NetworkType == string(operv1.NetworkTypeOpenShiftSDN) {
-				allErrs = append(allErrs, field.Invalid(fldPath.Child(fieldNames.IngressVIPs), vip, "IPv6 is not supported on OpenShiftSDN"))
 			}
 		}
 

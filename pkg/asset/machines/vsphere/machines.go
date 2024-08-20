@@ -83,9 +83,11 @@ func Machines(clusterID string, config *types.InstallConfig, pool *types.Machine
 			"machine.openshift.io/cluster-api-machine-type": role,
 		}
 
-		failureDomains = append(failureDomains, machinev1.VSphereFailureDomain{
-			Name: failureDomain.Name,
-		})
+		if !hasFailureDomain(failureDomains, failureDomain.Name) {
+			failureDomains = append(failureDomains, machinev1.VSphereFailureDomain{
+				Name: failureDomain.Name,
+			})
+		}
 
 		osImageForZone := failureDomain.Topology.Template
 		if failureDomain.Topology.Template == "" {
@@ -128,18 +130,25 @@ func Machines(clusterID string, config *types.InstallConfig, pool *types.Machine
 
 	// when multiple zones are defined, network and workspace are derived from the topology
 	origProv := vsphereMachineProvider.DeepCopy()
-	if len(failureDomains) > 1 {
+	if len(failureDomains) >= 1 {
 		vsphereMachineProvider.Network = machineapi.NetworkSpec{}
 		vsphereMachineProvider.Workspace = &machineapi.Workspace{}
 		vsphereMachineProvider.Template = ""
 	}
 
+	// Only set AddressesFromPools and Nameservers if AddressesFromPools is > 0, else revert to
+	// the older static IP manifest way.
 	if len(hosts) > 0 {
-		vsphereMachineProvider.Network.Devices = []machineapi.NetworkDeviceSpec{
-			{
-				AddressesFromPools: origProv.Network.Devices[0].AddressesFromPools,
-				Nameservers:        origProv.Network.Devices[0].Nameservers,
-			},
+		if len(origProv.Network.Devices[0].AddressesFromPools) > 0 {
+			vsphereMachineProvider.Network.Devices = []machineapi.NetworkDeviceSpec{
+				{
+					AddressesFromPools: origProv.Network.Devices[0].AddressesFromPools,
+					Nameservers:        origProv.Network.Devices[0].Nameservers,
+				},
+			}
+		} else {
+			// Older static IP config, lets remove network since it'll come from FD
+			vsphereMachineProvider.Network = machineapi.NetworkSpec{}
 		}
 	}
 
@@ -254,4 +263,13 @@ func provider(clusterID string, vcenter *vsphere.VCenter, failureDomain vsphere.
 
 // ConfigMasters sets the PublicIP flag and assigns a set of load balancers to the given machines
 func ConfigMasters(machines []machineapi.Machine, clusterID string) {
+}
+
+func hasFailureDomain(failureDomains []machinev1.VSphereFailureDomain, failureDomain string) bool {
+	for _, fd := range failureDomains {
+		if fd.Name == failureDomain {
+			return true
+		}
+	}
+	return false
 }

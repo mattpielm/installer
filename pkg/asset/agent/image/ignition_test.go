@@ -86,7 +86,7 @@ func TestIgnition_getTemplateData(t *testing.T) {
 	}
 	clusterName := "test-agent-cluster-install.test"
 
-	templateData := getTemplateData(clusterName, pullSecret, releaseImageList, releaseImage, releaseImageMirror, haveMirrorConfig, publicContainerRegistries, agentClusterInstall, infraEnvID, osImage, proxy, "minimal-iso")
+	templateData := getTemplateData(clusterName, pullSecret, releaseImageList, releaseImage, releaseImageMirror, haveMirrorConfig, publicContainerRegistries, agentClusterInstall, infraEnvID, osImage, proxy, "minimal-iso", "")
 	assert.Equal(t, clusterName, templateData.ClusterName)
 	assert.Equal(t, "http", templateData.ServiceProtocol)
 	assert.Equal(t, pullSecret, templateData.PullSecret)
@@ -155,7 +155,7 @@ func TestIgnition_addStaticNetworkConfig(t *testing.T) {
 					NetworkYaml: "interfaces:\n- ipv4:\n    address:\n    - ip: bad-ip\n      prefix-length: 24\n    enabled: true\n  mac-address: 52:54:01:aa:aa:a1\n  name: eth0\n  state: up\n  type: ethernet\n",
 				},
 			},
-			expectedError:    "failed to create StaticNetwork config data: failed to create static config for host 0: failed to execute 'nmstatectl gc', error: invalid IP address syntax",
+			expectedError:    ".*invalid IP address syntax",
 			expectedFileList: nil,
 		},
 	}

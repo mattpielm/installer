@@ -10,13 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/IBM-Cloud/bluemix-go"
-	"github.com/IBM-Cloud/bluemix-go/api/resource/resourcev2/controllerv2"
-	"github.com/IBM-Cloud/bluemix-go/authentication"
 	"github.com/IBM-Cloud/bluemix-go/crn"
-	"github.com/IBM-Cloud/bluemix-go/http"
-	"github.com/IBM-Cloud/bluemix-go/rest"
-	bxsession "github.com/IBM-Cloud/bluemix-go/session"
 	"github.com/IBM-Cloud/power-go-client/clients/instance"
 	"github.com/IBM-Cloud/power-go-client/ibmpisession"
 	"github.com/IBM/go-sdk-core/v5/core"
@@ -28,7 +22,6 @@ import (
 	"github.com/IBM/platform-services-go-sdk/resourcecontrollerv2"
 	"github.com/IBM/platform-services-go-sdk/resourcemanagerv2"
 	"github.com/IBM/vpc-go-sdk/vpcv1"
-	"github.com/golang-jwt/jwt"
 	"github.com/sirupsen/logrus"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -72,72 +65,6 @@ type User struct {
 	cloudName  string `default:"bluemix"`
 	cloudType  string `default:"public"`
 	generation int    `default:"2"`
-}
-
-func fetchUserDetails(bxSession *bxsession.Session, generation int) (*User, error) {
-	config := bxSession.Config
-	user := User{}
-	var bluemixToken string
-
-	if strings.HasPrefix(config.IAMAccessToken, "Bearer") {
-		bluemixToken = config.IAMAccessToken[7:len(config.IAMAccessToken)]
-	} else {
-		bluemixToken = config.IAMAccessToken
-	}
-
-	token, err := jwt.Parse(bluemixToken, func(token *jwt.Token) (interface{}, error) {
-		return "", nil
-	})
-	if err != nil && !strings.Contains(err.Error(), "key is of invalid type") {
-		return &user, err
-	}
-
-	claims := token.Claims.(jwt.MapClaims)
-	if email, ok := claims["email"]; ok {
-		user.Email = email.(string)
-	}
-	user.ID = claims["id"].(string)
-	user.Account = claims["account"].(map[string]interface{})["bss"].(string)
-	iss := claims["iss"].(string)
-	if strings.Contains(iss, "https://iam.cloud.ibm.com") {
-		user.cloudName = "bluemix"
-	} else {
-		user.cloudName = "staging"
-	}
-	user.cloudType = "public"
-
-	user.generation = generation
-	return &user, nil
-}
-
-// GetRegion converts from a zone into a region.
-func GetRegion(zone string) (region string, err error) {
-	err = nil
-	switch {
-	case strings.HasPrefix(zone, "dal"), strings.HasPrefix(zone, "us-south"):
-		region = "us-south"
-	case strings.HasPrefix(zone, "sao"):
-		region = "sao"
-	case strings.HasPrefix(zone, "us-east"):
-		region = "us-east"
-	case strings.HasPrefix(zone, "tor"):
-		region = "tor"
-	case strings.HasPrefix(zone, "eu-de-"):
-		region = "eu-de"
-	case strings.HasPrefix(zone, "lon"):
-		region = "lon"
-	case strings.HasPrefix(zone, "syd"):
-		region = "syd"
-	case strings.HasPrefix(zone, "tok"):
-		region = "tok"
-	case strings.HasPrefix(zone, "osa"):
-		region = "osa"
-	case strings.HasPrefix(zone, "mon"):
-		region = "mon"
-	default:
-		return "", fmt.Errorf("region not found for the zone: %s", zone)
-	}
-	return
 }
 
 // ClusterUninstaller holds the various options for the cluster we want to delete.
@@ -444,23 +371,14 @@ func (o *ClusterUninstaller) newAuthenticator(apikey string) (core.Authenticator
 
 func (o *ClusterUninstaller) loadSDKServices() error {
 	var (
-		bxSession             *bxsession.Session
-		tokenProviderEndpoint = "https://iam.cloud.ibm.com" //nolint:gosec // not a credential despite `token` in its name
-		tokenRefresher        *authentication.IAMAuthRepository
-		err                   error
-		ctrlv2                controllerv2.ResourceControllerAPIV2
-		resourceClientV2      controllerv2.ResourceServiceInstanceRepository
-		authenticator         core.Authenticator
-		versionDate           = "2023-07-04"
-		tgOptions             *transitgatewayapisv1.TransitGatewayApisV1Options
-		serviceName           string
+		err           error
+		authenticator core.Authenticator
+		versionDate   = "2023-07-04"
+		tgOptions     *transitgatewayapisv1.TransitGatewayApisV1Options
+		serviceName   string
 	)
 
 	defer func() {
-		o.Logger.Debugf("loadSDKServices: bxSession = %v", bxSession)
-		o.Logger.Debugf("loadSDKServices: tokenRefresher = %v", tokenRefresher)
-		o.Logger.Debugf("loadSDKServices: ctrlv2 = %v", ctrlv2)
-		o.Logger.Debugf("loadSDKServices: resourceClientV2 = %v", resourceClientV2)
 		o.Logger.Debugf("loadSDKServices: o.ServiceGUID = %v", o.ServiceGUID)
 		o.Logger.Debugf("loadSDKServices: o.piSession = %v", o.piSession)
 		o.Logger.Debugf("loadSDKServices: o.instanceClient = %v", o.instanceClient)
@@ -476,41 +394,9 @@ func (o *ClusterUninstaller) loadSDKServices() error {
 		return fmt.Errorf("loadSDKServices: missing APIKey in metadata.json")
 	}
 
-	bxSession, err = bxsession.New(&bluemix.Config{
-		BluemixAPIKey:         o.APIKey,
-		TokenProviderEndpoint: &tokenProviderEndpoint,
-		Debug:                 false,
-	})
-	if err != nil {
-		return fmt.Errorf("loadSDKServices: bxsession.New: %w", err)
-	}
-
-	tokenRefresher, err = authentication.NewIAMAuthRepository(bxSession.Config, &rest.Client{
-		DefaultHeader: gohttp.Header{
-			"User-Agent": []string{http.UserAgent()},
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("loadSDKServices: authentication.NewIAMAuthRepository: %w", err)
-	}
-	err = tokenRefresher.AuthenticateAPIKey(bxSession.Config.BluemixAPIKey)
-	if err != nil {
-		return fmt.Errorf("loadSDKServices: tokenRefresher.AuthenticateAPIKey: %w", err)
-	}
-
-	user, err := fetchUserDetails(bxSession, 2)
+	user, err := powervs.FetchUserDetails(o.APIKey)
 	if err != nil {
 		return fmt.Errorf("loadSDKServices: fetchUserDetails: %w", err)
-	}
-
-	ctrlv2, err = controllerv2.New(bxSession)
-	if err != nil {
-		return fmt.Errorf("loadSDKServices: controllerv2.New: %w", err)
-	}
-
-	resourceClientV2 = ctrlv2.ResourceServiceInstanceV2()
-	if err != nil {
-		return fmt.Errorf("loadSDKServices: ctrlv2.ResourceServiceInstanceV2: %w", err)
 	}
 
 	authenticator, err = o.newAuthenticator(o.APIKey)
@@ -740,6 +626,7 @@ func (o *ClusterUninstaller) ServiceInstanceNameToGUID(ctx context.Context, name
 		groupID   = o.resourceGroupID
 	)
 
+	o.Logger.Debugf("ServiceInstanceNameToGUID: groupID = %s", groupID)
 	// If the user passes in a human readable group id, then we need to convert it to a UUID
 	listGroupOptions := o.managementSvc.NewListResourceGroupsOptions()
 	groups, _, err := o.managementSvc.ListResourceGroupsWithContext(ctx, listGroupOptions)
@@ -747,10 +634,12 @@ func (o *ClusterUninstaller) ServiceInstanceNameToGUID(ctx context.Context, name
 		return "", fmt.Errorf("failed to list resource groups: %w", err)
 	}
 	for _, group := range groups.Resources {
+		o.Logger.Debugf("ServiceInstanceNameToGUID: group.Name = %s", *group.Name)
 		if *group.Name == groupID {
 			groupID = *group.ID
 		}
 	}
+	o.Logger.Debugf("ServiceInstanceNameToGUID: groupID = %s", groupID)
 
 	options = o.controllerSvc.NewListResourceInstancesOptions()
 	options.SetResourceGroupID(groupID)
@@ -771,6 +660,8 @@ func (o *ClusterUninstaller) ServiceInstanceNameToGUID(ctx context.Context, name
 				response           *core.DetailedResponse
 			)
 
+			o.Logger.Debugf("ServiceInstanceNameToGUID: resource.Name = %s", *resource.Name)
+
 			getResourceOptions = o.controllerSvc.NewGetResourceInstanceOptions(*resource.ID)
 
 			resourceInstance, response, err = o.controllerSvc.GetResourceInstance(getResourceOptions)
@@ -781,11 +672,25 @@ func (o *ClusterUninstaller) ServiceInstanceNameToGUID(ctx context.Context, name
 				return "", fmt.Errorf("failed to get instance, response is: %v", response)
 			}
 
-			if resourceInstance.Type != nil && *resourceInstance.Type == "service_instance" {
-				if resourceInstance.GUID != nil && *resourceInstance.Name == name {
-					return *resourceInstance.GUID, nil
-				}
+			if resourceInstance.Type == nil {
+				o.Logger.Debugf("ServiceInstanceNameToGUID: type: nil")
+				continue
 			}
+			o.Logger.Debugf("ServiceInstanceNameToGUID: type: %v", *resourceInstance.Type)
+			if resourceInstance.GUID == nil {
+				o.Logger.Debugf("ServiceInstanceNameToGUID: GUID: nil")
+				continue
+			}
+			if *resourceInstance.Type != "service_instance" && *resourceInstance.Type != "composite_instance" {
+				continue
+			}
+			if *resourceInstance.Name != name {
+				continue
+			}
+
+			o.Logger.Debugf("ServiceInstanceNameToGUID: Found match!")
+
+			return *resourceInstance.GUID, nil
 		}
 
 		// Based on: https://cloud.ibm.com/apidocs/resource-controller/resource-controller?code=go#list-resource-instances

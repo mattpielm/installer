@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -17,7 +18,8 @@ import (
 )
 
 const (
-	agentISOFilename = "agent.%s.iso"
+	agentISOFilename    = "agent.%s.iso"
+	iso9660Level1ExtLen = 3
 )
 
 // AgentImage is an asset that generates the bootable image used to install clusters.
@@ -79,7 +81,8 @@ func (a *AgentImage) Generate(dependencies asset.Parents) error {
 		}
 	}
 
-	err = a.updateIgnitionImg(agentArtifacts.IgnitionByte)
+	// Update Ignition images
+	err = a.updateIgnitionContent(agentArtifacts)
 	if err != nil {
 		return err
 	}
@@ -92,38 +95,27 @@ func (a *AgentImage) Generate(dependencies asset.Parents) error {
 	return nil
 }
 
-func (a *AgentImage) updateIgnitionImg(ignition []byte) error {
-	ca := NewCpioArchive()
-	err := ca.StoreBytes("config.ign", ignition, 0o644)
-	if err != nil {
-		return err
-	}
-	ignitionBuff, err := ca.SaveBuffer()
-	if err != nil {
-		return err
-	}
-
-	ignitionImgPath := filepath.Join(a.tmpPath, "images", "ignition.img")
-	fi, err := os.Stat(ignitionImgPath)
+// updateIgnitionContent updates the ignition data into the corresponding images in the ISO.
+func (a *AgentImage) updateIgnitionContent(agentArtifacts *AgentArtifacts) error {
+	ignitionc := &isoeditor.IgnitionContent{}
+	ignitionc.Config = agentArtifacts.IgnitionByte
+	fileInfo, err := isoeditor.NewIgnitionImageReader(a.isoPath, ignitionc)
 	if err != nil {
 		return err
 	}
 
-	// Verify that the current compressed ignition archive does not exceed the
-	// embed area (usually 256 Kb)
-	if len(ignitionBuff) > int(fi.Size()) {
-		return fmt.Errorf("ignition content length (%d) exceeds embed area size (%d)", len(ignitionBuff), fi.Size())
-	}
+	for _, fileData := range fileInfo {
+		filename := filepath.Join(a.tmpPath, fileData.Filename)
+		file, err := os.Create(filename)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
 
-	ignitionImg, err := os.OpenFile(ignitionImgPath, os.O_WRONLY, 0)
-	if err != nil {
-		return err
-	}
-	defer ignitionImg.Close()
-
-	_, err = ignitionImg.Write(ignitionBuff)
-	if err != nil {
-		return err
+		_, err = io.Copy(file, fileData.Data)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -174,6 +166,43 @@ func (a *AgentImage) appendKargs(kargs []byte) error {
 	return nil
 }
 
+// normalizeFilesExtension scans the extracted ISO files and trims
+// the file extensions longer than three chars.
+func (a *AgentImage) normalizeFilesExtension() error {
+	var skipFiles = map[string]bool{
+		"boot.catalog": true, // Required for arm64 iso
+	}
+
+	return filepath.WalkDir(a.tmpPath, func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		ext := filepath.Ext(p)
+		// ext includes also the dot separator
+		if len(ext) > iso9660Level1ExtLen+1 {
+			b := filepath.Base(p)
+			if _, ok := skipFiles[filepath.Base(b)]; ok {
+				return nil
+			}
+
+			// Replaces file extensions longer than three chars
+			np := p[:len(p)-len(ext)] + ext[:iso9660Level1ExtLen+1]
+			err = os.Rename(p, np)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
 // PersistToFile writes the iso image in the assets folder
 func (a *AgentImage) PersistToFile(directory string) error {
 	defer os.RemoveAll(a.tmpPath)
@@ -189,7 +218,11 @@ func (a *AgentImage) PersistToFile(directory string) error {
 	// Remove symlink if it exists
 	os.Remove(agentIsoFile)
 
-	var err error
+	err := a.normalizeFilesExtension()
+	if err != nil {
+		return err
+	}
+
 	// For external platform when the bootArtifactsBaseURL is specified,
 	// output the rootfs file alongside the minimal ISO
 	if a.platform == hiveext.ExternalPlatformType {
