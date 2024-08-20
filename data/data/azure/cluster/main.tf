@@ -57,6 +57,7 @@ module "master" {
   use_ipv6 = var.use_ipv6
 }
 
+/* NoDNS NoRoute53
 module "dns" {
   source                          = "./dns"
   cluster_domain                  = var.cluster_domain
@@ -75,3 +76,4 @@ module "dns" {
   use_ipv4 = var.use_ipv4
   use_ipv6 = var.use_ipv6
 }
+End NoRoute53 NoDNS */
