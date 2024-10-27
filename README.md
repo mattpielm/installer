@@ -1,5 +1,58 @@
 # OpenShift Installer
 
+## Summary of Changes from release-4.14
+```diff
+diff --git a/data/data/aws/bootstrap/main.tf b/data/data/aws/bootstrap/main.tf
+index 7370b697a9..c4e9af3238 100644
+--- a/data/data/aws/bootstrap/main.tf
++++ b/data/data/aws/bootstrap/main.tf
+@@ -91,6 +91,7 @@ resource "aws_iam_role" "bootstrap" {
+
+   name = "${var.cluster_id}-bootstrap-role"
+   path = "/"
++  force_detach_policies = true
+
+   assume_role_policy = <<EOF
+ {
+diff --git a/data/data/aws/cluster/main.tf b/data/data/aws/cluster/main.tf
+index e48df9fcf2..bfb4c98cbb 100644
+--- a/data/data/aws/cluster/main.tf
++++ b/data/data/aws/cluster/main.tf
+@@ -66,6 +66,7 @@ module "iam" {
+   tags = local.tags
+ }
+
++/* NoRoute53: Comment out DNS module so installer doesn't even check for route53 (and fail)
+ module "dns" {
+   source = "./route53"
+
+@@ -84,6 +85,7 @@ module "dns" {
+   publish_strategy         = var.aws_publish_strategy
+   custom_endpoints         = var.custom_endpoints
+ }
++*/
+
+ module "vpc" {
+   source = "./vpc"
+diff --git a/data/data/azure/cluster/main.tf b/data/data/azure/cluster/main.tf
+index 2a5eb0cec7..ec1b1b39b0 100644
+--- a/data/data/azure/cluster/main.tf
++++ b/data/data/azure/cluster/main.tf
+@@ -57,6 +57,7 @@ module "master" {
+   use_ipv6 = var.use_ipv6
+ }
+
++/* NoDNS NoRoute53
+ module "dns" {
+   source                          = "./dns"
+   cluster_domain                  = var.cluster_domain
+@@ -75,3 +76,4 @@ module "dns" {
+   use_ipv4 = var.use_ipv4
+   use_ipv6 = var.use_ipv6
+ }
++End NoRoute53 NoDNS */
+```
+
 ## Supported Platforms
 
 * [AWS](docs/user/aws/README.md)
